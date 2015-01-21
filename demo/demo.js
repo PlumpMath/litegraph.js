@@ -10,17 +10,21 @@ function multiConnection()
     node_vec.pos = [200,200];
 	graph.add(node_vec);
 
-	var node_shader = LiteGraph.createNode("core/FinalOutput");
-    node_shader.pos = [1000,300];
-	graph.add(node_shader);
-
     var node_tex = LiteGraph.createNode("texture/textureSample2d");
     node_tex.pos = [400,500];
     graph.add(node_tex);
 
-    node_vec.connect(0,node_tex,0 );
-    node_tex.connect(0,node_shader,0 );
+    var node_prev = LiteGraph.createNode("texture/preview");
+    node_prev.pos = [1000,100];
+    graph.add(node_prev);
 
+    var node_shader = LiteGraph.createNode("core/FinalOutput");
+    node_shader.pos = [1000,600];
+    graph.add(node_shader);
+
+    node_vec.connect(0,node_tex,0 );
+    node_tex.connect(1,node_shader,0 );
+    node_tex.connect(0,node_prev,0 );
 
 }
 

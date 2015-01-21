@@ -3,6 +3,7 @@ if( typeof(GL) != "undefined")
 {
 	function LGraphTexture()
 	{
+        this.addOutput("Texture","Texture");
 		this.addOutput("Color","vec4");
         this.addOutput("R","R");
         this.addOutput("G","G");
