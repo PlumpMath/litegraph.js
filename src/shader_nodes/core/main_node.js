@@ -6,7 +6,7 @@
 function FinalOutput()
 {
 
-    this.addInput("base color","vec4");
+    this.addInput("Base color","vec4");
     //inputs: ["base color","metallic", "specular", "roughness", "emissive color", "opacity", "opacitiy mask", "normal", "world position offset", "world displacement", "tesselation multiplier", "subsurface color", "ambient occlusion", "refraction"],
     this.properties = { value:1.0 };
     this.editable = { property:"value", type:"number" };
