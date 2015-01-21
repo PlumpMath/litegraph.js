@@ -1597,8 +1597,8 @@ LGraphCanvas.prototype.processMouseMove = function(e)
             var max_slots = Math.max( this.resizing_node.inputs ? this.resizing_node.inputs.length : 0, this.resizing_node.outputs ? this.resizing_node.outputs.length : 0);
             if(this.resizing_node.size[1] < max_slots * LiteGraph.NODE_SLOT_HEIGHT + 4)
                 this.resizing_node.size[1] = max_slots * LiteGraph.NODE_SLOT_HEIGHT + 4;
-            if(this.resizing_node.size[0] < LiteGraph.NODE_MIN_WIDTH)
-                this.resizing_node.size[0] = LiteGraph.NODE_MIN_WIDTH;
+            if(this.resizing_node.size[0] < this.resizing_node.title_width)
+                this.resizing_node.size[0] = this.resizing_node.title_width;
 
             this.canvas.style.cursor = "se-resize";
             this.dirty_canvas = true;
@@ -3219,7 +3219,7 @@ function LGraphNode(title)
 LGraphNode.prototype._ctor = function( title )
 {
     this.title = title || "Unnamed";
-    this.title_width = 0;
+    this.title_width = LiteGraph.NODE_MIN_WIDTH;
     this.size = [LiteGraph.NODE_WIDTH,60];
     this.graph = null;
 
@@ -3397,6 +3397,8 @@ LGraphNode.prototype.computeTitleWidth = function(ctx, font)
 {
     ctx.font = font;
     this.title_width = this.title ? ctx.measureText(this.title ).width + LiteGraph.NODE_TITLE_HEIGHT + 5: 0; // 5 it's the padding
+    if(this.size[0] < this.title_width)
+        this.size[0] = this.title_width;
     return this.title_width;
 }
 

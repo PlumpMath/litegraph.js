@@ -47,7 +47,7 @@ function LGraphNode(title)
 LGraphNode.prototype._ctor = function( title )
 {
     this.title = title || "Unnamed";
-    this.title_width = 0;
+    this.title_width = LiteGraph.NODE_MIN_WIDTH;
     this.size = [LiteGraph.NODE_WIDTH,60];
     this.graph = null;
 
@@ -225,6 +225,8 @@ LGraphNode.prototype.computeTitleWidth = function(ctx, font)
 {
     ctx.font = font;
     this.title_width = this.title ? ctx.measureText(this.title ).width + LiteGraph.NODE_TITLE_HEIGHT + 5: 0; // 5 it's the padding
+    if(this.size[0] < this.title_width)
+        this.size[0] = this.title_width;
     return this.title_width;
 }
 

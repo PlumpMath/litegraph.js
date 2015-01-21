@@ -512,6 +512,20 @@ if(window.glMatrix)
 
 	LiteGraph.registerNodeType("math3d/mult-quat", Math3DMultQuat );
 
+    function PixelNormalWS()
+    {
+        this.addOutput( "Normal","vec3" );
+    }
+
+    PixelNormalWS.title = "PixelNormalWS";
+    PixelNormalWS.desc = "Normal in World Space at pixel";
+
+    PixelNormalWS.prototype.onExecute = function()
+    {
+    }
+
+    LiteGraph.registerNodeType("math3d/PixelNormalWS", PixelNormalWS );
+
 } //glMatrix
 
 })();

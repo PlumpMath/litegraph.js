@@ -721,8 +721,8 @@ LGraphCanvas.prototype.processMouseMove = function(e)
             var max_slots = Math.max( this.resizing_node.inputs ? this.resizing_node.inputs.length : 0, this.resizing_node.outputs ? this.resizing_node.outputs.length : 0);
             if(this.resizing_node.size[1] < max_slots * LiteGraph.NODE_SLOT_HEIGHT + 4)
                 this.resizing_node.size[1] = max_slots * LiteGraph.NODE_SLOT_HEIGHT + 4;
-            if(this.resizing_node.size[0] < LiteGraph.NODE_MIN_WIDTH)
-                this.resizing_node.size[0] = LiteGraph.NODE_MIN_WIDTH;
+            if(this.resizing_node.size[0] < this.resizing_node.title_width)
+                this.resizing_node.size[0] = this.resizing_node.title_width;
 
             this.canvas.style.cursor = "se-resize";
             this.dirty_canvas = true;
