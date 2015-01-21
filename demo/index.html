@@ -13,19 +13,28 @@
 	</div>
 
     <script type="text/javascript" src="../external/jquery-1.6.2.min.js"></script>
+    <script type="text/javascript" src="../external/gl-matrix.js"></script>
+    <script type="text/javascript" src="../external/litegl.js"></script>
 
-
-    <script type="text/javascript" src="../src/litegraph.js"></script>
+    <script type="text/javascript" src="../dist/litegraph.js"></script>
     <script type="text/javascript" src="../src/litegraph-editor.js"></script>
 
     <script type="text/javascript" src="../src/nodes/base.js"></script>
     <script type="text/javascript" src="../src/nodes/math.js"></script>
-    <script type="text/javascript" src="../src/nodes/interface.js"></script>
-    <script type="text/javascript" src="../src/nodes/image.js"></script>
+    <script type="text/javascript" src="../src/nodes/gltextures.js"></script>
     <script type="text/javascript" src="../dist/shader_nodes.js"></script>
 
     <script type="text/javascript" src="demo.js"></script>
 	<script type="text/javascript" src="code.js"></script>
+    <script type="text/javascript">
+        function init() {
 
+            var gl = GL.create({width: 1, height: 1});
+            gl.textures["test"] = GL.Texture.fromURL ( "imgs/grid.png", {minFilter: gl.NEAREST});
+        }
+
+    </script>
+
+    <script>init();</script>
 </body>
 </html>

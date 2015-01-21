@@ -6,33 +6,22 @@ function demo()
 
 function multiConnection()
 {
-	var node_const_A = LiteGraph.createNode("basic/const");
-	node_const_A.pos = [200,200];
-	graph.add(node_const_A);
-	node_const_A.setValue(4.5);
+	var node_vec = LiteGraph.createNode("math3d/xyz-to-vec3");
+    node_vec.pos = [200,200];
+	graph.add(node_vec);
 
-	var node_const_B = LiteGraph.createNode("basic/const");
-	node_const_B.pos = [200,300];
-	graph.add(node_const_B);
-	node_const_B.setValue(10);
+	var node_shader = LiteGraph.createNode("core/FinalOutput");
+    node_shader.pos = [1000,300];
+	graph.add(node_shader);
 
-	var node_math = LiteGraph.createNode("math/operation");
-	node_math.pos = [400,200];
-	node_math.addOutput("A*B");
-	graph.add(node_math);
+    var node_tex = LiteGraph.createNode("texture/textureSample2d");
+    node_tex.pos = [400,500];
+    graph.add(node_tex);
 
-	var node_watch = LiteGraph.createNode("basic/watch");
-	node_watch.pos = [700,200];
-	graph.add(node_watch);
+    node_vec.connect(0,node_tex,0 );
+    node_tex.connect(0,node_shader,0 );
 
-	var node_watch2 = LiteGraph.createNode("basic/watch");
-	node_watch2.pos = [700,300];
-	graph.add(node_watch2);
 
-	node_const_A.connect(0,node_math,0 );
-	node_const_B.connect(0,node_math,1 );
-	node_math.connect(0,node_watch,0 );
-	node_math.connect(0,node_watch2,0 );
 }
 
 function sortTest()

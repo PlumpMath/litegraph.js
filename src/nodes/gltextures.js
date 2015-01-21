@@ -1,15 +1,20 @@
 //Works with Litegl.js to create WebGL nodes
-if(typeof(LiteGraph) != "undefined")
+if( typeof(GL) != "undefined")
 {
 	function LGraphTexture()
 	{
-		this.addOutput("Texture","Texture");
+		this.addOutput("Color","vec4");
+        this.addOutput("R","R");
+        this.addOutput("G","G");
+        this.addOutput("B","B");
+        this.addOutput("A","A");
+        this.addInput("UVs","vec3");
 		this.properties = {name:""};
 		this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
 	}
 
-	LGraphTexture.title = "Texture";
-	LGraphTexture.desc = "Texture";
+	LGraphTexture.title = "textureSample2d";
+	LGraphTexture.desc = "textureSample2d";
 	LGraphTexture.widgets_info = {"name": { widget:"texture"} };
 
 	//REPLACE THIS TO INTEGRATE WITH YOUR FRAMEWORK
@@ -244,7 +249,7 @@ if(typeof(LiteGraph) != "undefined")
 		return tex_canvas;
 	}
 
-	LiteGraph.registerNodeType("texture/texture", LGraphTexture );
+	LiteGraph.registerNodeType("texture/textureSample2d", LGraphTexture );
 	window.LGraphTexture = LGraphTexture;
 
 	//**************************
@@ -1448,6 +1453,9 @@ if(typeof(LiteGraph) != "undefined")
 		this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
 	}
 
+    LGraphCubemap.title = "textureSampleCube";
+    LGraphCubemap.desc = "textureSampleCube";
+
 	LGraphCubemap.prototype.onDropFile = function(data, filename, file)
 	{
 		if(!data)
@@ -1458,7 +1466,7 @@ if(typeof(LiteGraph) != "undefined")
 		else
 		{
 			if( typeof(data) == "string" )
-				this._drop_texture = GL.Texture.fromURL(data);
+				this._drop_texture = GL.Texture.cubemapFromURL(data);
 			else
 				this._drop_texture = GL.Texture.fromDDSInMemory(data);
 			this.properties.name = filename;

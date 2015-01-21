@@ -9,7 +9,7 @@ module.exports = function (grunt) {
             your_target: {
                 files: {
                     'dist/shader_nodes.js': [ 'src/shader_nodes/**/*.js'],
-                    'dist/<%= pkg.name %>.js': [ 'src/<%= pkg.name %>.js']
+                    'dist/<%= pkg.name %>.js': [ 'src/core/*.js']
                 },
                 options: {
 
