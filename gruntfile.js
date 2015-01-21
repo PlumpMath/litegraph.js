@@ -8,7 +8,7 @@ module.exports = function (grunt) {
         concat_in_order: {
             your_target: {
                 files: {
-                    'dist/shader_nodes.js': [ 'src/shader_nodes/*.js'],
+                    'dist/shader_nodes.js': [ 'src/shader_nodes/**/*.js'],
                     'dist/<%= pkg.name %>.js': [ 'src/<%= pkg.name %>.js']
                 },
                 options: {
