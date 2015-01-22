@@ -67,6 +67,10 @@ LGraphNode.prototype._ctor = function( title )
         //skip_title_render: true,
         //unsafe_execution: false,
     };
+
+
+    this.shader_piece = null;
+    this.code = {};
 }
 
 /**
@@ -932,3 +936,17 @@ LGraphNode.prototype.localToScreen = function(x,y, graphcanvas)
     return [(x + this.pos[0]) * graphcanvas.scale + graphcanvas.offset[0],
             (y + this.pos[1]) * graphcanvas.scale + graphcanvas.offset[1]];
 }
+
+LGraphNode.prototype.getInputNodes = function()
+{
+    var r = [];
+    if(!this.inputs || this.inputs.length == 0) return r;
+    for(var i = 0; i < this.inputs.length; i++){
+        var link_id = this.inputs[i].link;
+        var link = this.graph.links[link_id];
+        r.push( this.graph.getNodeById( link.origin_id ));// we knot it's 0 cause inputs only can have one link
+    }
+
+    return r;
+}
+

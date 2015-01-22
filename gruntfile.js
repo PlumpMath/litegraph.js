@@ -7,7 +7,7 @@ module.exports = function (grunt) {
             your_target: {
                 files: {
                     'dist/shader_nodes.js': [ 'src/shader_nodes/**/*.js'],
-                    'dist/<%= pkg.name %>.js': [ 'src/core/*.js']
+                    'dist/<%= pkg.name %>.js': [ 'src/core/*.js', 'src/shader_lib/**/*.js']
                 },
                 options: {
 
@@ -75,7 +75,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-concat-in-order');
     grunt.loadNpmTasks('grunt-text-replace');
 
-    grunt.registerTask('test', ['jshint', 'qunit']);
+
 
     grunt.registerTask('default', ['qunit', 'jshint', 'concat_in_order', 'replace:remove_declares', 'uglify']);
 

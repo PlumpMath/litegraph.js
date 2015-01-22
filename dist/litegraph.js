@@ -3239,6 +3239,10 @@ LGraphNode.prototype._ctor = function( title )
         //skip_title_render: true,
         //unsafe_execution: false,
     };
+
+
+    this.shader_piece = null;
+    this.code = {};
 }
 
 /**
@@ -4105,6 +4109,20 @@ LGraphNode.prototype.localToScreen = function(x,y, graphcanvas)
             (y + this.pos[1]) * graphcanvas.scale + graphcanvas.offset[1]];
 }
 
+LGraphNode.prototype.getInputNodes = function()
+{
+    var r = [];
+    if(!this.inputs || this.inputs.length == 0) return r;
+    for(var i = 0; i < this.inputs.length; i++){
+        var link_id = this.inputs[i].link;
+        var link = this.graph.links[link_id];
+        r.push( this.graph.getNodeById( link.origin_id ));// we knot it's 0 cause inputs only can have one link
+    }
+
+    return r;
+}
+
+
 
 // *************************************************************
 //   LiteGraph CLASS                                     *******
@@ -4671,3 +4689,209 @@ if( !window["requestAnimationFrame"] )
             window.setTimeout(callback, 1000 / 60);
         });
 }
+
+var PPixelNormalWS = {};
+
+PPixelNormalWS.id = "pixel_normal_ws";
+PPixelNormalWS.includes = {u_model: 1, a_normal: 1, v_normal: 1};
+PPixelNormalWS.already_included = false;
+
+PPixelNormalWS.getVertexCode = function (output, input) {
+    if(!PPixelNormalWS.already_included )
+        var code = "v_normal = u_model * vec4(a_normal, 0.0);\
+                ";
+    return code;
+}
+
+PPixelNormalWS.getFragmentCode = function (output, input) {
+    if(!PPixelNormalWS.already_included )
+        var code = "vec3 pixel_normal_ws = v_normal;\n\
+            ";
+
+    return code;
+}
+
+
+PPixelNormalWS.getCode = function (output, input) {
+    var c = {};
+    c.fragment ={};
+    c.vertex ={};
+    c.vertex.uniforms = "";
+    c.fragment.uniforms = "";
+    c.vertex.body = this.getVertexCode(output, input);
+    c.fragment.body = this.getFragmentCode(output, input);
+    PPixelNormalWS.already_included =  true;
+    c.includes = {u_model: 1, a_normal: 1, v_normal: 1};
+    return c;
+}
+
+
+var PReflect = {};
+
+PReflect.id = "reflect";
+PReflect.includes = {};
+
+PReflect.getVertexCode = function(output,incident, normal) {
+//    if(incident == "eye_to_pixel" || incident == "eye_to_vertex")
+//        reflect.includes[incident]= 1;
+//
+//    var code = "vec3 "+output+"= reflect("+incident+","+normal+");";
+//    return code;
+    return "";
+}
+
+
+PReflect.getFragmentCode = function(output,incident, normal) {
+    if(incident == "eye_to_pixel" || incident == "eye_to_vertex")
+        reflect.includes[incident]= 1;
+
+    var code = "vec3 "+output+"= reflect("+incident+","+normal+");";
+    return code;
+}
+
+
+var ShaderConstructor = {};
+
+
+
+
+ShaderConstructor.getCode = function (code, uniforms) {
+
+    var vertex_code = this.getVertexCode(code,  uniforms);
+    var fragment_code = this.getFragmentCode(code,  uniforms);
+    console.log("vertex:");
+    console.log(vertex_code);
+    console.log("fragment:");
+    console.log(fragment_code);
+    var shader = new GL.Shader(vertex_code, fragment_code);
+}
+
+ShaderConstructor.getVertexCode = function (code, uniforms) {
+    var vertex_code = code.vertex.body;
+    var includes = code.includes;
+    // header
+    var r = "\
+            precision highp float;\n\
+			attribute vec3 a_vertex;\n\
+			attribute vec3 a_normal;\n\
+			attribute vec2 a_coord;\n\
+			";
+    if (includes["v_coord"])
+        r += "varying vec2 v_coord;\n\
+            ";
+    if (includes["v_normal"])
+        r += "varying vec3 v_normal;\n\
+            ";
+    r += "uniform mat4 u_mvp;\n\
+		    uniform mat4 u_model;\n";
+    r += code.vertex.uniforms  || "\
+            ";
+    // body
+    r += "void main() {\n\
+            ";
+    r += vertex_code;
+    r += "gl_Position = u_mvp * vec4(a_vertex,1.0);\n\
+            }\n\
+			";
+
+    return r;
+
+
+}
+
+ShaderConstructor.getFragmentCode = function (code,  uniforms) {
+    var fragment_code = code.fragment.body;
+    var includes = code.includes;
+    // header
+    var r = "\
+            precision highp float;\n\
+			";
+    if (includes["v_coord"])
+        r += "varying vec2 v_coord;\n\
+            ";
+    if (includes["v_normal"])
+        r += "varying vec3 v_normal;\n\
+            ";
+    r += code.fragment.uniforms || "\
+            ";
+    // body
+    r += "void main() {\n\
+            ";
+    r += fragment_code;
+    r += "gl_FragColor = "+code.output_var+";\n";
+
+    r += "\n}\n\
+			";
+
+    return r;
+
+
+}
+
+
+
+var PTextureSample = {};
+
+PTextureSample.id = "texture_sample";
+PTextureSample.includes = {};
+
+PTextureSample.getVertexCode = function (output, input, texture_id) {
+    return "";
+}
+
+PTextureSample.getFragmentCode = function (output, input, texture_id) {
+    input = input || "v_coord";
+    var code = "vec4 " + output + " = texture2D(" + texture_id + ", " + input + ");\n\
+                ";
+    return code;
+}
+
+
+PTextureSample.getCode = function (output, input, texture_id) {
+    var c = {};
+    c.fragment ={};
+    c.vertex ={};
+    c.vertex.uniforms = "";
+    c.fragment.uniforms = "uniform sampler2D "+texture_id+";\n      ";
+    c.vertex.body = this.getVertexCode(output, input, texture_id);
+    c.fragment.body = this.getFragmentCode(output, input, texture_id);
+    c.includes = PTextureSample.includes ;
+    c.output_var = output;
+    return c;
+}
+
+
+
+
+var PUVs = {};
+
+PUVs.id = "uvs";
+PUVs.includes = {a_coord:1, v_coord: 1};
+PUVs.already_included = false;
+
+PUVs.getVertexCode = function (output, input) {
+    return "v_coord = a_coord;\n\
+            ";
+}
+
+PUVs.getFragmentCode = function (output, input) {
+    return "";
+}
+
+
+PUVs.getCode = function (output, input) {
+    var c = {};
+    c.fragment ={};
+    c.vertex ={};
+    c.vertex.uniforms = "";
+    c.fragment.uniforms = "";
+    c.vertex.body = this.getVertexCode(output, input);
+    c.fragment.body = this.getFragmentCode(output, input);
+    c.includes = {a_coord: 1, v_coord: 1};
+    c.output_var = "v_coord";
+    return c;
+}
+
+
+
+LiteGraph.ShaderLib = {};

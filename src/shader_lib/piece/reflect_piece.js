@@ -1,10 +1,10 @@
 
-var reflect = {};
+var PReflect = {};
 
-reflect.id = "reflect";
-reflect.includes = {};
+PReflect.id = "reflect";
+PReflect.includes = {};
 
-reflect.getVertexCode = function(output,incident, normal) {
+PReflect.getVertexCode = function(output,incident, normal) {
 //    if(incident == "eye_to_pixel" || incident == "eye_to_vertex")
 //        reflect.includes[incident]= 1;
 //
@@ -14,7 +14,7 @@ reflect.getVertexCode = function(output,incident, normal) {
 }
 
 
-reflect.getFragmentCode = function(output,incident, normal) {
+PReflect.getFragmentCode = function(output,incident, normal) {
     if(incident == "eye_to_pixel" || incident == "eye_to_vertex")
         reflect.includes[incident]= 1;
 

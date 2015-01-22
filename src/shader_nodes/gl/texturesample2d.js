@@ -6,9 +6,11 @@ function LGraphTexture()
     this.addOutput("G","G");
     this.addOutput("B","B");
     this.addOutput("A","A");
-    this.addInput("UVs","vec3");
+    this.addInput("UVs","vec2");
     this.properties = {name:""};
     this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
+
+    this.shader_piece = PTextureSample; // hardcoded for testing
 }
 
 LGraphTexture.title = "textureSample";
@@ -148,6 +150,8 @@ LGraphTexture.prototype.getExtraMenuOptions = function(graphcanvas)
 
 LGraphTexture.prototype.onExecute = function()
 {
+    this.processInputCode();
+
     if(this._drop_texture)
     {
         this.setOutputData(0, this._drop_texture);
@@ -246,6 +250,29 @@ LGraphTexture.generateLowResTexturePreview = function(tex)
         temp_tex.toCanvas(tex_canvas);
     return tex_canvas;
 }
+
+LGraphTexture.prototype.processInputCode = function()
+{
+
+    var nodes = this.getInputNodes();
+    var node = nodes[0];
+    var input_code = node.code;
+
+    this.code = this.shader_piece.getCode("color_"+node.id, input_code.output_var, "u_"+ this.title +"_"+ node.id);
+
+    this.code.vertex.body = input_code.vertex.body.concat(this.code.vertex.body);
+    this.code.vertex.uniforms = input_code.vertex.uniforms.concat(this.code.vertex.uniforms);
+    this.code.fragment.body = input_code.fragment.body.concat(this.code.fragment.body);
+    this.code.fragment.uniforms = input_code.fragment.uniforms.concat(this.code.fragment.uniforms);
+
+    for (var inc in input_code.includes) { this.code.includes[inc] = input_code.includes[inc]; }
+}
+
+//var nodes = this.getInputNodes();
+//for(var i = 0; i < nodes.length; ++i){
+//    var node = nodes[i];
+//    node.shader_piece.getCode();
+//}
 
 LiteGraph.registerNodeType("texture/textureSample", LGraphTexture );
 window.LGraphTexture = LGraphTexture;

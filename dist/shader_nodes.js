@@ -3,7 +3,7 @@
  */
 
 
-function ShaderNode()
+function LGraphShader()
 {
 
     this.addInput("Base color","vec4");
@@ -11,36 +11,60 @@ function ShaderNode()
     this.properties = { value:1.0 };
     this.editable = { property:"value", type:"number" };
     this.size = [200,200];
+    this.shader_piece = ShaderConstructor;
 }
 
-ShaderNode.title = "ShaderNode";
-ShaderNode.desc = "ShaderNode";
+LGraphShader.title = "ShaderMain";
+LGraphShader.desc = "Shader Main Node";
 
 
-ShaderNode.prototype.setValue = function(v)
+LGraphShader.prototype.setValue = function(v)
 {
 
 };
 
-ShaderNode.prototype.onExecute = function()
+LGraphShader.prototype.onExecute = function()
 {
-
+    this.processInputCode();
 }
 
-ShaderNode.prototype.onDrawBackground = function(ctx)
+LGraphShader.prototype.onDrawBackground = function(ctx)
 {
     //show the current value
     //this.outputs[0].label = this.properties["value"].toFixed(3);
 }
 
-ShaderNode.prototype.onWidget = function(e,widget)
+LGraphShader.prototype.onWidget = function(e,widget)
 {
 
 }
 
 
+LGraphShader.prototype.processInputCode = function() {
 
-LiteGraph.registerNodeType("core/ShaderNode",ShaderNode);
+    var nodes = this.getInputNodes();
+    var node = nodes[0]; // 0 it's base color
+    var input_code = node.code;
+    this.shader_piece.getCode(input_code, "");
+}
+
+//    this.code = this.shader_piece.getCode("color_"+node.id, input_code.output_var, node.id); // I need to check texture id
+//
+//    this.code.vertex = input_code.vertex.concat(this.code.vertex);
+//    this.code.fragment = input_code.fragment.concat(this.code.fragment);
+//
+//    for (var inc in input_code.includes) { this.code.includes[inc] = input_code.includes[inc]; }
+
+
+//var nodes = this.getInputNodes();
+//for(var i = 0; i < nodes.length; ++i){
+//    var node = nodes[i];
+//    node.shader_piece.getCode();
+//}
+
+
+
+LiteGraph.registerNodeType("core/ShaderNode",LGraphShader);
 //**************************
 function LGraphTexturePreview()
 {
@@ -87,9 +111,11 @@ function LGraphTexture()
     this.addOutput("G","G");
     this.addOutput("B","B");
     this.addOutput("A","A");
-    this.addInput("UVs","vec3");
+    this.addInput("UVs","vec2");
     this.properties = {name:""};
     this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
+
+    this.shader_piece = PTextureSample; // hardcoded for testing
 }
 
 LGraphTexture.title = "textureSample";
@@ -229,6 +255,8 @@ LGraphTexture.prototype.getExtraMenuOptions = function(graphcanvas)
 
 LGraphTexture.prototype.onExecute = function()
 {
+    this.processInputCode();
+
     if(this._drop_texture)
     {
         this.setOutputData(0, this._drop_texture);
@@ -328,5 +356,70 @@ LGraphTexture.generateLowResTexturePreview = function(tex)
     return tex_canvas;
 }
 
+LGraphTexture.prototype.processInputCode = function()
+{
+
+    var nodes = this.getInputNodes();
+    var node = nodes[0];
+    var input_code = node.code;
+
+    this.code = this.shader_piece.getCode("color_"+node.id, input_code.output_var, "u_"+ this.title +"_"+ node.id);
+
+    this.code.vertex.body = input_code.vertex.body.concat(this.code.vertex.body);
+    this.code.vertex.uniforms = input_code.vertex.uniforms.concat(this.code.vertex.uniforms);
+    this.code.fragment.body = input_code.fragment.body.concat(this.code.fragment.body);
+    this.code.fragment.uniforms = input_code.fragment.uniforms.concat(this.code.fragment.uniforms);
+
+    for (var inc in input_code.includes) { this.code.includes[inc] = input_code.includes[inc]; }
+}
+
+//var nodes = this.getInputNodes();
+//for(var i = 0; i < nodes.length; ++i){
+//    var node = nodes[i];
+//    node.shader_piece.getCode();
+//}
+
 LiteGraph.registerNodeType("texture/textureSample", LGraphTexture );
 window.LGraphTexture = LGraphTexture;
+
+//UVS
+function LGraphUVs()
+{
+    this.addOutput("value","vec2");
+    this.properties = { value:1.0 };
+    this.editable = { property:"value", type:"number" };
+
+    this.shader_piece = PUVs; // hardcoded for testing
+}
+
+LGraphUVs.title = "UVs";
+LGraphUVs.desc = "The texture coordinates";
+
+
+LGraphUVs.prototype.setValue = function(v)
+{
+    if( typeof(v) == "string") v = parseFloat(v);
+    this.properties["value"] = v;
+    this.setDirtyCanvas(true);
+};
+
+LGraphUVs.prototype.onExecute = function()
+{
+    this.code = this.shader_piece.getCode(); // I need to check texture id
+    this.setOutputData(0, parseFloat( this.properties["value"] ) );
+}
+
+LGraphUVs.prototype.onDrawBackground = function(ctx)
+{
+    //show the current value
+    this.outputs[0].label = this.properties["value"].toFixed(3);
+}
+
+LGraphUVs.prototype.onWidget = function(e,widget)
+{
+    if(widget.name == "value")
+        this.setValue(widget.value);
+}
+
+LiteGraph.registerNodeType("texture/UVs", LGraphUVs);
+
