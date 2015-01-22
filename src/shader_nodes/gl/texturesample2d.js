@@ -119,8 +119,9 @@ LGraphTexture.prototype.onDropFile = function(data, filename, file)
     else
     {
         var texture = null;
+        var no_ext_name = filename.split('.')[0];
         if( typeof(data) == "string" )
-            texture = GL.Texture.fromURL( data );
+            gl.textures[no_ext_name] = texture = GL.Texture.fromURL( data );
         else if( filename.toLowerCase().indexOf(".dds") != -1 )
             texture = GL.Texture.fromDDSInMemory(data);
         else
@@ -131,7 +132,7 @@ LGraphTexture.prototype.onDropFile = function(data, filename, file)
         }
 
         this._drop_texture = texture;
-        this.properties.name = filename;
+        this.properties.name = no_ext_name;
     }
 }
 
@@ -257,8 +258,8 @@ LGraphTexture.prototype.processInputCode = function()
     var nodes = this.getInputNodes();
     var node = nodes[0];
     var input_code = node.code;
-
-    this.code = this.shader_piece.getCode("color_"+node.id, input_code.output_var, "u_"+ this.title +"_"+ node.id);
+    var texture_name = "u_" + (this.properties.name ? this.properties.name : "default_name") + "_texture"; // TODO check if there is a texture
+    this.code = this.shader_piece.getCode("color_"+node.id, input_code.output_var, texture_name);
 
     this.code.vertex.body = input_code.vertex.body.concat(this.code.vertex.body);
     this.code.vertex.uniforms = input_code.vertex.uniforms.concat(this.code.vertex.uniforms);

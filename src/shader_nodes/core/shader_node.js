@@ -25,7 +25,14 @@ LGraphShader.prototype.setValue = function(v)
 
 LGraphShader.prototype.onExecute = function()
 {
-    this.processInputCode();
+    var shader = this.processInputCode();
+
+    this.graph.shader_output = shader;
+    var texture_nodes = this.graph.findNodesByType("texture/textureSample");// we need to find all the textures used in the graph
+    graph.shader_textures = [];
+    for(var i = 0; i < texture_nodes.length; ++i){
+        graph.shader_textures.push(texture_nodes[i].properties.name);
+    }
 }
 
 LGraphShader.prototype.onDrawBackground = function(ctx)
@@ -45,7 +52,7 @@ LGraphShader.prototype.processInputCode = function() {
     var nodes = this.getInputNodes();
     var node = nodes[0]; // 0 it's base color
     var input_code = node.code;
-    this.shader_piece.getCode(input_code, "");
+    return this.shader_piece.createShader(input_code, "");
 }
 
 //    this.code = this.shader_piece.getCode("color_"+node.id, input_code.output_var, node.id); // I need to check texture id
