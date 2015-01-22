@@ -29,9 +29,9 @@ LGraphShader.prototype.onExecute = function()
 
     this.graph.shader_output = shader;
     var texture_nodes = this.graph.findNodesByType("texture/textureSample");// we need to find all the textures used in the graph
-    graph.shader_textures = [];
+    this.graph.shader_textures = [];
     for(var i = 0; i < texture_nodes.length; ++i){
-        graph.shader_textures.push(texture_nodes[i].properties.name);
+        this.graph.shader_textures.push(texture_nodes[i].properties.name);
     }
 }
 
