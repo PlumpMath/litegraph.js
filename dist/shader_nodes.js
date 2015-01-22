@@ -92,8 +92,8 @@ function LGraphTexture()
     this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
 }
 
-LGraphTexture.title = "textureSample2d";
-LGraphTexture.desc = "textureSample2d";
+LGraphTexture.title = "textureSample";
+LGraphTexture.desc = "textureSample";
 LGraphTexture.widgets_info = {"name": { widget:"texture"} };
 
 //REPLACE THIS TO INTEGRATE WITH YOUR FRAMEWORK
@@ -328,5 +328,5 @@ LGraphTexture.generateLowResTexturePreview = function(tex)
     return tex_canvas;
 }
 
-LiteGraph.registerNodeType("texture/textureSample2d", LGraphTexture );
+LiteGraph.registerNodeType("texture/textureSample", LGraphTexture );
 window.LGraphTexture = LGraphTexture;

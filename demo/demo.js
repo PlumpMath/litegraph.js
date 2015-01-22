@@ -10,7 +10,7 @@ function multiConnection()
     node_vec.pos = [200,200];
 	graph.add(node_vec);
 
-    var node_tex = LiteGraph.createNode("texture/textureSample2d");
+    var node_tex = LiteGraph.createNode("texture/textureSample");
     node_tex.pos = [400,500];
     graph.add(node_tex);
 
