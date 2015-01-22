@@ -3,7 +3,7 @@
  */
 
 
-function FinalOutput()
+function ShaderNode()
 {
 
     this.addInput("Base color","vec4");
@@ -13,33 +13,31 @@ function FinalOutput()
     this.size = [200,200];
 }
 
-FinalOutput.title = "Final Output";
-FinalOutput.desc = "Final output";
+ShaderNode.title = "ShaderNode";
+ShaderNode.desc = "ShaderNode";
 
 
-FinalOutput.prototype.setValue = function(v)
+ShaderNode.prototype.setValue = function(v)
 {
-    if( typeof(v) == "string") v = parseFloat(v);
-    this.properties["value"] = v;
-    this.setDirtyCanvas(true);
+
 };
 
-FinalOutput.prototype.onExecute = function()
+ShaderNode.prototype.onExecute = function()
 {
 
 }
 
-FinalOutput.prototype.onDrawBackground = function(ctx)
+ShaderNode.prototype.onDrawBackground = function(ctx)
 {
     //show the current value
     //this.outputs[0].label = this.properties["value"].toFixed(3);
 }
 
-FinalOutput.prototype.onWidget = function(e,widget)
+ShaderNode.prototype.onWidget = function(e,widget)
 {
 
 }
 
 
 
-LiteGraph.registerNodeType("core/FinalOutput",FinalOutput);
+LiteGraph.registerNodeType("core/ShaderNode",ShaderNode);

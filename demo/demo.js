@@ -18,7 +18,7 @@ function multiConnection()
     node_prev.pos = [1000,100];
     graph.add(node_prev);
 
-    var node_shader = LiteGraph.createNode("core/FinalOutput");
+    var node_shader = LiteGraph.createNode("core/ShaderNode");
     node_shader.pos = [1000,600];
     graph.add(node_shader);
 

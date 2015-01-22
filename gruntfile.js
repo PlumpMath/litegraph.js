@@ -1,8 +1,6 @@
-
-
 module.exports = function (grunt) {
 
-    var path = require('path');
+
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         concat_in_order: {
@@ -16,13 +14,27 @@ module.exports = function (grunt) {
                 }
             }
         },
-        strip_code: {
-            options: {
-                pattern: /(require|declare)\((.*?)\);/g
+        replace: {
+            remove_declares: {
+                src: ['dist/<%= pkg.name %>.js'],
+                dest: 'dist/<%= pkg.name %>.js',
+                replacements: [
+                    {
+                        from: /(require|declare)\((.*?)\);/g,
+                        to: ''
+                    }
+                ],
             },
-            your_target: {
-                src: 'dist/<%= pkg.name %>.js'
-            },
+            union_shaders: {
+                src: ['dist/<%= pkg.name %>.js'],
+                dest: 'dist/<%= pkg.name %>.js',
+                replacements: [
+                    {
+                        from: /(require|declare)\((.*?)\);/g,
+                        to: ''
+                    }
+                ],
+            }
         },
         uglify: {
             options: {
@@ -54,16 +66,18 @@ module.exports = function (grunt) {
             files: ['<%= jshint.files %>'],
             tasks: ['jshint', 'qunit']
         }
-    });
+    })
+    ;
 
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-qunit');
     grunt.loadNpmTasks('grunt-concat-in-order');
-    grunt.loadNpmTasks('grunt-strip-code');
+    grunt.loadNpmTasks('grunt-text-replace');
 
     grunt.registerTask('test', ['jshint', 'qunit']);
 
-    grunt.registerTask('default', ['qunit', 'jshint', 'concat_in_order', 'strip_code', 'uglify']);
+    grunt.registerTask('default', ['qunit', 'jshint', 'concat_in_order', 'replace:remove_declares', 'uglify']);
 
-};
+}
+;
