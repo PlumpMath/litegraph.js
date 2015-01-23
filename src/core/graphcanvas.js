@@ -601,8 +601,7 @@ LGraphCanvas.prototype.processMouseDown = function(e)
     //this is to ensure to defocus(blur) if a text input element is on focus
     if(!ref_window.document.activeElement || (ref_window.document.activeElement.nodeName.toLowerCase() != "input" && ref_window.document.activeElement.nodeName.toLowerCase() != "textarea"))
         e.preventDefault();
-    // removed the stopPropagation so the editor works fine
-    //e.stopPropagation();
+    e.stopPropagation();
     return false;
 }
 
@@ -736,7 +735,7 @@ LGraphCanvas.prototype.processMouseMove = function(e)
      */
 
     e.preventDefault();
-    e.stopPropagation();
+    //e.stopPropagation();     // removed the stopPropagation so the editor works fine
     return false;
     //this is not really optimal
     //this.graph.change();
