@@ -196,7 +196,7 @@ LGraphTexture.getTargetTexture = function( origin, target, mode )
     {
         case LGraphTexture.LOW: tex_type = gl.UNSIGNED_BYTE; break;
         case LGraphTexture.HIGH: tex_type = gl.HIGH_PRECISION_FORMAT; break;
-        case LGraphTexture.REUSE: return origin; break;
+        case LGraphTexture.REUSE: return origin;
         case LGraphTexture.COPY:
         default: tex_type = origin ? origin.type : gl.UNSIGNED_BYTE; break;
     }
@@ -367,11 +367,15 @@ LGraphTexture.generateLowResTexturePreview = function(tex)
 LGraphTexture.prototype.processInputCode = function()
 {
 
-    var nodes = this.getInputNodes();
-    var node = nodes[0];
-    var input_code = node.code;
+    // REFACTOR
+    // signature this.getNodeCode( link_id )
+//    var nodes = this.getInputNodes();
+//    var node = nodes[0];
+    var input_code = this.getNodeCode(0);
+
+
     var texture_name = "u_" + (this.properties.name ? this.properties.name : "default_name") + "_texture"; // TODO check if there is a texture
-    this.code = this.shader_piece.getCode("color_"+node.id, input_code.output_var, texture_name);
+    this.code = this.shader_piece.getCode("color_"+this.id, input_code.output_var, texture_name);
 
     this.code.vertex.body = input_code.vertex.body.concat(this.code.vertex.body);
     this.code.vertex.uniforms = input_code.vertex.uniforms.concat(this.code.vertex.uniforms);

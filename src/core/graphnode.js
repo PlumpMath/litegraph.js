@@ -950,3 +950,11 @@ LGraphNode.prototype.getInputNodes = function()
     return r;
 }
 
+LGraphNode.prototype.getNodeCode = function(link_id)
+{
+    var nodes = this.getInputNodes();
+    return nodes[link_id].code;
+
+}
+
+
