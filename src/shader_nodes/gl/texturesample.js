@@ -111,6 +111,7 @@ LGraphTexture.getNoiseTexture = function()
 
 LGraphTexture.prototype.onDropFile = function(data, filename, file)
 {
+    console.log([data, filename, file]);
     if(!data)
     {
         this._drop_texture = null;

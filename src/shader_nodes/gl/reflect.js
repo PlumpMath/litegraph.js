@@ -1,7 +1,7 @@
 //UVS
 function LGraphReflect()
 {
-    this.addOutput("reflect_vec","vec3");
+    this.addOutput("reflect vector","vec3");
     this.addInput("normal","vec3");
     this.addInput("vector","vec3");
 

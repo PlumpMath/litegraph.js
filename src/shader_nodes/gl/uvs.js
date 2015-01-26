@@ -1,7 +1,7 @@
 //UVS
 function LGraphUVs()
 {
-    this.addOutput("value","vec2");
+    this.addOutput("texCoords","vec2");
 
     this.shader_piece = PUVs; // hardcoded for testing
 }

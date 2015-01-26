@@ -1118,7 +1118,7 @@ LGraphCanvas.prototype.setCanvas = function(canvas)
     });
 
     //droping files
-    canvas.ondragover = function () { console.log('hover'); return false; };
+    canvas.ondragover = function () { /*console.log('hover');*/ return false; };
     canvas.ondragend = function () { console.log('out'); return false; };
     canvas.ondrop = function (e) {
         e.preventDefault();
