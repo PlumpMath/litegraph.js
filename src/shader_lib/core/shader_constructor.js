@@ -1,12 +1,14 @@
 var ShaderConstructor = {};
 
 
+// codes it's [vertex, fragment]
+ShaderConstructor.createShader = function (codes) {
 
+    var vertex = codes[0];
+    var fragment = codes[1];
 
-ShaderConstructor.createShader = function (code, uniforms) {
-
-    var vertex_code = this.getVertexCode(code,  uniforms);
-    var fragment_code = this.getFragmentCode(code,  uniforms);
+    var vertex_code = this.createVertexCode(vertex);
+    var fragment_code = this.createFragmentCode(fragment);
     console.log("vertex:");
     console.log(vertex_code);
     console.log("fragment:");
@@ -14,8 +16,8 @@ ShaderConstructor.createShader = function (code, uniforms) {
     return new GL.Shader(vertex_code,fragment_code);
 }
 
-ShaderConstructor.getVertexCode = function (code, uniforms) {
-    var vertex_code = code.vertex.body;
+ShaderConstructor.createVertexCode = function (code, uniforms) {
+
     var includes = code.includes;
     // header
     var r = "\
@@ -32,12 +34,14 @@ ShaderConstructor.getVertexCode = function (code, uniforms) {
             ";
     r += "uniform mat4 u_mvp;\n\
 		    uniform mat4 u_model;\n";
-    r += code.vertex.uniforms  || "\
-            ";
+
+    for(var k in code.getHeader())
+        r += k;
+
     // body
     r += "void main() {\n\
             ";
-    r += vertex_code;
+    r += code.getBody();
     r += "gl_Position = u_mvp * vec4(a_vertex,1.0);\n\
             }\n\
 			";
@@ -46,8 +50,7 @@ ShaderConstructor.getVertexCode = function (code, uniforms) {
 
 }
 
-ShaderConstructor.getFragmentCode = function (code,  uniforms) {
-    var fragment_code = code.fragment.body;
+ShaderConstructor.createFragmentCode = function (code) {
     var includes = code.includes;
     // header
     var r = "\
@@ -59,13 +62,13 @@ ShaderConstructor.getFragmentCode = function (code,  uniforms) {
     if (includes["v_normal"])
         r += "varying vec3 v_normal;\n\
             ";
-    r += code.fragment.uniforms || "\
-            ";
+    for(var k in code.getHeader())
+        r += k;
     // body
     r += "void main() {\n\
             ";
-    r += fragment_code;
-    r += "gl_FragColor = "+code.output_var+";\n";
+    r += code.getBody();
+    r += "gl_FragColor = "+code.getOutputVar()+";\n";
 
     r += "\n}\n\
 			";

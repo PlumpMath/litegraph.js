@@ -1,3 +1,6 @@
+require(CodePiece);
+declare(PTextureSample);
+
 var PTextureSample = {};
 
 PTextureSample.id = "texture_sample";
@@ -16,16 +19,18 @@ PTextureSample.getFragmentCode = function (output, input, texture_id) {
 
 
 PTextureSample.getCode = function (output, input, texture_id) {
-    var c = {};
-    c.fragment ={};
-    c.vertex ={};
-    c.vertex.uniforms = "";
-    c.fragment.uniforms = "uniform sampler2D "+texture_id+";\n      ";
-    c.vertex.body = this.getVertexCode(output, input, texture_id);
-    c.fragment.body = this.getFragmentCode(output, input, texture_id);
-    c.includes = PTextureSample.includes ;
-    c.output_var = output;
-    return c;
+
+
+    var vertex = new CodePiece();
+    vertex.setIncludes(PTextureSample.includes);
+
+    var fragment = new CodePiece();
+    fragment.setBody(this.getFragmentCode(output, input, texture_id));
+    fragment.addHeaderLine("uniform sampler2D "+texture_id+";\n      ");
+    fragment.setIncludes(PTextureSample.includes);
+    fragment.setOutputVar(output);
+
+    return [vertex, fragment];
 }
 
 

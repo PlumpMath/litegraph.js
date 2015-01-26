@@ -21,7 +21,7 @@ LGraphUVs.prototype.setValue = function(v)
 
 LGraphUVs.prototype.onExecute = function()
 {
-    this.code = this.shader_piece.getCode(); // I need to check texture id
+    this.codes = this.shader_piece.getCode(); // I need to check texture id
     this.setOutputData(0, parseFloat( this.properties["value"] ) );
 }
 

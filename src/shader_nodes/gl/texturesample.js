@@ -255,18 +255,15 @@ LGraphTexture.generateLowResTexturePreview = function(tex)
 LGraphTexture.prototype.processInputCode = function()
 {
 
-    var input_code = this.getNodeCode(0);
+    var input_codes = this.getInputCode(0);
 
 
     var texture_name = "u_" + (this.properties.name ? this.properties.name : "default_name") + "_texture"; // TODO check if there is a texture
-    this.code = this.shader_piece.getCode("color_"+this.id, input_code.output_var, texture_name);
+    this.codes = this.shader_piece.getCode("color_"+this.id, input_codes[1].getOutputVar(), texture_name); // output var must be fragment
 
-    this.code.vertex.body = input_code.vertex.body.concat(this.code.vertex.body);
-    this.code.vertex.uniforms = input_code.vertex.uniforms.concat(this.code.vertex.uniforms);
-    this.code.fragment.body = input_code.fragment.body.concat(this.code.fragment.body);
-    this.code.fragment.uniforms = input_code.fragment.uniforms.concat(this.code.fragment.uniforms);
+    this.codes[0].merge(input_codes[0]);
+    this.codes[1].merge(input_codes[1]);
 
-    for (var inc in input_code.includes) { this.code.includes[inc] = input_code.includes[inc]; }
 }
 
 //var nodes = this.getInputNodes();

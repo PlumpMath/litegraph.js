@@ -70,7 +70,7 @@ LGraphNode.prototype._ctor = function( title )
 
 
     this.shader_piece = null;
-    this.code = {};
+    this.codes = {}; // 0 it's vertes 1 it's fragment
 }
 
 /**
@@ -950,10 +950,10 @@ LGraphNode.prototype.getInputNodes = function()
     return r;
 }
 
-LGraphNode.prototype.getNodeCode = function(link_id)
+LGraphNode.prototype.getInputCode = function(link_id)
 {
     var nodes = this.getInputNodes();
-    return nodes[link_id].code;
+    return nodes[link_id].codes;
 
 }
 

@@ -6,7 +6,7 @@ module.exports = function (grunt) {
         concat_in_order: {
             your_target: {
                 files: {
-                    'dist/shader_nodes.js': [ 'src/shader_nodes/**/*.js'],
+                    'dist/nodes_for_shader_editor.js': [ 'src/shader_nodes/**/*.js'],
                     'dist/<%= pkg.name %>.js': [ 'src/core/*.js', 'src/shader_lib/**/*.js']
                 },
                 options: {
@@ -42,7 +42,7 @@ module.exports = function (grunt) {
             },
             dist: {
                 files: {
-                    'dist/shader_nodes.min.js': ['<%= Object.keys(concat_in_order.your_target.files)[0] %>'], // to extract the destination file from concat
+                    'dist/nodes_for_shader_editor.min.js': ['<%= Object.keys(concat_in_order.your_target.files)[0] %>'], // to extract the destination file from concat
                     'dist/<%= pkg.name %>.min.js': ['<%= Object.keys(concat_in_order.your_target.files)[1] %>'] // to extract the destination file from concat
                 }
             }
