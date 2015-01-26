@@ -4804,6 +4804,12 @@ ShaderConstructor.createVertexCode = function (code, uniforms) {
     if (includes["v_normal"])
         r += "varying vec3 v_normal;\n\
             ";
+    if (includes["v_pos"])
+        r += "varying vec3 v_pos;\n\
+            ";
+    if (includes["u_eye"])
+        r += "uniform vec3 u_eye;\n\
+            ";
     r += "uniform mat4 u_mvp;\n\
 		    uniform mat4 u_model;\n";
 
@@ -4812,6 +4818,9 @@ ShaderConstructor.createVertexCode = function (code, uniforms) {
 
     // body
     r += "void main() {\n\
+            ";
+    if (includes["v_pos"])
+        r += "v_pos = (u_model * vec4(a_vertex,1.0)).xyz;\n\
             ";
     r += code.getBody();
     r += "gl_Position = u_mvp * vec4(a_vertex,1.0);\n\
@@ -4834,6 +4843,12 @@ ShaderConstructor.createFragmentCode = function (code) {
     if (includes["v_normal"])
         r += "varying vec3 v_normal;\n\
             ";
+    if (includes["v_pos"])
+        r += "varying vec3 v_pos;\n\
+            ";
+    if (includes["u_eye"])
+        r += "uniform vec3 u_eye;\n\
+            ";
     for(var k in code.getHeader())
         r += k;
     // body
@@ -4852,6 +4867,45 @@ ShaderConstructor.createFragmentCode = function (code) {
 
 
 
+
+
+
+
+var PCameraToPixelWS = {};
+
+PCameraToPixelWS.id = "cameratopixelws";
+PCameraToPixelWS.includes = {v_pos:1, u_eye: 1};
+PCameraToPixelWS.already_included = false; // TODO add multiple times same line
+
+PCameraToPixelWS.getVertexCode = function (output, input) {
+    return "";
+}
+
+PCameraToPixelWS.getFragmentCode = function (output, input) {
+    return "vec3 camera_to_pixel_ws = normalize(v_pos - u_eye); \n\
+            ";
+}
+
+
+PCameraToPixelWS.getCode = function (output, input) {
+    var vertex = new CodePiece();
+    vertex.setBody(this.getVertexCode(output, input));
+    vertex.setIncludes(PCameraToPixelWS.includes);
+
+    var fragment = new CodePiece();
+    fragment.setBody(this.getFragmentCode(output, input));
+    fragment.setIncludes(PCameraToPixelWS.includes);
+    fragment.setOutputVar("camera_to_pixel_ws");
+
+    PCameraToPixelWS.already_included = true;
+
+    return [vertex, fragment];
+}
+
+
+
+
+
 var PPixelNormalWS = {};
 
 PPixelNormalWS.id = "pixel_normal_ws";
@@ -4859,14 +4913,12 @@ PPixelNormalWS.includes = {u_model: 1, a_normal: 1, v_normal: 1};
 PPixelNormalWS.already_included = false;
 
 PPixelNormalWS.getVertexCode = function (output, input) {
-    if(!PPixelNormalWS.already_included )
-        var code = "v_normal = u_model * vec4(a_normal, 0.0);\
+        var code = "v_normal = (u_model * vec4(a_normal, 0.0)).xyz;\n\
                 ";
     return code;
 }
 
 PPixelNormalWS.getFragmentCode = function (output, input) {
-    if(!PPixelNormalWS.already_included )
         var code = "vec3 pixel_normal_ws = v_normal;\n\
             ";
 
@@ -4875,17 +4927,22 @@ PPixelNormalWS.getFragmentCode = function (output, input) {
 
 
 PPixelNormalWS.getCode = function (output, input) {
-    var c = {};
-    c.fragment ={};
-    c.vertex ={};
-    c.vertex.uniforms = "";
-    c.fragment.uniforms = "";
-    c.vertex.body = this.getVertexCode(output, input);
-    c.fragment.body = this.getFragmentCode(output, input);
-    PPixelNormalWS.already_included =  true;
-    c.includes = {u_model: 1, a_normal: 1, v_normal: 1};
-    return c;
+    var vertex = new CodePiece();
+    vertex.setBody(this.getVertexCode(output, input));
+    vertex.setIncludes(PPixelNormalWS.includes);
+
+    var fragment = new CodePiece();
+    fragment.setBody(this.getFragmentCode(output, input));
+    fragment.setIncludes(PPixelNormalWS.includes);
+    fragment.setOutputVar("pixel_normal_ws");
+
+    PPixelNormalWS.already_included = true;
+
+    return [vertex, fragment];
 }
+
+
+
 
 
 var PReflect = {};
@@ -4904,12 +4961,67 @@ PReflect.getVertexCode = function(output,incident, normal) {
 
 
 PReflect.getFragmentCode = function(output,incident, normal) {
-    if(incident == "eye_to_pixel" || incident == "eye_to_vertex")
-        reflect.includes[incident]= 1;
 
-    var code = "vec3 "+output+"= reflect("+incident+","+normal+");";
+    var code = "vec3 "+output+"= reflect("+incident+","+normal+");\n\
+            ";
     return code;
 }
+
+PReflect.getCode = function (output, incident, normal) {
+
+
+    var vertex = new CodePiece();
+    vertex.setIncludes(PReflect.includes);
+
+    var fragment = new CodePiece();
+    fragment.setBody(this.getFragmentCode(output, incident, normal));
+    fragment.setIncludes(PReflect.includes);
+    fragment.setOutputVar(output);
+
+    return [vertex, fragment];
+}
+
+
+
+
+
+
+
+
+
+var PTextureSampleCube = {};
+
+PTextureSampleCube.id = "texture_sample_cube";
+PTextureSampleCube.includes = {};
+
+PTextureSampleCube.getVertexCode = function (output, input, texture_id) {
+    return "";
+}
+
+PTextureSampleCube.getFragmentCode = function (output, input, texture_id) {
+    if(!input)
+        throw("input for sample cube not defined")
+    var code = "vec4 " + output + " = textureCube(" + texture_id + ", " + input + ");\n\
+                ";
+    return code;
+}
+
+
+PTextureSampleCube.getCode = function (output, input, texture_id) {
+
+    var vertex = new CodePiece();
+    vertex.setIncludes(PTextureSampleCube.includes);
+
+    var fragment = new CodePiece();
+    fragment.setBody(this.getFragmentCode(output, input, texture_id));
+    fragment.addHeaderLine("uniform samplerCube "+texture_id+";\n      ");
+    fragment.setIncludes(PTextureSampleCube.includes);
+    fragment.setOutputVar(output);
+
+    return [vertex, fragment];
+}
+
+
 
 
 
@@ -4983,7 +5095,3 @@ PUVs.getCode = function (output, input) {
 
     return [vertex, fragment];
 }
-
-
-
-LiteGraph.ShaderLib = {};

@@ -1,3 +1,0 @@
-
-
-LiteGraph.ShaderLib = {};

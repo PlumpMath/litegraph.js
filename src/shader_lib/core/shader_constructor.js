@@ -32,6 +32,12 @@ ShaderConstructor.createVertexCode = function (code, uniforms) {
     if (includes["v_normal"])
         r += "varying vec3 v_normal;\n\
             ";
+    if (includes["v_pos"])
+        r += "varying vec3 v_pos;\n\
+            ";
+    if (includes["u_eye"])
+        r += "uniform vec3 u_eye;\n\
+            ";
     r += "uniform mat4 u_mvp;\n\
 		    uniform mat4 u_model;\n";
 
@@ -40,6 +46,9 @@ ShaderConstructor.createVertexCode = function (code, uniforms) {
 
     // body
     r += "void main() {\n\
+            ";
+    if (includes["v_pos"])
+        r += "v_pos = (u_model * vec4(a_vertex,1.0)).xyz;\n\
             ";
     r += code.getBody();
     r += "gl_Position = u_mvp * vec4(a_vertex,1.0);\n\
@@ -61,6 +70,12 @@ ShaderConstructor.createFragmentCode = function (code) {
             ";
     if (includes["v_normal"])
         r += "varying vec3 v_normal;\n\
+            ";
+    if (includes["v_pos"])
+        r += "varying vec3 v_pos;\n\
+            ";
+    if (includes["u_eye"])
+        r += "uniform vec3 u_eye;\n\
             ";
     for(var k in code.getHeader())
         r += k;

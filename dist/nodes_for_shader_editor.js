@@ -59,6 +59,52 @@ LGraphShader.prototype.processInputCode = function() {
 
 
 LiteGraph.registerNodeType("core/ShaderNode",LGraphShader);
+//UVS
+function LGraphCamToPixelWS()
+{
+    this.addOutput("value","vec3");
+    this.properties = { value:1.0 };
+    this.editable = { property:"value", type:"number" };
+
+    this.shader_piece = PCameraToPixelWS; // hardcoded for testing
+}
+
+LGraphCamToPixelWS.title = "CameraToPixelWS";
+LGraphCamToPixelWS.desc = "The vector from camera to pixel";
+
+LGraphCamToPixelWS.prototype.onExecute = function()
+{
+    this.codes = this.shader_piece.getCode(); // I need to check texture id
+    this.setOutputData(0, parseFloat( this.properties["value"] ) );
+}
+
+
+LiteGraph.registerNodeType("texture/CameraToPixelWS", LGraphCamToPixelWS);
+
+
+//UVS
+function LGraphPixelNormalWS()
+{
+    this.addOutput("value","vec3");
+    this.properties = { value:1.0 };
+    this.editable = { property:"value", type:"number" };
+
+    this.shader_piece = PPixelNormalWS; // hardcoded for testing
+}
+
+LGraphPixelNormalWS.title = "PixelNormalWS";
+LGraphPixelNormalWS.desc = "The normal in world coordinates";
+
+LGraphPixelNormalWS.prototype.onExecute = function()
+{
+    this.codes = this.shader_piece.getCode(); // I need to check texture id
+    this.setOutputData(0, parseFloat( this.properties["value"] ) );
+}
+
+
+LiteGraph.registerNodeType("texture/PixelNormalWS", LGraphPixelNormalWS);
+
+
 //**************************
 function LGraphTexturePreview()
 {
@@ -97,6 +143,45 @@ LGraphTexturePreview.prototype.onDrawBackground = function(ctx)
 
 LiteGraph.registerNodeType("texture/preview", LGraphTexturePreview );
 window.LGraphTexturePreview = LGraphTexturePreview;
+//UVS
+function LGraphReflect()
+{
+    this.addOutput("reflect_vec","vec3");
+    this.addInput("normal","vec3");
+    this.addInput("vector","vec3");
+
+    this.shader_piece = PReflect; // hardcoded for testing
+}
+
+LGraphReflect.title = "ReflectVector";
+LGraphReflect.desc = "To reflect a vector3";
+
+
+LGraphReflect.prototype.onExecute = function()
+{
+    this.processInputCode();
+}
+
+
+LGraphReflect.prototype.processInputCode = function()
+{
+
+    var in_codes_normal = this.getInputCode(0); // normal
+    var in_codes_incident = this.getInputCode(1); // inident vector
+
+    // (output, incident, normal)
+    this.codes = this.shader_piece.getCode("reflect_"+this.id, in_codes_incident[1].getOutputVar(), in_codes_normal[1].getOutputVar()); // output var must be fragment
+
+    this.codes[0].merge(in_codes_normal[0]);
+    this.codes[1].merge(in_codes_normal[1]);
+    this.codes[0].merge(in_codes_incident[0]);
+    this.codes[1].merge(in_codes_incident[1]);
+
+}
+
+LiteGraph.registerNodeType("texture/reflect", LGraphReflect);
+
+
 function LGraphTexture()
 {
     this.addOutput("Texture","Texture");
@@ -365,21 +450,101 @@ LGraphTexture.prototype.processInputCode = function()
 
 }
 
-//var nodes = this.getInputNodes();
-//for(var i = 0; i < nodes.length; ++i){
-//    var node = nodes[i];
-//    node.shader_piece.getCode();
-//}
 
 LiteGraph.registerNodeType("texture/textureSample", LGraphTexture );
 window.LGraphTexture = LGraphTexture;
+
+
+function LGraphCubemap()
+{
+    this.addOutput("Cubemap","Cubemap");
+    this.addOutput("Color","vec4");
+    this.addInput("vec3","vec3");
+    this.properties = {name:""};
+    this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
+
+    this.shader_piece = PTextureSampleCube; // hardcoded for testing
+}
+
+LGraphCubemap.title = "textureSampleCube";
+LGraphCubemap.desc = "textureSampleCube";
+
+LGraphCubemap.prototype.onDropFile = function(data, filename, file)
+{
+    if(!data)
+    {
+        this._drop_texture = null;
+        this.properties.name = "";
+    }
+    else
+    {
+        var no_ext_name = filename.split('.')[0];
+        if( typeof(data) == "string" )
+            gl.textures[no_ext_name] = this._drop_texture = GL.Texture.cubemapFromURL(data);
+        else
+            gl.textures[no_ext_name] =this._drop_texture = GL.Texture.fromDDSInMemory(data);
+        this.properties.name = no_ext_name;
+    }
+}
+
+LGraphCubemap.prototype.onExecute = function()
+{
+
+    this.processInputCode();
+    if(this._drop_texture)
+    {
+        this.setOutputData(0, this._drop_texture);
+        return;
+    }
+
+    if(!this.properties.name)
+        return;
+
+    var tex = LGraphTexture.getTexture( this.properties.name );
+    if(!tex)
+        return;
+
+    this._last_tex = tex;
+    this.setOutputData(0, tex);
+}
+
+LGraphCubemap.prototype.onDrawBackground = function(ctx)
+{
+    if( this.flags.collapsed || this.size[1] <= 20)
+        return;
+
+    if(!ctx.webgl)
+        return;
+
+    var cube_mesh = gl.meshes["cube"];
+    if(!cube_mesh)
+        cube_mesh = gl.meshes["cube"] = GL.Mesh.cube({size:1});
+
+    //var view = mat4.lookAt( mat4.create(), [0,0
+}
+
+
+LGraphCubemap.prototype.processInputCode = function()
+{
+
+    var input_codes = this.getInputCode(0);
+
+    var texture_name = "u_" + (this.properties.name ? this.properties.name : "default_name") + "_texture"; // TODO check if there is a texture
+    this.codes = this.shader_piece.getCode("color_"+this.id, input_codes[1].getOutputVar(), texture_name); // output var must be fragment
+
+    this.codes[0].merge(input_codes[0]);
+    this.codes[1].merge(input_codes[1]);
+
+}
+
+
+LiteGraph.registerNodeType("texture/TextureSampleCube", LGraphCubemap );
+window.LGraphCubemap = LGraphCubemap;
 
 //UVS
 function LGraphUVs()
 {
     this.addOutput("value","vec2");
-    this.properties = { value:1.0 };
-    this.editable = { property:"value", type:"number" };
 
     this.shader_piece = PUVs; // hardcoded for testing
 }
@@ -387,31 +552,12 @@ function LGraphUVs()
 LGraphUVs.title = "UVs";
 LGraphUVs.desc = "The texture coordinates";
 
-
-LGraphUVs.prototype.setValue = function(v)
-{
-    if( typeof(v) == "string") v = parseFloat(v);
-    this.properties["value"] = v;
-    this.setDirtyCanvas(true);
-};
-
 LGraphUVs.prototype.onExecute = function()
 {
     this.codes = this.shader_piece.getCode(); // I need to check texture id
     this.setOutputData(0, parseFloat( this.properties["value"] ) );
 }
 
-LGraphUVs.prototype.onDrawBackground = function(ctx)
-{
-    //show the current value
-    this.outputs[0].label = this.properties["value"].toFixed(3);
-}
-
-LGraphUVs.prototype.onWidget = function(e,widget)
-{
-    if(widget.name == "value")
-        this.setValue(widget.value);
-}
 
 LiteGraph.registerNodeType("texture/UVs", LGraphUVs);
 

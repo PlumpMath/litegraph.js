@@ -266,11 +266,6 @@ LGraphTexture.prototype.processInputCode = function()
 
 }
 
-//var nodes = this.getInputNodes();
-//for(var i = 0; i < nodes.length; ++i){
-//    var node = nodes[i];
-//    node.shader_piece.getCode();
-//}
 
 LiteGraph.registerNodeType("texture/textureSample", LGraphTexture );
 window.LGraphTexture = LGraphTexture;
