@@ -2,7 +2,7 @@
 function LGraphCubemap()
 {
     this.addOutput("Cubemap","Cubemap");
-    this.addOutput("Color","vec4");
+    this.addOutput("Color","vec4", {vec3:1, vec4:1});
     this.addInput("vec3","vec3");
     this.properties = {name:""};
     this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];

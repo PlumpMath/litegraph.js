@@ -50,6 +50,8 @@ ShaderConstructor.createVertexCode = function (code, uniforms) {
     if (includes["v_pos"])
         r += "v_pos = (u_model * vec4(a_vertex,1.0)).xyz;\n\
             ";
+    for(var k in code.getBodyHeader())
+        r += k;
     r += code.getBody();
     r += "gl_Position = u_mvp * vec4(a_vertex,1.0);\n\
             }\n\
@@ -82,6 +84,8 @@ ShaderConstructor.createFragmentCode = function (code) {
     // body
     r += "void main() {\n\
             ";
+    for(var k in code.getBodyHeader())
+        r += k;
     r += code.getBody();
     r += "gl_FragColor = "+code.getOutputVar()+";\n";
 

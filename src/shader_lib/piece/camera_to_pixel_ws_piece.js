@@ -9,24 +9,24 @@ PCameraToPixelWS.includes = {v_pos:1, u_eye: 1};
 PCameraToPixelWS.already_included = false; // TODO add multiple times same line
 
 PCameraToPixelWS.getVertexCode = function (output, input) {
-    return "";
+    var vertex = new CodePiece();
+    vertex.setIncludes(PCameraToPixelWS.includes);
+    return vertex;
 }
 
 PCameraToPixelWS.getFragmentCode = function (output, input) {
-    return "vec3 camera_to_pixel_ws = normalize(v_pos - u_eye); \n\
-            ";
+    var fragment = new CodePiece();
+    fragment.setBodyHeader("vec3 camera_to_pixel_ws = normalize(v_pos - u_eye); \n\
+            ");
+    fragment.setIncludes(PCameraToPixelWS.includes);
+    fragment.setOutputVar("camera_to_pixel_ws");
+    return fragment;
 }
 
 
 PCameraToPixelWS.getCode = function (output, input) {
-    var vertex = new CodePiece();
-    vertex.setBody(this.getVertexCode(output, input));
-    vertex.setIncludes(PCameraToPixelWS.includes);
-
-    var fragment = new CodePiece();
-    fragment.setBody(this.getFragmentCode(output, input));
-    fragment.setIncludes(PCameraToPixelWS.includes);
-    fragment.setOutputVar("camera_to_pixel_ws");
+    var fragment = this.getFragmentCode(output, input);
+    var vertex = this.getVertexCode(output, input);
 
     PCameraToPixelWS.already_included = true;
 

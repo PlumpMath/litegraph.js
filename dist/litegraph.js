@@ -4589,6 +4589,7 @@ if( !window["requestAnimationFrame"] )
 function CodePiece()
 {
     this.header = {}; // map for custom uniforms or variants
+    this.bodyheader = {}; // upper part of the body for vars like cameratopixel
     this.body = "";
     this.includes = {}; // map for standard uniforms
     this.output_var = "";
@@ -4604,6 +4605,16 @@ CodePiece.prototype.getBody = function()
 CodePiece.prototype.setBody = function(s)
 {
     this.body = s;
+};
+
+CodePiece.prototype.getBodyHeader = function()
+{
+    return this.bodyheader;
+};
+
+CodePiece.prototype.setBodyHeader = function(s)
+{
+    this.bodyheader[s] = 1;
 };
 
 CodePiece.prototype.getHeader = function()
@@ -4649,7 +4660,9 @@ CodePiece.prototype.merge = function (input_code)
 {
     this.setBody( input_code.getBody().concat(this.body) );
 
-    for (var inc in input_code.getHeader()) { this.header[inc] = input_code.includes[inc]; }
+
+    for (var inc in input_code.getBodyHeader()) { this.bodyheader[inc] = input_code.bodyheader[inc]; }
+    for (var inc in input_code.getHeader()) { this.header[inc] = input_code.header[inc]; }
     // we merge the includes
     for (var inc in input_code.includes) { this.includes[inc] = input_code.includes[inc]; }
 };
@@ -4705,6 +4718,8 @@ ShaderConstructor.createVertexCode = function (code, uniforms) {
     if (includes["v_pos"])
         r += "v_pos = (u_model * vec4(a_vertex,1.0)).xyz;\n\
             ";
+    for(var k in code.getBodyHeader())
+        r += k;
     r += code.getBody();
     r += "gl_Position = u_mvp * vec4(a_vertex,1.0);\n\
             }\n\
@@ -4737,6 +4752,8 @@ ShaderConstructor.createFragmentCode = function (code) {
     // body
     r += "void main() {\n\
             ";
+    for(var k in code.getBodyHeader())
+        r += k;
     r += code.getBody();
     r += "gl_FragColor = "+code.getOutputVar()+";\n";
 
@@ -4761,26 +4778,96 @@ PCameraToPixelWS.includes = {v_pos:1, u_eye: 1};
 PCameraToPixelWS.already_included = false; // TODO add multiple times same line
 
 PCameraToPixelWS.getVertexCode = function (output, input) {
-    return "";
+    var vertex = new CodePiece();
+    vertex.setIncludes(PCameraToPixelWS.includes);
+    return vertex;
 }
 
 PCameraToPixelWS.getFragmentCode = function (output, input) {
-    return "vec3 camera_to_pixel_ws = normalize(v_pos - u_eye); \n\
-            ";
+    var fragment = new CodePiece();
+    fragment.setBodyHeader("vec3 camera_to_pixel_ws = normalize(v_pos - u_eye); \n\
+            ");
+    fragment.setIncludes(PCameraToPixelWS.includes);
+    fragment.setOutputVar("camera_to_pixel_ws");
+    return fragment;
 }
 
 
 PCameraToPixelWS.getCode = function (output, input) {
-    var vertex = new CodePiece();
-    vertex.setBody(this.getVertexCode(output, input));
-    vertex.setIncludes(PCameraToPixelWS.includes);
-
-    var fragment = new CodePiece();
-    fragment.setBody(this.getFragmentCode(output, input));
-    fragment.setIncludes(PCameraToPixelWS.includes);
-    fragment.setOutputVar("camera_to_pixel_ws");
+    var fragment = this.getFragmentCode(output, input);
+    var vertex = this.getVertexCode(output, input);
 
     PCameraToPixelWS.already_included = true;
+
+    return [vertex, fragment];
+}
+
+
+
+
+
+var PMixer = {};
+
+PMixer.id = "mixer";
+PMixer.includes = {v_pos:1, u_eye: 1};
+PMixer.already_included = false; // TODO add multiple times same line
+
+PMixer.getVertexCode = function (output, tex1, tex2, decal) {
+    return "";
+}
+
+PMixer.getFragmentCode = function (output, tex1, tex2, decal) {
+    return "vec4 "+output+" = mix("+tex1+","+tex2+","+decal+"); \n\
+            ";
+}
+
+
+PMixer.getCode = function (output, tex1, tex2, decal) {
+    var vertex = new CodePiece();
+    vertex.setBody(this.getVertexCode(output, tex1, tex2, decal));
+    vertex.setIncludes(PMixer.includes);
+
+    var fragment = new CodePiece();
+    fragment.setBody(this.getFragmentCode(output, tex1, tex2, decal));
+    fragment.setIncludes(PMixer.includes);
+    fragment.setOutputVar(output);
+
+    PMixer.already_included = true;
+
+    return [vertex, fragment];
+}
+
+
+
+
+
+var POperation = {};
+
+POperation.id = "operation";
+POperation.includes = {v_pos:1, u_eye: 1};
+POperation.already_included = false; // TODO add multiple times same line
+
+POperation.getVertexCode = function (output, op, input1, input2) {
+    return "";
+}
+
+POperation.getFragmentCode = function (output, op, input1, input2) {
+    return "vec4 "+output+" = "+input1+" "+op+" "+input2+"; \n\
+            ";
+}
+
+
+POperation.getCode = function (output, op, input1, input2) {
+    var vertex = new CodePiece();
+    vertex.setBody(this.getVertexCode(output, op, input1, input2));
+    vertex.setIncludes(POperation.includes);
+
+    var fragment = new CodePiece();
+    fragment.setBody(this.getFragmentCode(output, op, input1, input2));
+    fragment.setIncludes(POperation.includes);
+    fragment.setOutputVar(output);
+
+    POperation.already_included = true;
 
     return [vertex, fragment];
 }

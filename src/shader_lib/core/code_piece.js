@@ -7,6 +7,7 @@ declare(CodePiece);
 function CodePiece()
 {
     this.header = {}; // map for custom uniforms or variants
+    this.bodyheader = {}; // upper part of the body for vars like cameratopixel
     this.body = "";
     this.includes = {}; // map for standard uniforms
     this.output_var = "";
@@ -22,6 +23,16 @@ CodePiece.prototype.getBody = function()
 CodePiece.prototype.setBody = function(s)
 {
     this.body = s;
+};
+
+CodePiece.prototype.getBodyHeader = function()
+{
+    return this.bodyheader;
+};
+
+CodePiece.prototype.setBodyHeader = function(s)
+{
+    this.bodyheader[s] = 1;
 };
 
 CodePiece.prototype.getHeader = function()
@@ -67,7 +78,9 @@ CodePiece.prototype.merge = function (input_code)
 {
     this.setBody( input_code.getBody().concat(this.body) );
 
-    for (var inc in input_code.getHeader()) { this.header[inc] = input_code.includes[inc]; }
+
+    for (var inc in input_code.getBodyHeader()) { this.bodyheader[inc] = input_code.bodyheader[inc]; }
+    for (var inc in input_code.getHeader()) { this.header[inc] = input_code.header[inc]; }
     // we merge the includes
     for (var inc in input_code.includes) { this.includes[inc] = input_code.includes[inc]; }
 };
