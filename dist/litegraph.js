@@ -4589,32 +4589,31 @@ if( !window["requestAnimationFrame"] )
 function CodePiece()
 {
     this.header = {}; // map for custom uniforms or variants
-    this.bodyheader = {}; // upper part of the body for vars like cameratopixel
-    this.body = "";
+    this.body_hash = {}; // upper part of the body for vars like cameratopixel
+    this.body_ids = [];
     this.includes = {}; // map for standard uniforms
     this.output_var = "";
     this.scope = "";
 }
 
+CodePiece.prototype.getBodyIds = function()
+{
+    return this.body_ids;
+};
 
 CodePiece.prototype.getBody = function()
 {
-    return this.body;
+    return this.body_hash;
 };
 
 CodePiece.prototype.setBody = function(s)
 {
-    this.body = s;
-};
+    var id = s.hashCode();
+    if(!this.body_hash[id]){
+        this.body_hash[id] = s;
+        this.body_ids.push(id);
+    }
 
-CodePiece.prototype.getBodyHeader = function()
-{
-    return this.bodyheader;
-};
-
-CodePiece.prototype.setBodyHeader = function(s)
-{
-    this.bodyheader[s] = 1;
 };
 
 CodePiece.prototype.getHeader = function()
@@ -4658,10 +4657,10 @@ CodePiece.prototype.setScope = function(scope)
 
 CodePiece.prototype.merge = function (input_code)
 {
-    this.setBody( input_code.getBody().concat(this.body) );
-
-
-    for (var inc in input_code.getBodyHeader()) { this.bodyheader[inc] = input_code.bodyheader[inc]; }
+    //this.setBody( input_code.getBody().concat(this.body) );
+    var body_hash = input_code.getBody();
+    for (var i = 0, l = body_hash.length; i < l; i++)
+        this.setBody(body_hash[i]);
     for (var inc in input_code.getHeader()) { this.header[inc] = input_code.header[inc]; }
     // we merge the includes
     for (var inc in input_code.includes) { this.includes[inc] = input_code.includes[inc]; }
@@ -4718,9 +4717,11 @@ ShaderConstructor.createVertexCode = function (code, uniforms) {
     if (includes["v_pos"])
         r += "v_pos = (u_model * vec4(a_vertex,1.0)).xyz;\n\
             ";
-    for(var k in code.getBodyHeader())
-        r += k;
-    r += code.getBody();
+    var ids = code.getBodyIds();
+    var body_hash = code.getBody();
+    for (var i = 0, l = ids.length; i < l; i++) {
+        r += body_hash[ids[i]];
+    }
     r += "gl_Position = u_mvp * vec4(a_vertex,1.0);\n\
             }\n\
 			";
@@ -4752,9 +4753,11 @@ ShaderConstructor.createFragmentCode = function (code) {
     // body
     r += "void main() {\n\
             ";
-    for(var k in code.getBodyHeader())
-        r += k;
-    r += code.getBody();
+    var ids = code.getBodyIds();
+    var body_hash = code.getBody();
+    for (var i = 0, l = ids.length; i < l; i++) {
+        r += body_hash[ids[i]];
+    }
     r += "gl_FragColor = "+code.getOutputVar()+";\n";
 
     r += "\n}\n\
@@ -4785,7 +4788,7 @@ PCameraToPixelWS.getVertexCode = function (output, input) {
 
 PCameraToPixelWS.getFragmentCode = function (output, input) {
     var fragment = new CodePiece();
-    fragment.setBodyHeader("vec3 camera_to_pixel_ws = normalize(v_pos - u_eye); \n\
+    fragment.setBody("vec3 camera_to_pixel_ws = normalize(v_pos - u_eye); \n\
             ");
     fragment.setIncludes(PCameraToPixelWS.includes);
     fragment.setOutputVar("camera_to_pixel_ws");

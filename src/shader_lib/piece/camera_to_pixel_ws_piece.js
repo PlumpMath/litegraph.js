@@ -16,7 +16,7 @@ PCameraToPixelWS.getVertexCode = function (output, input) {
 
 PCameraToPixelWS.getFragmentCode = function (output, input) {
     var fragment = new CodePiece();
-    fragment.setBodyHeader("vec3 camera_to_pixel_ws = normalize(v_pos - u_eye); \n\
+    fragment.setBody("vec3 camera_to_pixel_ws = normalize(v_pos - u_eye); \n\
             ");
     fragment.setIncludes(PCameraToPixelWS.includes);
     fragment.setOutputVar("camera_to_pixel_ws");
