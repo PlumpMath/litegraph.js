@@ -358,9 +358,9 @@ LGraphNode.prototype.triggerOutput = function(slot,param)
  * @param {string} type string defining the output type ("vec3","number",...)
  * @param {Object} extra_info this can be used to have special properties of an output (special color, position, etc)
  */
-LGraphNode.prototype.addOutput = function(name,type,extra_info)
+LGraphNode.prototype.addOutput = function(name,type,types, extra_info)
 {
-    var o = {name:name,type:type,links:null};
+    var o = {name:name,type:type,types:types,links:null};
     if(extra_info)
         for(var i in extra_info)
             o[i] = extra_info[i];
@@ -418,9 +418,9 @@ LGraphNode.prototype.removeOutput = function(slot)
  * @param {string} type string defining the input type ("vec3","number",...)
  * @param {Object} extra_info this can be used to have special properties of an input (label, color, position, etc)
  */
-LGraphNode.prototype.addInput = function(name,type,extra_info)
+LGraphNode.prototype.addInput = function(name,type,types,extra_info)
 {
-    var o = {name:name,type:type,link:null};
+    var o = {name:name,type:type,link:null, types:types};
     if(extra_info)
         for(var i in extra_info)
             o[i] = extra_info[i];
@@ -629,7 +629,8 @@ LGraphNode.prototype.connect = function(slot, node, target_slot)
     }
     else if( !output.type ||  //generic output
         !node.inputs[target_slot].type || //generic input
-        output.type == node.inputs[target_slot].type) //same type
+        output.type == node.inputs[target_slot].type || //same type
+        LiteGraph.compareNodeTypes(output,node.inputs[target_slot]))
     {
         //info: link structure => [ 0:link_id, 1:start_node_id, 2:start_slot, 3:end_node_id, 4:end_slot ]
         //var link = [ this.graph.last_link_id++, this.id, slot, node.id, target_slot ];
@@ -956,5 +957,7 @@ LGraphNode.prototype.getInputCode = function(link_id)
     return nodes[link_id].codes;
 
 }
+
+
 
 

@@ -1,7 +1,7 @@
 function LGraphTexture()
 {
-    this.addOutput("Texture","Texture");
-    this.addOutput("Color","vec4");
+    this.addOutput("Texture","Texture",{Texture:1});
+    this.addOutput("Color","vec4", {Vec3:1, Vec4:1});
     this.addOutput("R","R");
     this.addOutput("G","G");
     this.addOutput("B","B");
@@ -11,6 +11,12 @@ function LGraphTexture()
     this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
 
     this.shader_piece = PTextureSample; // hardcoded for testing
+
+    // default texture
+    if(typeof(gl) != "undefined" && gl.textures["ball"]){
+        this.properties.name = "ball";
+        this._drop_texture = gl.textures["ball"];
+    }
 }
 
 LGraphTexture.title = "textureSample";

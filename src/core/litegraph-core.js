@@ -548,6 +548,42 @@ LiteGraph.extendClass = function ( target, origin )
         }
 }
 
+LiteGraph.compareNodeTypes = function(output,input)
+{
+    if(!output.types ||!input.types )
+        return false;
+    for (key in output.types) {
+        if (input.types.hasOwnProperty(key)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+LiteGraph.dispatchEvent = function(name, obj, element)
+{
+    var event;
+    if (document.createEvent) {
+        event = document.createEvent("HTMLEvents");
+        event.initEvent(name, true, true);
+    } else {
+        event = document.createEventObject();
+        event.eventType = name;
+    }
+
+    event.eventName = name;
+    event.data = obj;
+    if(!element)
+        element = document
+    // for other browser
+    if (document.createEvent) {
+        element.dispatchEvent(event);
+    } else {// for IE
+        element.fireEvent("on" + event.eventType, event);
+    }
+}
+
+
 /*
  LiteGraph.createNodetypeWrapper = function( class_object )
  {

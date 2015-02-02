@@ -1,7 +1,7 @@
 //**************************
 function LGraphTexturePreview()
 {
-    this.addInput("Texture","Texture");
+    this.addInput("Texture","Texture", {Texture:1, Vec3:1, Vec4:1});
     this.properties = { flipY: false };
     this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
 }
