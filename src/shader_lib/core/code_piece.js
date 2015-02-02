@@ -7,8 +7,8 @@ declare(CodePiece);
 function CodePiece()
 {
     this.header = {}; // map for custom uniforms or variants
-    this.body_hash = {}; // upper part of the body for vars like cameratopixel
-    this.body_ids = [];
+    this.body_hash = {}; // body hashmap
+    this.body_ids = []; // body ids sorted  by insert order
     this.includes = {}; // map for standard uniforms
     this.output_var = "";
     this.scope = "";
@@ -27,7 +27,7 @@ CodePiece.prototype.getBody = function()
 CodePiece.prototype.setBody = function(s)
 {
     var id = s.hashCode();
-    if(!this.body_hash[id]){
+    if(typeof(this.body_hash[id]) === 'undefined' ){
         this.body_hash[id] = s;
         this.body_ids.push(id);
     }

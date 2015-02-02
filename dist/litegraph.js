@@ -4609,7 +4609,7 @@ CodePiece.prototype.getBody = function()
 CodePiece.prototype.setBody = function(s)
 {
     var id = s.hashCode();
-    if(!this.body_hash[id]){
+    if(typeof(this.body_hash[id]) === 'undefined' ){
         this.body_hash[id] = s;
         this.body_ids.push(id);
     }
