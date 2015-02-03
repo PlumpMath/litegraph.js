@@ -6,7 +6,7 @@ function demo()
 
 function multiConnection()
 {
-	var node_vec = LiteGraph.createNode("texture/UVs");
+	var node_vec = LiteGraph.createNode("texture/TextureCoords");
     node_vec.pos = [200,200];
 	graph.add(node_vec);
 

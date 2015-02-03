@@ -13,9 +13,9 @@ function LGraphTexture()
     this.shader_piece = PTextureSample; // hardcoded for testing
 
     // default texture
-    if(typeof(gl) != "undefined" && gl.textures["ball"]){
-        this.properties.name = "ball";
-        this._drop_texture = gl.textures["ball"];
+    if(typeof(gl) != "undefined" && gl.textures["default"]){
+        this.properties.name = "default";
+        this._drop_texture = gl.textures["default"];
     }
 }
 

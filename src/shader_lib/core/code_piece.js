@@ -29,7 +29,7 @@ CodePiece.prototype.setBody = function(s)
     var id = s.hashCode();
     if(typeof(this.body_hash[id]) === 'undefined' ){
         this.body_hash[id] = s;
-        this.body_ids.push(id);
+        this.body_ids.unshift(id);
     }
 
 };
@@ -76,9 +76,13 @@ CodePiece.prototype.setScope = function(scope)
 CodePiece.prototype.merge = function (input_code)
 {
     //this.setBody( input_code.getBody().concat(this.body) );
+
+    var ids = input_code.getBodyIds();
     var body_hash = input_code.getBody();
-    for (var i = 0, l = body_hash.length; i < l; i++)
-        this.setBody(body_hash[i]);
+    for (var i = ids.length-1; i >= 0; i--) {
+        this.setBody(body_hash[ids[i]]);
+    }
+
     for (var inc in input_code.getHeader()) { this.header[inc] = input_code.header[inc]; }
     // we merge the includes
     for (var inc in input_code.includes) { this.includes[inc] = input_code.includes[inc]; }

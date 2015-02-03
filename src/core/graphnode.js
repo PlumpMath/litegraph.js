@@ -945,7 +945,8 @@ LGraphNode.prototype.getInputNodes = function()
     for(var i = 0; i < this.inputs.length; i++){
         var link_id = this.inputs[i].link;
         var link = this.graph.links[link_id];
-        r.push( this.graph.getNodeById( link.origin_id ));// we knot it's 0 cause inputs only can have one link
+        if(link)
+            r.push( this.graph.getNodeById( link.origin_id ));// we knot it's 0 cause inputs only can have one link
     }
 
     return r;
@@ -954,7 +955,9 @@ LGraphNode.prototype.getInputNodes = function()
 LGraphNode.prototype.getInputCode = function(link_id)
 {
     var nodes = this.getInputNodes();
-    return nodes[link_id].codes;
+    if(nodes[link_id])
+        return nodes[link_id].codes;
+    return null;
 
 }
 
