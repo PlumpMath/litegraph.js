@@ -1140,6 +1140,7 @@ LGraphCanvas.prototype.setCanvas = function (canvas) {
             //console.log(event.target);
             var data = event.target.result;
             node.onDropFile(data, filename, file);
+            that.onUpdate();
         };
 
         //read data
@@ -1150,6 +1151,7 @@ LGraphCanvas.prototype.setCanvas = function (canvas) {
             reader.readAsDataURL(file);
         else
             reader.readAsArrayBuffer(file);
+
 
         return false;
     };
@@ -1302,7 +1304,6 @@ LGraphCanvas.prototype.stopRendering = function () {
 
 LGraphCanvas.prototype.processMouseDown = function (e) {
     if (!this.graph) return;
-
     this.adjustMouseEvent(e);
 
     var ref_window = this.getCanvasWindow();
@@ -1448,6 +1449,7 @@ LGraphCanvas.prototype.processMouseDown = function (e) {
      */
 
     this.graph.change();
+    this.onUpdate(); // callback
 
     //this is to ensure to defocus(blur) if a text input element is on focus
     if (!ref_window.document.activeElement || (ref_window.document.activeElement.nodeName.toLowerCase() != "input" && ref_window.document.activeElement.nodeName.toLowerCase() != "textarea"))
@@ -1672,7 +1674,7 @@ LGraphCanvas.prototype.processMouseUp = function (e) {
      */
 
     this.graph.change();
-
+    this.onUpdate();
     e.stopPropagation();
     e.preventDefault();
     return false;
@@ -1764,6 +1766,10 @@ LGraphCanvas.prototype.processMouseWheel = function (e) {
 
     e.preventDefault();
     return false; // prevent default
+}
+
+LGraphCanvas.prototype.onUpdate = function () {
+
 }
 
 LGraphCanvas.prototype.onNodeSelected = function (n) {
@@ -4676,13 +4682,18 @@ var ShaderConstructor = {};
 
 
 // codes it's [vertex, fragment]
-ShaderConstructor.createShader = function (codes) {
+ShaderConstructor.createShader = function (color_codes, normal_code, world_offset_code) {
 
-    var vertex = codes[0];
-    var fragment = codes[1];
+    var vertex_color = color_codes[0];
+    var fragment_color = color_codes[1];
+    var vertex_normal = normal_code[0];
+    var fragment_normal = normal_code[1];
+    var vertex_offset = world_offset_code[0];
+    var fragment_offset = world_offset_code[1];
 
-    var vertex_code = this.createVertexCode(vertex);
-    var fragment_code = this.createFragmentCode(fragment);
+
+    var vertex_code = this.createVertexCode(vertex_color,vertex_normal,vertex_offset);
+    var fragment_code = this.createFragmentCode(fragment_color,fragment_normal,fragment_offset);
     console.log("vertex:");
     console.log(vertex_code);
     console.log("fragment:");
@@ -4690,7 +4701,7 @@ ShaderConstructor.createShader = function (codes) {
     return new GL.Shader(vertex_code,fragment_code);
 }
 
-ShaderConstructor.createVertexCode = function (code, uniforms) {
+ShaderConstructor.createVertexCode = function (code, vertex_normal,vertex_offset) {
 
     var includes = code.includes;
     // header
@@ -4708,6 +4719,9 @@ ShaderConstructor.createVertexCode = function (code, uniforms) {
             ";
     if (includes["v_pos"])
         r += "varying vec3 v_pos;\n\
+            ";
+    if (includes["u_time"])
+        r += "uniform float u_time;\n\
             ";
     if (includes["u_eye"])
         r += "uniform vec3 u_eye;\n\
@@ -4737,7 +4751,7 @@ ShaderConstructor.createVertexCode = function (code, uniforms) {
 
 }
 
-ShaderConstructor.createFragmentCode = function (code) {
+ShaderConstructor.createFragmentCode = function (code,fragment_normal,fragment_offset) {
     var includes = code.includes;
     // header
     var r = "\
@@ -4751,6 +4765,9 @@ ShaderConstructor.createFragmentCode = function (code) {
             ";
     if (includes["v_pos"])
         r += "varying vec3 v_pos;\n\
+            ";
+    if (includes["u_time"])
+        r += "uniform float u_time;\n\
             ";
     if (includes["u_eye"])
         r += "uniform vec3 u_eye;\n\
@@ -4776,41 +4793,6 @@ ShaderConstructor.createFragmentCode = function (code) {
 }
 
 
-
-
-
-
-
-var PCameraToPixelWS = {};
-
-PCameraToPixelWS.id = "cameratopixelws";
-PCameraToPixelWS.includes = {v_pos:1, u_eye: 1};
-PCameraToPixelWS.already_included = false; // TODO add multiple times same line
-
-PCameraToPixelWS.getVertexCode = function (output, input) {
-    var vertex = new CodePiece();
-    vertex.setIncludes(PCameraToPixelWS.includes);
-    return vertex;
-}
-
-PCameraToPixelWS.getFragmentCode = function (output, input) {
-    var fragment = new CodePiece();
-    fragment.setBody("vec3 camera_to_pixel_ws = normalize(v_pos - u_eye); \n\
-            ");
-    fragment.setIncludes(PCameraToPixelWS.includes);
-    fragment.setOutputVar("camera_to_pixel_ws");
-    return fragment;
-}
-
-
-PCameraToPixelWS.getCode = function (output, input) {
-    var fragment = this.getFragmentCode(output, input);
-    var vertex = this.getVertexCode(output, input);
-
-    PCameraToPixelWS.already_included = true;
-
-    return [vertex, fragment];
-}
 
 
 
@@ -4855,6 +4837,147 @@ PConstant.prototype.getCode = function (output_var, value, scope) {
     fragment.setIncludes(this.includes );
     fragment.setOutputVar(output_var);
 
+
+    return [vertex, fragment];
+}
+
+
+
+
+
+var PCameraToPixelWS = {};
+
+PCameraToPixelWS.id = "cameratopixelws";
+PCameraToPixelWS.includes = {v_pos:1, u_eye: 1};
+PCameraToPixelWS.already_included = false; // TODO add multiple times same line
+
+PCameraToPixelWS.getVertexCode = function (output, input) {
+    var vertex = new CodePiece();
+    vertex.setIncludes(PCameraToPixelWS.includes);
+    return vertex;
+}
+
+PCameraToPixelWS.getFragmentCode = function (output, input) {
+    var fragment = new CodePiece();
+    fragment.setBody("vec3 camera_to_pixel_ws = normalize(v_pos - u_eye); \n\
+            ");
+    fragment.setIncludes(PCameraToPixelWS.includes);
+    fragment.setOutputVar("camera_to_pixel_ws");
+    return fragment;
+}
+
+
+PCameraToPixelWS.getCode = function (output, input) {
+    var fragment = this.getFragmentCode(output, input);
+    var vertex = this.getVertexCode(output, input);
+
+    PCameraToPixelWS.already_included = true;
+
+    return [vertex, fragment];
+}
+
+
+
+
+
+var PPixelNormalWS = {};
+
+PPixelNormalWS.id = "pixel_normal_ws";
+PPixelNormalWS.includes = {u_model: 1, a_normal: 1, v_normal: 1};
+PPixelNormalWS.already_included = false;
+
+PPixelNormalWS.getVertexCode = function (output, input) {
+        var code = "v_normal = (u_model * vec4(a_normal, 0.0)).xyz;\n\
+                ";
+    return code;
+}
+
+PPixelNormalWS.getFragmentCode = function (output, input) {
+        var code = "vec3 pixel_normal_ws = v_normal;\n\
+            ";
+
+    return code;
+}
+
+
+PPixelNormalWS.getCode = function (output, input) {
+    var vertex = new CodePiece();
+    vertex.setBody(this.getVertexCode(output, input));
+    vertex.setIncludes(PPixelNormalWS.includes);
+
+    var fragment = new CodePiece();
+    fragment.setBody(this.getFragmentCode(output, input));
+    fragment.setIncludes(PPixelNormalWS.includes);
+    fragment.setOutputVar("pixel_normal_ws");
+
+    PPixelNormalWS.already_included = true;
+
+    return [vertex, fragment];
+}
+
+
+
+
+
+var PUVs = {};
+
+PUVs.id = "uvs";
+PUVs.includes = {a_coord:1, v_coord: 1};
+PUVs.already_included = false; // TODO add multiple times same line
+
+PUVs.getVertexCode = function (output, input) {
+    return "v_coord = a_coord;\n\
+            ";
+}
+
+PUVs.getFragmentCode = function (output, input) {
+    return "";
+}
+
+
+PUVs.getCode = function (output, input) {
+    var fragment = new CodePiece();
+    fragment.setIncludes(PUVs.includes);
+    fragment.setOutputVar("v_coord");
+
+    var vertex = new CodePiece();
+    vertex.setBody(this.getVertexCode(output, input));
+    vertex.setIncludes(PUVs.includes);
+
+    PUVs.already_included = true;
+
+    return [vertex, fragment];
+}
+
+
+
+
+
+var PVertexPosWS = {};
+
+PVertexPosWS.id = "cameratopixelws";
+PVertexPosWS.includes = {v_pos:1, u_eye: 1};
+PVertexPosWS.already_included = false; // TODO add multiple times same line
+
+PVertexPosWS.getVertexCode = function (output, input) {
+    var vertex = new CodePiece();
+    vertex.setIncludes(PCameraToPixelWS.includes);
+    vertex.setOutputVar("v_pos");
+    return vertex;
+}
+
+PVertexPosWS.getFragmentCode = function (output, input) {
+    var fragment = new CodePiece();
+    fragment.setIncludes(PVertexPosWS.includes);
+    return fragment;
+}
+
+
+PVertexPosWS.getCode = function (output, input) {
+    var fragment = this.getFragmentCode(output, input);
+    var vertex = this.getVertexCode(output, input);
+
+    PVertexPosWS.already_included = true;
 
     return [vertex, fragment];
 }
@@ -4925,45 +5048,6 @@ POperation.getCode = function (output, op, input1, input2) {
     fragment.setOutputVar(output);
 
     POperation.already_included = true;
-
-    return [vertex, fragment];
-}
-
-
-
-
-
-var PPixelNormalWS = {};
-
-PPixelNormalWS.id = "pixel_normal_ws";
-PPixelNormalWS.includes = {u_model: 1, a_normal: 1, v_normal: 1};
-PPixelNormalWS.already_included = false;
-
-PPixelNormalWS.getVertexCode = function (output, input) {
-        var code = "v_normal = (u_model * vec4(a_normal, 0.0)).xyz;\n\
-                ";
-    return code;
-}
-
-PPixelNormalWS.getFragmentCode = function (output, input) {
-        var code = "vec3 pixel_normal_ws = v_normal;\n\
-            ";
-
-    return code;
-}
-
-
-PPixelNormalWS.getCode = function (output, input) {
-    var vertex = new CodePiece();
-    vertex.setBody(this.getVertexCode(output, input));
-    vertex.setIncludes(PPixelNormalWS.includes);
-
-    var fragment = new CodePiece();
-    fragment.setBody(this.getFragmentCode(output, input));
-    fragment.setIncludes(PPixelNormalWS.includes);
-    fragment.setOutputVar("pixel_normal_ws");
-
-    PPixelNormalWS.already_included = true;
 
     return [vertex, fragment];
 }
@@ -5093,32 +5177,30 @@ PTextureSample.getCode = function (output, input, texture_id) {
 
 
 
-var PUVs = {};
+var PTime = {};
 
-PUVs.id = "uvs";
-PUVs.includes = {a_coord:1, v_coord: 1};
-PUVs.already_included = false; // TODO add multiple times same line
+PTime.id = "uvs";
+PTime.includes = {u_time:1};
 
-PUVs.getVertexCode = function (output, input) {
-    return "v_coord = a_coord;\n\
-            ";
+
+PTime.getVertexCode = function () {
+    return "";
 }
 
-PUVs.getFragmentCode = function (output, input) {
+PTime.getFragmentCode = function () {
     return "";
 }
 
 
-PUVs.getCode = function (output, input) {
+PTime.getCode = function () {
     var fragment = new CodePiece();
-    fragment.setIncludes(PUVs.includes);
-    fragment.setOutputVar("v_coord");
+    fragment.setIncludes(PTime.includes);
+    fragment.setOutputVar("u_time");
 
     var vertex = new CodePiece();
-    vertex.setBody(this.getVertexCode(output, input));
-    vertex.setIncludes(PUVs.includes);
-
-    PUVs.already_included = true;
+    vertex.setBody(this.getVertexCode());
+    vertex.setIncludes(PTime.includes);
+    vertex.setOutputVar("u_time");
 
     return [vertex, fragment];
 }

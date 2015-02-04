@@ -264,6 +264,7 @@ LGraphCanvas.prototype.setCanvas = function (canvas) {
             //console.log(event.target);
             var data = event.target.result;
             node.onDropFile(data, filename, file);
+            that.onUpdate();
         };
 
         //read data
@@ -274,6 +275,7 @@ LGraphCanvas.prototype.setCanvas = function (canvas) {
             reader.readAsDataURL(file);
         else
             reader.readAsArrayBuffer(file);
+
 
         return false;
     };
@@ -426,7 +428,6 @@ LGraphCanvas.prototype.stopRendering = function () {
 
 LGraphCanvas.prototype.processMouseDown = function (e) {
     if (!this.graph) return;
-
     this.adjustMouseEvent(e);
 
     var ref_window = this.getCanvasWindow();
@@ -572,6 +573,7 @@ LGraphCanvas.prototype.processMouseDown = function (e) {
      */
 
     this.graph.change();
+    this.onUpdate(); // callback
 
     //this is to ensure to defocus(blur) if a text input element is on focus
     if (!ref_window.document.activeElement || (ref_window.document.activeElement.nodeName.toLowerCase() != "input" && ref_window.document.activeElement.nodeName.toLowerCase() != "textarea"))
@@ -796,7 +798,7 @@ LGraphCanvas.prototype.processMouseUp = function (e) {
      */
 
     this.graph.change();
-
+    this.onUpdate();
     e.stopPropagation();
     e.preventDefault();
     return false;
@@ -888,6 +890,10 @@ LGraphCanvas.prototype.processMouseWheel = function (e) {
 
     e.preventDefault();
     return false; // prevent default
+}
+
+LGraphCanvas.prototype.onUpdate = function () {
+
 }
 
 LGraphCanvas.prototype.onNodeSelected = function (n) {

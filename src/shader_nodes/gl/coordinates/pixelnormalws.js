@@ -8,7 +8,7 @@ function LGraphPixelNormalWS()
 }
 
 LGraphPixelNormalWS.title = "PixelNormalWS";
-LGraphPixelNormalWS.desc = "The normal in world coordinates";
+LGraphPixelNormalWS.desc = "The normal in world space";
 
 LGraphPixelNormalWS.prototype.onExecute = function()
 {
@@ -16,5 +16,5 @@ LGraphPixelNormalWS.prototype.onExecute = function()
 }
 
 
-LiteGraph.registerNodeType("texture/PixelNormalWS", LGraphPixelNormalWS);
+LiteGraph.registerNodeType("coordinates/pixelNormalWS", LGraphPixelNormalWS);
 

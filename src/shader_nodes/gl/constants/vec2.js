@@ -13,7 +13,7 @@ function LGraphConstVec2()
 LGraphConstVec2.title = "ConstVec2";
 LGraphConstVec2.desc = "Constant vector2";
 
-
+// repeated function should refactor
 LGraphConstVec2.prototype.setFloatValue = function(old_value,new_value) {
     if( typeof(new_value) == "string") new_value = parseFloat(new_value);
     old_value = new_value;
@@ -39,7 +39,7 @@ LGraphConstVec2.prototype.onDrawBackground = function(ctx)
 
 LGraphConstVec2.prototype.valueToString = function()
 {
-    return "vec2("+this.properties["v1"]+","+this.properties["v2"]+")";
+    return "vec2("+this.properties["v1"].toFixed(3)+","+this.properties["v2"].toFixed(3)+")";
 }
 
 LiteGraph.registerNodeType("constants/ConstVec2", LGraphConstVec2);

@@ -6,7 +6,7 @@ function demo()
 
 function multiConnection()
 {
-	var node_vec = LiteGraph.createNode("texture/TextureCoords");
+	var node_vec = LiteGraph.createNode("coordinates/textureCoords");
     node_vec.pos = [200,200];
 	graph.add(node_vec);
 
@@ -27,11 +27,11 @@ function multiConnection()
     node_tex.connect(0,node_prev,0 );
 
 
-    var node_vec = LiteGraph.createNode("texture/PixelNormalWS");
+    var node_vec = LiteGraph.createNode("coordinates/pixelNormalWS");
     node_vec.pos = [100,500];
     graph.add(node_vec);
 
-    var node_cam = LiteGraph.createNode("texture/CameraToPixelWS");
+    var node_cam = LiteGraph.createNode("coordinates/cameraToPixelWS");
     node_cam.pos = [100,600];
     graph.add(node_cam);
 

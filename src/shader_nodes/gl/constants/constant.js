@@ -4,6 +4,7 @@ function LGraphConstant()
 {
     this.addOutput("value","number", {number:1});
     this.properties = { value:1.0 };
+
     this.editable = { property:"value", type:"number" };
 
     this.shader_piece = new PConstant("float"); // hardcoded for testing
@@ -22,7 +23,7 @@ LGraphConstant.prototype.setValue = function(v)
 
 LGraphConstant.prototype.onExecute = function()
 {
-    this.codes = this.shader_piece.getCode("float_"+this.id, this.properties["value"], PConstant.FRAGMENT); // need to check scope
+    this.codes = this.shader_piece.getCode("float_"+this.id, this.properties["value"].toFixed(3), PConstant.FRAGMENT); // need to check scope
 
     this.setOutputData(0, parseFloat( this.properties["value"] ) );
 }

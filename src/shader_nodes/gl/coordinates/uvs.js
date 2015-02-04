@@ -5,7 +5,9 @@ function LGraphUVs()
 
     this.properties = { UTiling:1.0,
                         VTiling:1.0 };
-
+    this.options = {    UTiling:{min:0, max:1, step:0.01},
+                        VTiling:{min:0, max:1, step:0.01}
+    };
     this.shader_piece = PUVs; // hardcoded for testing
 }
 
@@ -28,6 +30,6 @@ LGraphUVs.prototype.setValue = function(v1,v2)
     this.setFloatValue(this.properties["VTiling"],v2);
 };
 
-LiteGraph.registerNodeType("texture/TextureCoords", LGraphUVs);
+LiteGraph.registerNodeType("coordinates/textureCoords", LGraphUVs);
 
 

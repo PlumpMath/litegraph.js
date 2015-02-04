@@ -264,12 +264,13 @@ LGraphTexture.prototype.processInputCode = function()
 
     var input_codes = this.getInputCode(0);
 
+    if(input_codes){
+        var texture_name = "u_" + (this.properties.name ? this.properties.name : "default_name") + "_texture"; // TODO check if there is a texture
+        this.codes = this.shader_piece.getCode("color_"+this.id, input_codes[1].getOutputVar(), texture_name); // output var must be fragment
 
-    var texture_name = "u_" + (this.properties.name ? this.properties.name : "default_name") + "_texture"; // TODO check if there is a texture
-    this.codes = this.shader_piece.getCode("color_"+this.id, input_codes[1].getOutputVar(), texture_name); // output var must be fragment
-
-    this.codes[0].merge(input_codes[0]);
-    this.codes[1].merge(input_codes[1]);
+        this.codes[0].merge(input_codes[0]);
+        this.codes[1].merge(input_codes[1]);
+    }
 
 }
 

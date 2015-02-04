@@ -7,6 +7,7 @@ function LGraphMixer()
     this.addInput("alpha","number", {float:1});
 
     this.properties = { alpha:0.5};
+    this.options = { alpha:{min:0, max:1, step:0.01}};
     this.shader_piece = PMixer; // hardcoded for testing
 }
 
@@ -39,5 +40,11 @@ LGraphMixer.prototype.processInputCode = function()
 
 }
 
+LGraphMixer.prototype.onDrawBackground = function(ctx)
+{
+    //show the current value
+    if(!this.isInputConnected(3))
+        this.inputs[3].label = this.properties["alpha"].toFixed(3);
+}
 
 LiteGraph.registerNodeType("texture/Lerp", LGraphMixer );

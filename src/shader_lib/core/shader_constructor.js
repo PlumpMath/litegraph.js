@@ -2,13 +2,18 @@ var ShaderConstructor = {};
 
 
 // codes it's [vertex, fragment]
-ShaderConstructor.createShader = function (codes) {
+ShaderConstructor.createShader = function (color_codes, normal_code, world_offset_code) {
 
-    var vertex = codes[0];
-    var fragment = codes[1];
+    var vertex_color = color_codes[0];
+    var fragment_color = color_codes[1];
+    var vertex_normal = normal_code[0];
+    var fragment_normal = normal_code[1];
+    var vertex_offset = world_offset_code[0];
+    var fragment_offset = world_offset_code[1];
 
-    var vertex_code = this.createVertexCode(vertex);
-    var fragment_code = this.createFragmentCode(fragment);
+
+    var vertex_code = this.createVertexCode(vertex_color,vertex_normal,vertex_offset);
+    var fragment_code = this.createFragmentCode(fragment_color,fragment_normal,fragment_offset);
     console.log("vertex:");
     console.log(vertex_code);
     console.log("fragment:");
@@ -16,7 +21,7 @@ ShaderConstructor.createShader = function (codes) {
     return new GL.Shader(vertex_code,fragment_code);
 }
 
-ShaderConstructor.createVertexCode = function (code, uniforms) {
+ShaderConstructor.createVertexCode = function (code, vertex_normal,vertex_offset) {
 
     var includes = code.includes;
     // header
@@ -34,6 +39,9 @@ ShaderConstructor.createVertexCode = function (code, uniforms) {
             ";
     if (includes["v_pos"])
         r += "varying vec3 v_pos;\n\
+            ";
+    if (includes["u_time"])
+        r += "uniform float u_time;\n\
             ";
     if (includes["u_eye"])
         r += "uniform vec3 u_eye;\n\
@@ -63,7 +71,7 @@ ShaderConstructor.createVertexCode = function (code, uniforms) {
 
 }
 
-ShaderConstructor.createFragmentCode = function (code) {
+ShaderConstructor.createFragmentCode = function (code,fragment_normal,fragment_offset) {
     var includes = code.includes;
     // header
     var r = "\
@@ -77,6 +85,9 @@ ShaderConstructor.createFragmentCode = function (code) {
             ";
     if (includes["v_pos"])
         r += "varying vec3 v_pos;\n\
+            ";
+    if (includes["u_time"])
+        r += "uniform float u_time;\n\
             ";
     if (includes["u_eye"])
         r += "uniform vec3 u_eye;\n\
