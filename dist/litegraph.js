@@ -3967,17 +3967,16 @@ LGraphNode.prototype.getInputNodes = function()
         var link_id = this.inputs[i].link;
         var link = this.graph.links[link_id];
         if(link)
-            r.push( this.graph.getNodeById( link.origin_id ));// we knot it's 0 cause inputs only can have one link
+            r[i] =  this.graph.getNodeById( link.origin_id );// we knot it's 0 cause inputs only can have one link
     }
-
     return r;
 }
 
 LGraphNode.prototype.getInputCode = function(link_id)
 {
-    var nodes = this.getInputNodes();
-    if(nodes[link_id])
-        return nodes[link_id].codes;
+    var link = this.graph.links[link_id];
+    if(link)
+        return this.graph.getNodeById( link.origin_id ).codes[link.origin_id];
     return null;
 
 }
@@ -4694,11 +4693,21 @@ ShaderConstructor.createShader = function (color_codes, normal_code, world_offse
 
     var vertex_code = this.createVertexCode(vertex_color,vertex_normal,vertex_offset);
     var fragment_code = this.createFragmentCode(fragment_color,fragment_normal,fragment_offset);
-    console.log("vertex:");
-    console.log(vertex_code);
-    console.log("fragment:");
-    console.log(fragment_code);
-    return new GL.Shader(vertex_code,fragment_code);
+    if(LiteGraph.debug){
+        console.log("vertex:");
+        console.log(vertex_code);
+        console.log("fragment:");
+        console.log(fragment_code);
+    }
+    try {
+        var shader = new GL.Shader(vertex_code,fragment_code);
+        return shader;
+    }
+    catch(err) {
+        console.error(err);
+    }
+    return null;
+
 }
 
 ShaderConstructor.createVertexCode = function (code, vertex_normal,vertex_offset) {
@@ -5087,6 +5096,49 @@ PReflect.getCode = function (output, incident, normal) {
     var fragment = new CodePiece();
     fragment.setBody(this.getFragmentCode(output, incident, normal));
     fragment.setIncludes(PReflect.includes);
+    fragment.setOutputVar(output);
+
+    return [vertex, fragment];
+}
+
+
+
+
+
+
+
+
+
+
+var PSmooth = {};
+
+PSmooth.id = "smoothsteep";
+PSmooth.includes = {};
+
+PSmooth.getVertexCode = function(output ,lower, upper, x) {
+//    if(incident == "eye_to_pixel" || incident == "eye_to_vertex")
+//        reflect.includes[incident]= 1;
+//
+//    var code = "vec3 "+output+"= reflect("+incident+","+normal+");";
+//    return code;
+    return "";
+}
+
+
+PSmooth.getFragmentCode = function(output ,lower, upper, x) {
+
+    var code = "float "+output+" = smoothstep("+lower+","+upper+", "+x+");\n\
+            ";
+    return code;
+}
+
+PSmooth.getCode = function (output ,lower, upper, x) {
+    var vertex = new CodePiece();
+    vertex.setIncludes(PSmooth.includes);
+
+    var fragment = new CodePiece();
+    fragment.setBody(this.getFragmentCode(output ,lower, upper, x));
+    fragment.setIncludes(PSmooth.includes);
     fragment.setOutputVar(output);
 
     return [vertex, fragment];

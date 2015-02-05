@@ -14,11 +14,21 @@ ShaderConstructor.createShader = function (color_codes, normal_code, world_offse
 
     var vertex_code = this.createVertexCode(vertex_color,vertex_normal,vertex_offset);
     var fragment_code = this.createFragmentCode(fragment_color,fragment_normal,fragment_offset);
-    console.log("vertex:");
-    console.log(vertex_code);
-    console.log("fragment:");
-    console.log(fragment_code);
-    return new GL.Shader(vertex_code,fragment_code);
+    if(LiteGraph.debug){
+        console.log("vertex:");
+        console.log(vertex_code);
+        console.log("fragment:");
+        console.log(fragment_code);
+    }
+    try {
+        var shader = new GL.Shader(vertex_code,fragment_code);
+        return shader;
+    }
+    catch(err) {
+        console.error(err);
+    }
+    return null;
+
 }
 
 ShaderConstructor.createVertexCode = function (code, vertex_normal,vertex_offset) {

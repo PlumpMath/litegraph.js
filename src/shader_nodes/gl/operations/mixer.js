@@ -43,8 +43,9 @@ LGraphMixer.prototype.processInputCode = function()
 LGraphMixer.prototype.onDrawBackground = function(ctx)
 {
     //show the current value
-    if(!this.isInputConnected(3))
-        this.inputs[3].label = this.properties["alpha"].toFixed(3);
+    this.inputs[2].label = "alpha";
+    if(!this.isInputConnected(2))
+        this.inputs[2].label += "="+this.properties["alpha"].toFixed(3);
 }
 
 LiteGraph.registerNodeType("texture/Lerp", LGraphMixer );

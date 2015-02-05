@@ -70,7 +70,7 @@ LGraphNode.prototype._ctor = function( title )
 
 
     this.shader_piece = null;
-    this.codes = {}; // 0 it's vertes 1 it's fragment
+    this.codes = []; //output codes in each output link channel
 }
 
 /**
@@ -946,17 +946,16 @@ LGraphNode.prototype.getInputNodes = function()
         var link_id = this.inputs[i].link;
         var link = this.graph.links[link_id];
         if(link)
-            r.push( this.graph.getNodeById( link.origin_id ));// we knot it's 0 cause inputs only can have one link
+            r[i] =  this.graph.getNodeById( link.origin_id );// we knot it's 0 cause inputs only can have one link
     }
-
     return r;
 }
 
 LGraphNode.prototype.getInputCode = function(link_id)
 {
-    var nodes = this.getInputNodes();
-    if(nodes[link_id])
-        return nodes[link_id].codes;
+    var link = this.graph.links[link_id];
+    if(link)
+        return this.graph.getNodeById( link.origin_id ).codes[link.origin_id];
     return null;
 
 }

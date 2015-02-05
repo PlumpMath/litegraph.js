@@ -262,14 +262,13 @@ LGraphTexture.generateLowResTexturePreview = function(tex)
 LGraphTexture.prototype.processInputCode = function()
 {
 
-    var input_codes = this.getInputCode(0);
+    var input_code = this.getInputCode(0);
 
-    if(input_codes){
+    if(input_code){
         var texture_name = "u_" + (this.properties.name ? this.properties.name : "default_name") + "_texture"; // TODO check if there is a texture
-        this.codes = this.shader_piece.getCode("color_"+this.id, input_codes[1].getOutputVar(), texture_name); // output var must be fragment
+        var color_output = this.codes[1] = this.shader_piece.getCode("color_"+this.id, input_code.getOutputVar(), texture_name); // 1 it's the color output
 
-        this.codes[0].merge(input_codes[0]);
-        this.codes[1].merge(input_codes[1]);
+        color_output.merge(input_code);
     }
 
 }

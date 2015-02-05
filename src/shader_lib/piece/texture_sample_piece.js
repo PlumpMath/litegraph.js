@@ -30,7 +30,7 @@ PTextureSample.getCode = function (output, input, texture_id) {
     fragment.setIncludes(PTextureSample.includes);
     fragment.setOutputVar(output);
 
-    return [vertex, fragment];
+    return new ShaderCode(vertex, fragment, "u_time");
 }
 
 

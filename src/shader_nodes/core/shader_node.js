@@ -11,13 +11,11 @@ function LGraphShader()
     this.addInput("world position offset","vec3", {vec3:1});
 
     //inputs: ["base color","metallic", "specular", "roughness", "emissive color", "opacity", "opacitiy mask", "normal", "world position offset", "world displacement", "tesselation multiplier", "subsurface color", "ambient occlusion", "refraction"],
-    this.properties = { value:1.0 };
-    this.editable = { property:"value", type:"number" };
     this.size = [200,200];
     this.shader_piece = ShaderConstructor;
 }
 
-LGraphShader.title = "ShaderMain";
+LGraphShader.title = "Shader";
 LGraphShader.desc = "Shader Main Node";
 
 
@@ -46,11 +44,11 @@ LGraphShader.prototype.onWidget = function(e,widget)
 
 LGraphShader.prototype.processInputCode = function() {
 
-    var empty_code = new CodePiece();
+    var empty_codes = [new CodePiece(), new CodePiece()];
 
-    var color_code = this.getInputCode(0) || empty_code; // 0 it's the color
-    var normal_code = this.getInputCode(1) || empty_code; // 1 it's the normal
-    var world_offset_code = this.getInputCode(2) || empty_code; // 1 it's the normal
+    var color_code = this.getInputCode(0) || empty_codes; // 0 it's the color
+    var normal_code = this.getInputCode(1) || empty_codes; // 1 it's the normal
+    var world_offset_code = this.getInputCode(2) || empty_codes; // 1 it's the normal
 
     var shader = this.shader_piece.createShader(color_code,normal_code,world_offset_code);
     this.graph.shader_output = shader;
