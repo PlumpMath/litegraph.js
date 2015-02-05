@@ -44,11 +44,11 @@ LGraphShader.prototype.onWidget = function(e,widget)
 
 LGraphShader.prototype.processInputCode = function() {
 
-    var empty_codes = [new CodePiece(), new CodePiece()];
 
-    var color_code = this.getInputCode(0) || empty_codes; // 0 it's the color
-    var normal_code = this.getInputCode(1) || empty_codes; // 1 it's the normal
-    var world_offset_code = this.getInputCode(2) || empty_codes; // 1 it's the normal
+
+    var color_code = this.getInputCode(0) || LiteGraph.EMPTY_CODE; // 0 it's the color
+    var normal_code = this.getInputCode(1) || LiteGraph.EMPTY_CODE; // 1 it's the normal
+    var world_offset_code = this.getInputCode(2) || LiteGraph.EMPTY_CODE; // 1 it's the normal
 
     var shader = this.shader_piece.createShader(color_code,normal_code,world_offset_code);
     this.graph.shader_output = shader;

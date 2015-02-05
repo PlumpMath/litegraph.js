@@ -21,15 +21,13 @@ LGraphOperation.prototype.onExecute = function()
 LGraphOperation.prototype.processInputCode = function()
 {
 
-    var input_codes_l1 = this.getInputCode(0);
-    var input_codes_l2 = this.getInputCode(1);
+    var code_A = this.getInputCode(0);
+    var code_B = this.getInputCode(1);
 
-    this.codes = this.shader_piece.getCode( "result_"+this.id, "+",  input_codes_l1[1].getOutputVar(), input_codes_l2[1].getOutputVar()); // output var must be fragment
+    var output_code = this.codes[0] = this.shader_piece.getCode( "result_"+this.id, "+",  code_A.getOutputVar(), code_B.getOutputVar()); // output var must be fragment
 
-    this.codes[0].merge(input_codes_l1[0]);
-    this.codes[1].merge(input_codes_l1[1]);
-    this.codes[0].merge(input_codes_l2[0]);
-    this.codes[1].merge(input_codes_l2[1]);
+    output_code.merge(code_A);
+    output_code.merge(code_B);
 
 }
 

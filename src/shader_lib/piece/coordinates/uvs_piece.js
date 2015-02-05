@@ -21,13 +21,10 @@ PUVs.getFragmentCode = function (output, input) {
 PUVs.getCode = function (output, input) {
     var fragment = new CodePiece();
     fragment.setIncludes(PUVs.includes);
-    fragment.setOutputVar("v_coord");
 
     var vertex = new CodePiece();
     vertex.setBody(this.getVertexCode(output, input));
     vertex.setIncludes(PUVs.includes);
 
-    PUVs.already_included = true;
-
-    return [vertex, fragment];
+    return new ShaderCode(vertex, fragment, "v_coord");
 }

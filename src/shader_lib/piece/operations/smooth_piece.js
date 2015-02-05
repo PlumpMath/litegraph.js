@@ -31,9 +31,8 @@ PSmooth.getCode = function (output ,lower, upper, x) {
     var fragment = new CodePiece();
     fragment.setBody(this.getFragmentCode(output ,lower, upper, x));
     fragment.setIncludes(PSmooth.includes);
-    fragment.setOutputVar(output);
 
-    return [vertex, fragment];
+    return new ShaderCode(vertex, fragment, output);
 }
 
 

@@ -23,7 +23,7 @@ LGraphConstant.prototype.setValue = function(v)
 
 LGraphConstant.prototype.onExecute = function()
 {
-    this.codes = this.shader_piece.getCode("float_"+this.id, this.properties["value"].toFixed(3), PConstant.FRAGMENT); // need to check scope
+    this.codes[0] = this.shader_piece.getCode("float_"+this.id, this.properties["value"].toFixed(3), CodePiece.FRAGMENT); // need to check scope
 
     this.setOutputData(0, parseFloat( this.properties["value"] ) );
 }

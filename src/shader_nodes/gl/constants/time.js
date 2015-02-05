@@ -14,7 +14,7 @@ LGraphTime.desc = "Time since execution started";
 
 LGraphTime.prototype.onExecute = function()
 {
-    this.codes = this.shader_piece.getCode(PConstant.FRAGMENT); // need to check scope
+    this.codes[0] = this.shader_piece.getCode(CodePiece.FRAGMENT); // need to check scope
 
 }
 

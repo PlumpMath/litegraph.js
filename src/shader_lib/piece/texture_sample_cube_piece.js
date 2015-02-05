@@ -28,9 +28,8 @@ PTextureSampleCube.getCode = function (output, input, texture_id) {
     fragment.setBody(this.getFragmentCode(output, input, texture_id));
     fragment.addHeaderLine("uniform samplerCube "+texture_id+";\n      ");
     fragment.setIncludes(PTextureSampleCube.includes);
-    fragment.setOutputVar(output);
 
-    return [vertex, fragment];
+    return new ShaderCode(vertex, fragment, output);
 }
 
 

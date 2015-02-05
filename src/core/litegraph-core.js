@@ -99,6 +99,8 @@ var LiteGraph = {
         if(!node.flags) node.flags = {};
         if(!node.size) node.size = node.computeSize();
         if(!node.pos) node.pos = LiteGraph.DEFAULT_POSITION.concat();
+        if(!node.shader_piece) node.shader_piece = null;
+        if(!node.codes) node.codes = [];
         //extra options
         if(options)
         {

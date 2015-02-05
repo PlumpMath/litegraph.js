@@ -77,13 +77,13 @@ LGraphCubemap.prototype.onDrawBackground = function(ctx)
 LGraphCubemap.prototype.processInputCode = function()
 {
 
-    var input_codes = this.getInputCode(0);
+    var input_code = this.getInputCode(0); // get input in link 0
 
     var texture_name = "u_" + (this.properties.name ? this.properties.name : "default_name") + "_texture"; // TODO check if there is a texture
-    this.codes = this.shader_piece.getCode("color_"+this.id, input_codes[1].getOutputVar(), texture_name); // output var must be fragment
+    var color_code = this.codes[1] = this.shader_piece.getCode("color_"+this.id, input_code.getOutputVar(), texture_name);
 
-    this.codes[0].merge(input_codes[0]);
-    this.codes[1].merge(input_codes[1]);
+    color_code.merge(input_code);
+
 
 }
 

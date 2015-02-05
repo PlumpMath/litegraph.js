@@ -19,8 +19,6 @@ PTextureSample.getFragmentCode = function (output, input, texture_id) {
 
 
 PTextureSample.getCode = function (output, input, texture_id) {
-
-
     var vertex = new CodePiece();
     vertex.setIncludes(PTextureSample.includes);
 
@@ -28,9 +26,8 @@ PTextureSample.getCode = function (output, input, texture_id) {
     fragment.setBody(this.getFragmentCode(output, input, texture_id));
     fragment.addHeaderLine("uniform sampler2D "+texture_id+";\n      ");
     fragment.setIncludes(PTextureSample.includes);
-    fragment.setOutputVar(output);
 
-    return new ShaderCode(vertex, fragment, "u_time");
+    return new ShaderCode(vertex, fragment, output);
 }
 
 

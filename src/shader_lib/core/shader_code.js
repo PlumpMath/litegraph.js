@@ -23,3 +23,15 @@ ShaderCode.prototype.merge = function (other_code)
     this.fragment.merge(other_code.fragment);
 
 };
+
+ShaderCode.prototype.clone = function ()
+{
+    var vertex = this.vertex.clone();
+    var fragment = this.fragment.clone();
+    var cloned = new ShaderCode(vertex,fragment,this.output_var);
+    return cloned;
+};
+
+
+
+LiteGraph.EMPTY_CODE = new ShaderCode();

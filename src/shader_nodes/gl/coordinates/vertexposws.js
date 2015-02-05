@@ -12,7 +12,7 @@ LGraphVertexPosWS.desc = "Vertex position in WS";
 
 LGraphVertexPosWS.prototype.onExecute = function()
 {
-    this.codes = this.shader_piece.getCode(); // I need to check texture id
+    this.codes[0] = this.shader_piece.getCode(); // I need to check texture id
 }
 
 

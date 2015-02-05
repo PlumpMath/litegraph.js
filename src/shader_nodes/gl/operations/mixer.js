@@ -22,21 +22,22 @@ LGraphMixer.prototype.onExecute = function()
 
 LGraphMixer.prototype.processInputCode = function()
 {
+    var output_code = LiteGraph.EMPTY_CODE;
 
-    var input_codes_l1 = this.getInputCode(0);
-    var input_codes_l2 = this.getInputCode(1);
-    var alpha_code = this.getInputCode(2);
-    var alpha = alpha_code ? alpha_code[1].getOutputVar() :  this.properties["alpha"].toFixed(3); // need to put the correct scope
-    this.codes = this.shader_piece.getCode( "mixed_"+this.id, input_codes_l1[1].getOutputVar(), input_codes_l2[1].getOutputVar(),alpha); // output var must be fragment
-    // if the alpha is an input, otherwise hardcoded
-    if(alpha_code){
-        this.codes[0].merge(alpha_code[0]);
-        this.codes[1].merge(alpha_code[1]);
+    var code_A = this.getInputCode(0);
+    var code_B = this.getInputCode(1);
+    var code_alpha = this.getInputCode(2);
+    var alpha = code_alpha ? code_alpha.getOutputVar() :  this.properties["alpha"].toFixed(3); // need to put the correct scope
+
+    if(code_A && code_B){
+        output_code = this.codes[0] = this.shader_piece.getCode( "mixed_"+this.id, code_A.getOutputVar(), code_B.getOutputVar(),alpha); // output var must be fragment
+        // if the alpha is an input, otherwise hardcoded
+        if(code_alpha){
+            output_code.merge(code_alpha);
+        }
+        output_code.merge(code_A);
+        output_code.merge(code_B);
     }
-    this.codes[0].merge(input_codes_l1[0]);
-    this.codes[1].merge(input_codes_l1[1]);
-    this.codes[0].merge(input_codes_l2[0]);
-    this.codes[1].merge(input_codes_l2[1]);
 
 }
 

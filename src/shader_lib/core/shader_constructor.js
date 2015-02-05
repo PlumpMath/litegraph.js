@@ -2,18 +2,11 @@ var ShaderConstructor = {};
 
 
 // codes it's [vertex, fragment]
-ShaderConstructor.createShader = function (color_codes, normal_code, world_offset_code) {
-
-    var vertex_color = color_codes[0];
-    var fragment_color = color_codes[1];
-    var vertex_normal = normal_code[0];
-    var fragment_normal = normal_code[1];
-    var vertex_offset = world_offset_code[0];
-    var fragment_offset = world_offset_code[1];
+ShaderConstructor.createShader = function (color_code, normal_code, world_offset_code) {
 
 
-    var vertex_code = this.createVertexCode(vertex_color,vertex_normal,vertex_offset);
-    var fragment_code = this.createFragmentCode(fragment_color,fragment_normal,fragment_offset);
+    var vertex_code = this.createVertexCode(color_code, normal_code, world_offset_code);
+    var fragment_code = this.createFragmentCode(color_code, normal_code, world_offset_code);
     if(LiteGraph.debug){
         console.log("vertex:");
         console.log(vertex_code);
@@ -25,15 +18,19 @@ ShaderConstructor.createShader = function (color_codes, normal_code, world_offse
         return shader;
     }
     catch(err) {
+        console.log("vertex:");
+        console.log(vertex_code);
+        console.log("fragment:");
+        console.log(fragment_code);
         console.error(err);
     }
     return null;
 
 }
 
-ShaderConstructor.createVertexCode = function (code, vertex_normal,vertex_offset) {
+ShaderConstructor.createVertexCode = function (code, normal,offset) {
 
-    var includes = code.includes;
+    var includes = code.vertex.includes;
     // header
     var r = "\
             precision highp float;\n\
@@ -59,7 +56,7 @@ ShaderConstructor.createVertexCode = function (code, vertex_normal,vertex_offset
     r += "uniform mat4 u_mvp;\n\
 		    uniform mat4 u_model;\n";
 
-    for(var k in code.getHeader())
+    for(var k in code.vertex.getHeader())
         r += k;
 
     // body
@@ -68,8 +65,8 @@ ShaderConstructor.createVertexCode = function (code, vertex_normal,vertex_offset
     if (includes["v_pos"])
         r += "v_pos = (u_model * vec4(a_vertex,1.0)).xyz;\n\
             ";
-    var ids = code.getBodyIds();
-    var body_hash = code.getBody();
+    var ids = code.vertex.getBodyIds();
+    var body_hash = code.vertex.getBody();
     for (var i = 0, l = ids.length; i < l; i++) {
         r += body_hash[ids[i]];
     }
@@ -81,8 +78,8 @@ ShaderConstructor.createVertexCode = function (code, vertex_normal,vertex_offset
 
 }
 
-ShaderConstructor.createFragmentCode = function (code,fragment_normal,fragment_offset) {
-    var includes = code.includes;
+ShaderConstructor.createFragmentCode = function (code,normal,offset) {
+    var includes = code.fragment.includes;
     // header
     var r = "\
             precision highp float;\n\
@@ -102,13 +99,13 @@ ShaderConstructor.createFragmentCode = function (code,fragment_normal,fragment_o
     if (includes["u_eye"])
         r += "uniform vec3 u_eye;\n\
             ";
-    for(var k in code.getHeader())
+    for(var k in code.fragment.getHeader())
         r += k;
     // body
     r += "void main() {\n\
             ";
-    var ids = code.getBodyIds();
-    var body_hash = code.getBody();
+    var ids = code.fragment.getBodyIds();
+    var body_hash = code.fragment.getBody();
     for (var i = 0, l = ids.length; i < l; i++) {
         r += body_hash[ids[i]];
     }

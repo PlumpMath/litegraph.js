@@ -25,17 +25,14 @@ PReflect.getFragmentCode = function(output,incident, normal) {
 }
 
 PReflect.getCode = function (output, incident, normal) {
-
-
     var vertex = new CodePiece();
     vertex.setIncludes(PReflect.includes);
 
     var fragment = new CodePiece();
     fragment.setBody(this.getFragmentCode(output, incident, normal));
     fragment.setIncludes(PReflect.includes);
-    fragment.setOutputVar(output);
 
-    return [vertex, fragment];
+    return new ShaderCode(vertex, fragment, output);
 }
 
 

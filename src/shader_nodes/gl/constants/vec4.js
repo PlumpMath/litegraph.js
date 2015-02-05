@@ -33,7 +33,7 @@ LGraphConstVec4.prototype.setValue = function(v1,v2,v3,v4)
 
 LGraphConstVec4.prototype.onExecute = function()
 {
-    this.codes = this.shader_piece.getCode("vec4_"+this.id, this.valueToString(), PConstant.FRAGMENT); // need to check scope
+    this.codes[0] = this.shader_piece.getCode("vec4_"+this.id, this.valueToString(), CodePiece.FRAGMENT); // need to check scope
 }
 
 LGraphConstVec4.prototype.onDrawBackground = function(ctx)

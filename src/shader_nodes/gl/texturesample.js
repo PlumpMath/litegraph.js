@@ -2,10 +2,10 @@ function LGraphTexture()
 {
     this.addOutput("Texture","Texture",{Texture:1});
     this.addOutput("Color","vec4", {vec3:1, vec4:1});
-    this.addOutput("R","R");
-    this.addOutput("G","G");
-    this.addOutput("B","B");
-    this.addOutput("A","A");
+    this.addOutput("R","number", {number:1});
+    this.addOutput("G","number", {number:1});
+    this.addOutput("B","number", {number:1});
+    this.addOutput("A","number", {number:1});
     this.addInput("UVs","vec2");
     this.properties = {name:""};
     this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
@@ -269,6 +269,12 @@ LGraphTexture.prototype.processInputCode = function()
         var color_output = this.codes[1] = this.shader_piece.getCode("color_"+this.id, input_code.getOutputVar(), texture_name); // 1 it's the color output
 
         color_output.merge(input_code);
+        var r_chan = color_output.clone();
+        r_chan.output_var = color_output.getOutputVar()+".r";
+        this.codes[2] = r_chan;
+//        this.codes[3]
+//        this.codes[4]
+//        this.codes[5]
     }
 
 }

@@ -22,30 +22,21 @@ LGraphSmooth.prototype.onExecute = function()
 LGraphSmooth.prototype.processInputCode = function()
 {
 
-    var lower_codes = this.getInputCode(0);
-    var upper_codes= this.getInputCode(1);
+    var lower_code = this.getInputCode(0);
+    var upper_code = this.getInputCode(1);
     var x_code = this.getInputCode(2);
 
-    var lower = lower_codes ? lower_codes[1].getOutputVar() :  this.properties["lower"].toFixed(3); // need to put the correct scope
-    var upper = upper_codes ? upper_codes[1].getOutputVar() :  this.properties["upper"].toFixed(3); // need to put the correct scope
-    var x_var = x_code ? x_code[1].getOutputVar() :  "0.0";
+    var lower = lower_code ? lower_code.getOutputVar() :  this.properties["lower"].toFixed(3); // need to put the correct scope
+    var upper = upper_code ? upper_code.getOutputVar() :  this.properties["upper"].toFixed(3); // need to put the correct scope
+    var x_var = x_code ? x_code.getOutputVar() :  "0.0";
 
-    this.codes = this.shader_piece.getCode( "smoothed_"+this.id, lower, upper, x_var); // output var scope unknown
-    if(x_code){
-        this.codes[0].merge(x_code[0]);
-        this.codes[1].merge(x_code[1]);
-    }
-
-    if(lower_codes){
-        this.codes[0].merge(lower_codes[0]);
-        this.codes[1].merge(lower_codes[1]);
-    }
-    if(upper_codes){
-        this.codes[0].merge(upper_codes[0]);
-        this.codes[1].merge(upper_codes[1]);
-    }
-
-
+    var output_code = this.codes[0] = this.shader_piece.getCode( "smoothed_"+this.id, lower, upper, x_var); // output var scope unknown
+    if(x_code)
+        output_code.merge(x_code);
+    if(lower_code)
+        output_code.merge(lower_code);
+    if(upper_code)
+        output_code.merge(upper_code);
 }
 
 LGraphSmooth.prototype.onDrawBackground = function(ctx)

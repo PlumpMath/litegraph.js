@@ -1,9 +1,7 @@
 require(CodePiece);
 declare(PConstant);
 
-PConstant.VERTEX = 1;
-PConstant.FRAGMENT = 2;
-PConstant.BOTH = 3;
+
 
 function PConstant (type, name) {
     this.type = type;
@@ -13,7 +11,7 @@ function PConstant (type, name) {
 }
 
 PConstant.prototype.getVertexCode = function (output_var, value, scope) {
-    if(scope == PConstant.VERTEX || scope == PConstant.BOTH){
+    if(scope == CodePiece.VERTEX || scope == CodePiece.BOTH){
         var code = this.type+" " +output_var+" = "+value+";\n\
                 ";
         return code;
@@ -22,7 +20,7 @@ PConstant.prototype.getVertexCode = function (output_var, value, scope) {
 }
 
 PConstant.prototype.getFragmentCode = function (output_var, value, scope) {
-    if(scope == PConstant.FRAGMENT || scope == PConstant.BOTH){
+    if(scope == CodePiece.FRAGMENT || scope == CodePiece.BOTH){
         var code = this.type+" " +output_var+" = "+value+";\n\
                 ";
         return code;
@@ -39,8 +37,6 @@ PConstant.prototype.getCode = function (output_var, value, scope) {
     var fragment = new CodePiece();
     fragment.setBody(this.getFragmentCode(output_var, value, scope));
     fragment.setIncludes(this.includes );
-    fragment.setOutputVar(output_var);
 
-
-    return [vertex, fragment];
+    return new ShaderCode(vertex, fragment, output_var);
 }

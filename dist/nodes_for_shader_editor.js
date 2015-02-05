@@ -44,11 +44,11 @@ LGraphShader.prototype.onWidget = function(e,widget)
 
 LGraphShader.prototype.processInputCode = function() {
 
-    var empty_codes = [new CodePiece(), new CodePiece()];
 
-    var color_code = this.getInputCode(0) || empty_codes; // 0 it's the color
-    var normal_code = this.getInputCode(1) || empty_codes; // 1 it's the normal
-    var world_offset_code = this.getInputCode(2) || empty_codes; // 1 it's the normal
+
+    var color_code = this.getInputCode(0) || LiteGraph.EMPTY_CODE; // 0 it's the color
+    var normal_code = this.getInputCode(1) || LiteGraph.EMPTY_CODE; // 1 it's the normal
+    var world_offset_code = this.getInputCode(2) || LiteGraph.EMPTY_CODE; // 1 it's the normal
 
     var shader = this.shader_piece.createShader(color_code,normal_code,world_offset_code);
     this.graph.shader_output = shader;
@@ -89,7 +89,7 @@ LGraphConstant.prototype.setValue = function(v)
 
 LGraphConstant.prototype.onExecute = function()
 {
-    this.codes = this.shader_piece.getCode("float_"+this.id, this.properties["value"].toFixed(3), PConstant.FRAGMENT); // need to check scope
+    this.codes[0] = this.shader_piece.getCode("float_"+this.id, this.properties["value"].toFixed(3), CodePiece.FRAGMENT); // need to check scope
 
     this.setOutputData(0, parseFloat( this.properties["value"] ) );
 }
@@ -124,7 +124,7 @@ LGraphTime.desc = "Time since execution started";
 
 LGraphTime.prototype.onExecute = function()
 {
-    this.codes = this.shader_piece.getCode(PConstant.FRAGMENT); // need to check scope
+    this.codes[0] = this.shader_piece.getCode(CodePiece.FRAGMENT); // need to check scope
 
 }
 
@@ -160,7 +160,7 @@ LGraphConstVec2.prototype.setValue = function(v1,v2)
 
 LGraphConstVec2.prototype.onExecute = function()
 {
-    this.codes = this.shader_piece.getCode("vec2_"+this.id, this.valueToString(), PConstant.FRAGMENT); // need to check scope
+    this.codes[0] = this.shader_piece.getCode("vec2_"+this.id, this.valueToString(), CodePiece.FRAGMENT); // need to check scope
 }
 
 LGraphConstVec2.prototype.onDrawBackground = function(ctx)
@@ -208,7 +208,7 @@ LGraphConstVec3.prototype.setValue = function(v1,v2,v3)
 
 LGraphConstVec3.prototype.onExecute = function()
 {
-    this.codes = this.shader_piece.getCode("vec3_"+this.id, this.valueToString(), PConstant.FRAGMENT); // need to check scope
+    this.codes[0] = this.shader_piece.getCode("vec3_"+this.id, this.valueToString(), CodePiece.FRAGMENT); // need to check scope
 }
 
 LGraphConstVec3.prototype.onDrawBackground = function(ctx)
@@ -259,7 +259,7 @@ LGraphConstVec4.prototype.setValue = function(v1,v2,v3,v4)
 
 LGraphConstVec4.prototype.onExecute = function()
 {
-    this.codes = this.shader_piece.getCode("vec4_"+this.id, this.valueToString(), PConstant.FRAGMENT); // need to check scope
+    this.codes[0] = this.shader_piece.getCode("vec4_"+this.id, this.valueToString(), CodePiece.FRAGMENT); // need to check scope
 }
 
 LGraphConstVec4.prototype.onDrawBackground = function(ctx)
@@ -289,7 +289,7 @@ LGraphCamToPixelWS.desc = "The vector from camera to pixel";
 
 LGraphCamToPixelWS.prototype.onExecute = function()
 {
-    this.codes = this.shader_piece.getCode(); // I need to check texture id
+    this.codes[0] = this.shader_piece.getCode(); // I need to check texture id
 }
 
 
@@ -310,7 +310,7 @@ LGraphPixelNormalWS.desc = "The normal in world space";
 
 LGraphPixelNormalWS.prototype.onExecute = function()
 {
-    this.codes = this.shader_piece.getCode(); // I need to check texture id
+    this.codes[0] = this.shader_piece.getCode(); // I need to check texture id
 }
 
 
@@ -335,7 +335,7 @@ LGraphUVs.desc = "Texture coordinates";
 
 LGraphUVs.prototype.onExecute = function()
 {
-    this.codes = this.shader_piece.getCode(); // I need to check texture id
+    this.codes[0] = this.shader_piece.getCode(); // I need to check texture id
 }
 
 LGraphUVs.prototype.setFloatValue = function(old_value,new_value) {
@@ -367,7 +367,7 @@ LGraphVertexPosWS.desc = "Vertex position in WS";
 
 LGraphVertexPosWS.prototype.onExecute = function()
 {
-    this.codes = this.shader_piece.getCode(); // I need to check texture id
+    this.codes[0] = this.shader_piece.getCode(); // I need to check texture id
 }
 
 
@@ -399,21 +399,22 @@ LGraphMixer.prototype.onExecute = function()
 
 LGraphMixer.prototype.processInputCode = function()
 {
+    var output_code = LiteGraph.EMPTY_CODE;
 
-    var input_codes_l1 = this.getInputCode(0);
-    var input_codes_l2 = this.getInputCode(1);
-    var alpha_code = this.getInputCode(2);
-    var alpha = alpha_code ? alpha_code[1].getOutputVar() :  this.properties["alpha"].toFixed(3); // need to put the correct scope
-    this.codes = this.shader_piece.getCode( "mixed_"+this.id, input_codes_l1[1].getOutputVar(), input_codes_l2[1].getOutputVar(),alpha); // output var must be fragment
-    // if the alpha is an input, otherwise hardcoded
-    if(alpha_code){
-        this.codes[0].merge(alpha_code[0]);
-        this.codes[1].merge(alpha_code[1]);
+    var code_A = this.getInputCode(0);
+    var code_B = this.getInputCode(1);
+    var code_alpha = this.getInputCode(2);
+    var alpha = code_alpha ? code_alpha.getOutputVar() :  this.properties["alpha"].toFixed(3); // need to put the correct scope
+
+    if(code_A && code_B){
+        output_code = this.codes[0] = this.shader_piece.getCode( "mixed_"+this.id, code_A.getOutputVar(), code_B.getOutputVar(),alpha); // output var must be fragment
+        // if the alpha is an input, otherwise hardcoded
+        if(code_alpha){
+            output_code.merge(code_alpha);
+        }
+        output_code.merge(code_A);
+        output_code.merge(code_B);
     }
-    this.codes[0].merge(input_codes_l1[0]);
-    this.codes[1].merge(input_codes_l1[1]);
-    this.codes[0].merge(input_codes_l2[0]);
-    this.codes[1].merge(input_codes_l2[1]);
 
 }
 
@@ -450,15 +451,13 @@ LGraphOperation.prototype.onExecute = function()
 LGraphOperation.prototype.processInputCode = function()
 {
 
-    var input_codes_l1 = this.getInputCode(0);
-    var input_codes_l2 = this.getInputCode(1);
+    var code_A = this.getInputCode(0);
+    var code_B = this.getInputCode(1);
 
-    this.codes = this.shader_piece.getCode( "result_"+this.id, "+",  input_codes_l1[1].getOutputVar(), input_codes_l2[1].getOutputVar()); // output var must be fragment
+    var output_code = this.codes[0] = this.shader_piece.getCode( "result_"+this.id, "+",  code_A.getOutputVar(), code_B.getOutputVar()); // output var must be fragment
 
-    this.codes[0].merge(input_codes_l1[0]);
-    this.codes[1].merge(input_codes_l1[1]);
-    this.codes[0].merge(input_codes_l2[0]);
-    this.codes[1].merge(input_codes_l2[1]);
+    output_code.merge(code_A);
+    output_code.merge(code_B);
 
 }
 
@@ -468,9 +467,9 @@ LiteGraph.registerNodeType("texture/Operation", LGraphOperation );
 //UVS
 function LGraphReflect()
 {
-    this.addOutput("reflect vector","vec3");
-    this.addInput("normal","vec3");
-    this.addInput("vector","vec3");
+    this.addOutput("reflect vector","vec3", {vec3:1});
+    this.addInput("normal","vec3", {vec3:1});
+    this.addInput("vector","vec3", {vec3:1});
 
     this.shader_piece = PReflect; // hardcoded for testing
 }
@@ -488,16 +487,14 @@ LGraphReflect.prototype.onExecute = function()
 LGraphReflect.prototype.processInputCode = function()
 {
 
-    var in_codes_normal = this.getInputCode(0); // normal
-    var in_codes_incident = this.getInputCode(1); // inident vector
+    var code_normal = this.getInputCode(0); // normal
+    var code_incident = this.getInputCode(1); // inident vector
 
     // (output, incident, normal)
-    this.codes = this.shader_piece.getCode("reflect_"+this.id, in_codes_incident[1].getOutputVar(), in_codes_normal[1].getOutputVar()); // output var must be fragment
+    var output_code = this.codes[0] = this.shader_piece.getCode("reflect_"+this.id, code_incident.getOutputVar(), code_normal.getOutputVar()); // output var must be fragment
 
-    this.codes[0].merge(in_codes_normal[0]);
-    this.codes[1].merge(in_codes_normal[1]);
-    this.codes[0].merge(in_codes_incident[0]);
-    this.codes[1].merge(in_codes_incident[1]);
+    output_code.merge(code_normal);
+    output_code.merge(code_incident);
 
 }
 
@@ -528,30 +525,21 @@ LGraphSmooth.prototype.onExecute = function()
 LGraphSmooth.prototype.processInputCode = function()
 {
 
-    var lower_codes = this.getInputCode(0);
-    var upper_codes= this.getInputCode(1);
+    var lower_code = this.getInputCode(0);
+    var upper_code = this.getInputCode(1);
     var x_code = this.getInputCode(2);
 
-    var lower = lower_codes ? lower_codes[1].getOutputVar() :  this.properties["lower"].toFixed(3); // need to put the correct scope
-    var upper = upper_codes ? upper_codes[1].getOutputVar() :  this.properties["upper"].toFixed(3); // need to put the correct scope
-    var x_var = x_code ? x_code[1].getOutputVar() :  "0.0";
+    var lower = lower_code ? lower_code.getOutputVar() :  this.properties["lower"].toFixed(3); // need to put the correct scope
+    var upper = upper_code ? upper_code.getOutputVar() :  this.properties["upper"].toFixed(3); // need to put the correct scope
+    var x_var = x_code ? x_code.getOutputVar() :  "0.0";
 
-    this.codes = this.shader_piece.getCode( "smoothed_"+this.id, lower, upper, x_var); // output var scope unknown
-    if(x_code){
-        this.codes[0].merge(x_code[0]);
-        this.codes[1].merge(x_code[1]);
-    }
-
-    if(lower_codes){
-        this.codes[0].merge(lower_codes[0]);
-        this.codes[1].merge(lower_codes[1]);
-    }
-    if(upper_codes){
-        this.codes[0].merge(upper_codes[0]);
-        this.codes[1].merge(upper_codes[1]);
-    }
-
-
+    var output_code = this.codes[0] = this.shader_piece.getCode( "smoothed_"+this.id, lower, upper, x_var); // output var scope unknown
+    if(x_code)
+        output_code.merge(x_code);
+    if(lower_code)
+        output_code.merge(lower_code);
+    if(upper_code)
+        output_code.merge(upper_code);
 }
 
 LGraphSmooth.prototype.onDrawBackground = function(ctx)
@@ -609,10 +597,10 @@ function LGraphTexture()
 {
     this.addOutput("Texture","Texture",{Texture:1});
     this.addOutput("Color","vec4", {vec3:1, vec4:1});
-    this.addOutput("R","R");
-    this.addOutput("G","G");
-    this.addOutput("B","B");
-    this.addOutput("A","A");
+    this.addOutput("R","number", {number:1});
+    this.addOutput("G","number", {number:1});
+    this.addOutput("B","number", {number:1});
+    this.addOutput("A","number", {number:1});
     this.addInput("UVs","vec2");
     this.properties = {name:""};
     this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
@@ -869,14 +857,19 @@ LGraphTexture.generateLowResTexturePreview = function(tex)
 LGraphTexture.prototype.processInputCode = function()
 {
 
-    var input_codes = this.getInputCode(0);
+    var input_code = this.getInputCode(0);
 
-    if(input_codes){
+    if(input_code){
         var texture_name = "u_" + (this.properties.name ? this.properties.name : "default_name") + "_texture"; // TODO check if there is a texture
-        this.codes = this.shader_piece.getCode("color_"+this.id, input_codes[1].getOutputVar(), texture_name); // output var must be fragment
+        var color_output = this.codes[1] = this.shader_piece.getCode("color_"+this.id, input_code.getOutputVar(), texture_name); // 1 it's the color output
 
-        this.codes[0].merge(input_codes[0]);
-        this.codes[1].merge(input_codes[1]);
+        color_output.merge(input_code);
+        var r_chan = color_output.clone();
+        r_chan.output_var = color_output.getOutputVar()+".r";
+        this.codes[2] = r_chan;
+//        this.codes[3]
+//        this.codes[4]
+//        this.codes[5]
     }
 
 }
@@ -964,13 +957,13 @@ LGraphCubemap.prototype.onDrawBackground = function(ctx)
 LGraphCubemap.prototype.processInputCode = function()
 {
 
-    var input_codes = this.getInputCode(0);
+    var input_code = this.getInputCode(0); // get input in link 0
 
     var texture_name = "u_" + (this.properties.name ? this.properties.name : "default_name") + "_texture"; // TODO check if there is a texture
-    this.codes = this.shader_piece.getCode("color_"+this.id, input_codes[1].getOutputVar(), texture_name); // output var must be fragment
+    var color_code = this.codes[1] = this.shader_piece.getCode("color_"+this.id, input_code.getOutputVar(), texture_name);
 
-    this.codes[0].merge(input_codes[0]);
-    this.codes[1].merge(input_codes[1]);
+    color_code.merge(input_code);
+
 
 }
 

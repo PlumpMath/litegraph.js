@@ -148,7 +148,9 @@ LGraphNode.prototype.serialize = function()
         data: this.data,
         flags: LiteGraph.cloneObject(this.flags),
         inputs: this.inputs,
-        outputs: this.outputs
+        outputs: this.outputs,
+        shader_piece: this.shader_piece,
+        codes: this.codes
     };
 
     if(this.properties)
@@ -951,11 +953,12 @@ LGraphNode.prototype.getInputNodes = function()
     return r;
 }
 
-LGraphNode.prototype.getInputCode = function(link_id)
+LGraphNode.prototype.getInputCode = function(slot)
 {
+    var link_id = this.inputs[slot].link;
     var link = this.graph.links[link_id];
     if(link)
-        return this.graph.getNodeById( link.origin_id ).codes[link.origin_id];
+        return this.graph.getNodeById( link.origin_id ).codes[link.origin_slot];
     return null;
 
 }
