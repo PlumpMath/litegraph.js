@@ -4687,6 +4687,9 @@ CodePiece.prototype.clone = function()
     cloned.scope = this.scope;
     return cloned;
 };
+
+
+LiteGraph.CodeLib = {};
 /**
  * Created by vik on 26/01/2015.
  */
@@ -4844,6 +4847,58 @@ ShaderConstructor.createFragmentCode = function (code,normal,offset) {
 
 
 }
+
+
+
+
+
+
+
+
+function P2ParamFunc (type, name) {
+    this.type = type;
+    this.name = name;
+    this.id = "2paramfunc";
+    this.includes = {};
+}
+
+P2ParamFunc.prototype.getVertexCode = function (out_var, a, b, scope, out_type) {
+    if(scope == CodePiece.VERTEX || scope == CodePiece.BOTH){
+        var code = (out_type || this.type)+" " +out_var+" = "+this.name+"("+a+","+b+");\n\
+                ";
+        return code;
+    }
+    return "";
+}
+
+P2ParamFunc.prototype.getFragmentCode = function (out_var, a, b, scope, out_type) {
+    if(scope == CodePiece.FRAGMENT || scope == CodePiece.BOTH){
+        var code = (out_type || this.type)+" " +out_var+" = "+this.name+"("+a+","+b+");\n\
+                ";
+        return code;
+    }
+    return "";
+}
+
+
+P2ParamFunc.prototype.getCode = function (out_var, a, b, scope, out_type) {
+    var vertex = new CodePiece();
+    vertex.setBody(this.getVertexCode(out_var, a, b, scope, out_type));
+    vertex.setIncludes(this.includes);
+
+    var fragment = new CodePiece();
+    fragment.setBody(this.getFragmentCode(out_var, a, b, scope, out_type));
+    fragment.setIncludes(this.includes );
+
+    return new ShaderCode(vertex, fragment, out_var);
+}
+
+LiteGraph.CodeLib["distance"] = new P2ParamFunc ("float", "distance");
+LiteGraph.CodeLib["dot"] = new P2ParamFunc ("float", "dot");
+LiteGraph.CodeLib["cross"] = new P2ParamFunc ("vec3", "cross");
+LiteGraph.CodeLib["reflect"] = new P2ParamFunc (undefined, "reflect");
+LiteGraph.CodeLib["refract"] = new P2ParamFunc (undefined, "refract");
+
 
 
 

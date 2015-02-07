@@ -92,3 +92,6 @@ CodePiece.prototype.clone = function()
     cloned.scope = this.scope;
     return cloned;
 };
+
+
+LiteGraph.CodeLib = {};

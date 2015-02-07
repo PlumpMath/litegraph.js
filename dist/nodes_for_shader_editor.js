@@ -471,7 +471,7 @@ function LGraphReflect()
     this.addInput("normal","vec3", {vec3:1});
     this.addInput("vector","vec3", {vec3:1});
 
-    this.shader_piece = PReflect; // hardcoded for testing
+    this.shader_piece = LiteGraph.CodeLib["reflect"]; // hardcoded for testing
 }
 
 LGraphReflect.title = "ReflectVector";
@@ -491,7 +491,7 @@ LGraphReflect.prototype.processInputCode = function()
     var code_incident = this.getInputCode(1); // inident vector
 
     // (output, incident, normal)
-    var output_code = this.codes[0] = this.shader_piece.getCode("reflect_"+this.id, code_incident.getOutputVar(), code_normal.getOutputVar()); // output var must be fragment
+    var output_code = this.codes[0] = this.shader_piece.getCode("reflect_"+this.id, code_incident.getOutputVar(), code_normal.getOutputVar(), CodePiece.FRAGMENT, "vec3"); // output var must be fragment
 
     output_code.merge(code_normal);
     output_code.merge(code_incident);
@@ -867,6 +867,15 @@ LGraphTexture.prototype.processInputCode = function()
         var r_chan = color_output.clone();
         r_chan.output_var = color_output.getOutputVar()+".r";
         this.codes[2] = r_chan;
+        var g_chan = color_output.clone();
+        g_chan.output_var = color_output.getOutputVar()+".g";
+        this.codes[3] = g_chan;
+        var b_chan = color_output.clone();
+        b_chan.output_var = color_output.getOutputVar()+".b";
+        this.codes[4] = b_chan;
+        var a_chan = color_output.clone();
+        a_chan.output_var = color_output.getOutputVar()+".a";
+        this.codes[5] = a_chan;
 //        this.codes[3]
 //        this.codes[4]
 //        this.codes[5]
