@@ -1,7 +1,7 @@
 //UVS
 function LGraphPixelNormalWS()
 {
-    this.addOutput("Pixel Normal","vec3");
+    this.addOutput("Pixel Normal","vec3", {vec3:1});
 
 
     this.shader_piece = PPixelNormalWS; // hardcoded for testing

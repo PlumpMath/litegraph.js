@@ -373,7 +373,7 @@ LiteGraph.registerNodeType("constants/ConstVec4", LGraphConstVec4);
 //UVS
 function LGraphCamToPixelWS()
 {
-    this.addOutput("Camera To Pixel","vec3");
+    this.addOutput("Camera To Pixel","vec3", {vec3:1});
 
 
     this.shader_piece = PCameraToPixelWS; // hardcoded for testing
@@ -394,7 +394,7 @@ LiteGraph.registerNodeType("coordinates/cameraToPixelWS", LGraphCamToPixelWS);
 //UVS
 function LGraphPixelNormalWS()
 {
-    this.addOutput("Pixel Normal","vec3");
+    this.addOutput("Pixel Normal","vec3", {vec3:1});
 
 
     this.shader_piece = PPixelNormalWS; // hardcoded for testing
@@ -983,7 +983,7 @@ LGraphVecToComps.prototype.onExecute = function()
 
     if(input_code){
         var x_chan = input_code.clone();
-        x_chan.output_var = color_output.getOutputVar()+".x";
+        x_chan.output_var = input_code.getOutputVar()+".x";
         this.codes[0] = x_chan;
         var y_chan = input_code.clone();
         y_chan.output_var = input_code.getOutputVar()+".y";

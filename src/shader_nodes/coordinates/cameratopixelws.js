@@ -1,7 +1,7 @@
 //UVS
 function LGraphCamToPixelWS()
 {
-    this.addOutput("Camera To Pixel","vec3");
+    this.addOutput("Camera To Pixel","vec3", {vec3:1});
 
 
     this.shader_piece = PCameraToPixelWS; // hardcoded for testing

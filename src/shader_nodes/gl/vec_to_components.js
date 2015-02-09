@@ -20,7 +20,7 @@ LGraphVecToComps.prototype.onExecute = function()
 
     if(input_code){
         var x_chan = input_code.clone();
-        x_chan.output_var = color_output.getOutputVar()+".x";
+        x_chan.output_var = input_code.getOutputVar()+".x";
         this.codes[0] = x_chan;
         var y_chan = input_code.clone();
         y_chan.output_var = input_code.getOutputVar()+".y";
