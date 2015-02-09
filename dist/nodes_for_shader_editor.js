@@ -965,7 +965,7 @@ window.LGraphCubemap = LGraphCubemap;
 //Constant
 function LGraphVecToComps()
 {
-    this.addIntput("vec","vec4", {vec4:1,vec3:1,vec2:1});
+    this.addInput("vec","vec4", {vec4:1,vec3:1,vec2:1});
     this.addOutput("x","number", {number:1});
     this.addOutput("y","number", {number:1});
     this.addOutput("z","number", {number:1});
@@ -977,7 +977,7 @@ LGraphVecToComps.title = "VecToComps";
 LGraphVecToComps.desc = "Vector To Components";
 
 
-LGraphConstVec4.prototype.onExecute = function()
+LGraphVecToComps.prototype.onExecute = function()
 {
     var input_code = this.getInputCode(0);
 
@@ -1000,7 +1000,7 @@ LGraphConstVec4.prototype.onExecute = function()
 
 
 
-LiteGraph.registerNodeType("coordinates/VecToComps", LGraphConstVec4);
+LiteGraph.registerNodeType("coordinates/VecToComps", LGraphVecToComps);
 
 
 
