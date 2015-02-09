@@ -8,7 +8,7 @@ function LGraphMixer()
 
     this.properties = { alpha:0.5};
     this.options = { alpha:{min:0, max:1, step:0.01}};
-    this.shader_piece = PMixer; // hardcoded for testing
+    this.shader_piece = LiteGraph.CodeLib["mix"];
 }
 
 LGraphMixer.title = "Lerp";
@@ -30,7 +30,8 @@ LGraphMixer.prototype.processInputCode = function()
     var alpha = code_alpha ? code_alpha.getOutputVar() :  this.properties["alpha"].toFixed(3); // need to put the correct scope
 
     if(code_A && code_B){
-        output_code = this.codes[0] = this.shader_piece.getCode( "mixed_"+this.id, code_A.getOutputVar(), code_B.getOutputVar(),alpha); // output var must be fragment
+        // (out_var, a, b, c, scope, out_type)
+        output_code = this.codes[0] = this.shader_piece.getCode( "mixed_"+this.id, code_A.getOutputVar(), code_B.getOutputVar(),alpha, CodePiece.FRAGMENT, "vec4"); // output var must be fragment
         // if the alpha is an input, otherwise hardcoded
         if(code_alpha){
             output_code.merge(code_alpha);

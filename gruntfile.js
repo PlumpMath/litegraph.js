@@ -16,8 +16,8 @@ module.exports = function (grunt) {
         },
         replace: {
             remove_declares: {
-                src: ['dist/<%= pkg.name %>.js'],
-                dest: 'dist/<%= pkg.name %>.js',
+                src: ['dist/<%= pkg.name %>.js', 'dist/nodes_for_shader_editor.js'],
+                dest: 'dist/',
                 replacements: [
                     {
                         from: /(require|declare)\((.*?)\);/g,
