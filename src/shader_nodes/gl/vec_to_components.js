@@ -37,4 +37,4 @@ LGraphVecToComps.prototype.onExecute = function()
 
 
 
-LiteGraph.registerNodeType("coordinates/VecToComps", LGraphVecToComps);
+LiteGraph.registerNodeType("coordinates/"+LGraphVecToComps.title , LGraphVecToComps);

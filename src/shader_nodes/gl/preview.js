@@ -34,5 +34,5 @@ LGraphTexturePreview.prototype.onDrawBackground = function(ctx)
     ctx.restore();
 }
 
-LiteGraph.registerNodeType("texture/preview", LGraphTexturePreview );
+LiteGraph.registerNodeType("texture/"+LGraphTexturePreview.title, LGraphTexturePreview );
 window.LGraphTexturePreview = LGraphTexturePreview;

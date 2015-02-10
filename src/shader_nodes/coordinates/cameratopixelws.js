@@ -16,5 +16,5 @@ LGraphCamToPixelWS.prototype.onExecute = function()
 }
 
 
-LiteGraph.registerNodeType("coordinates/cameraToPixelWS", LGraphCamToPixelWS);
+LiteGraph.registerNodeType("coordinates/"+ LGraphCamToPixelWS.title , LGraphCamToPixelWS);
 

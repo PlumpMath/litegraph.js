@@ -40,4 +40,4 @@ LGraphConstant.prototype.onWidget = function(e,widget)
         this.setValue(widget.value);
 }
 
-LiteGraph.registerNodeType("constants/Number", LGraphConstant);
+LiteGraph.registerNodeType("constants/"+LGraphConstant.title, LGraphConstant);

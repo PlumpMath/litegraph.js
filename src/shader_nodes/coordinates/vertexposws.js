@@ -16,6 +16,6 @@ LGraphVertexPosWS.prototype.onExecute = function()
 }
 
 
-LiteGraph.registerNodeType("coordinates/vertexPosWS", LGraphVertexPosWS);
+LiteGraph.registerNodeType("coordinates/"+LGraphVertexPosWS.title, LGraphVertexPosWS);
 
 

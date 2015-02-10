@@ -50,4 +50,4 @@ LGraphMixer.prototype.onDrawBackground = function(ctx)
         this.inputs[2].label += "="+this.properties["alpha"].toFixed(3);
 }
 
-LiteGraph.registerNodeType("texture/Lerp", LGraphMixer );
+LiteGraph.registerNodeType("texture/"+LGraphMixer.title, LGraphMixer );

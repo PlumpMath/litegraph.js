@@ -16,5 +16,5 @@ LGraphPixelNormalWS.prototype.onExecute = function()
 }
 
 
-LiteGraph.registerNodeType("coordinates/pixelNormalWS", LGraphPixelNormalWS);
+LiteGraph.registerNodeType("coordinates/"+LGraphPixelNormalWS.title, LGraphPixelNormalWS);
 

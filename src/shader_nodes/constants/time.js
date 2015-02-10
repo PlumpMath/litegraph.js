@@ -18,4 +18,4 @@ LGraphTime.prototype.onExecute = function()
 
 }
 
-LiteGraph.registerNodeType("constants/Time", LGraphTime);
+LiteGraph.registerNodeType("constants/"+LGraphTime.title , LGraphTime);

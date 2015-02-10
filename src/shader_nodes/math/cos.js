@@ -21,5 +21,5 @@ LGraphCos.desc = "cosine of input";
 
 
 LGraph1ParamNode.inherit(LGraphCos);
-LiteGraph.registerNodeType("math/Cos", LGraphCos);
+LiteGraph.registerNodeType("math/"+LGraphCos.title, LGraphCos);
 

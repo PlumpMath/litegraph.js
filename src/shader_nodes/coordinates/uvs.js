@@ -30,6 +30,6 @@ LGraphUVs.prototype.setValue = function(v1,v2)
     this.setFloatValue(this.properties["VTiling"],v2);
 };
 
-LiteGraph.registerNodeType("coordinates/textureCoords", LGraphUVs);
+LiteGraph.registerNodeType("coordinates/"+LGraphUVs.title , LGraphUVs);
 
 

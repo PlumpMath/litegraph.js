@@ -21,5 +21,5 @@ LGraphAbs.desc = "Abs of input";
 
 
 LGraph1ParamNode.inherit(LGraphAbs);
-LiteGraph.registerNodeType("math/Abs", LGraphAbs);
+LiteGraph.registerNodeType("math/"+LGraphAbs.title, LGraphAbs);
 

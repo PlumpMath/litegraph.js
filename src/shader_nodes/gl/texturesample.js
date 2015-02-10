@@ -19,7 +19,7 @@ function LGraphTexture()
     }
 }
 
-LGraphTexture.title = "textureSample";
+LGraphTexture.title = "TextureSample";
 LGraphTexture.desc = "textureSample";
 LGraphTexture.widgets_info = {"name": { widget:"texture"} };
 
@@ -289,5 +289,5 @@ LGraphTexture.prototype.processInputCode = function()
 }
 
 
-LiteGraph.registerNodeType("texture/textureSample", LGraphTexture );
+LiteGraph.registerNodeType("texture/"+LGraphTexture.title, LGraphTexture );
 window.LGraphTexture = LGraphTexture;

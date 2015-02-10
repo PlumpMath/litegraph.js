@@ -50,4 +50,4 @@ LGraphSmooth.prototype.onDrawBackground = function(ctx)
         this.inputs[1].label += "="+this.properties["upper"].toFixed(3);
 }
 
-LiteGraph.registerNodeType("texture/SmoothStep", LGraphSmooth );
+LiteGraph.registerNodeType("texture/"+LGraphSmooth.title, LGraphSmooth );

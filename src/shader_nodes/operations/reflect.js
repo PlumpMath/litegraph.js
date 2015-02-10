@@ -8,7 +8,7 @@ function LGraphReflect()
     this.shader_piece = LiteGraph.CodeLib["reflect"]; // hardcoded for testing
 }
 
-LGraphReflect.title = "ReflectVector";
+LGraphReflect.title = "Reflect";
 LGraphReflect.desc = "To reflect a vector3";
 
 
@@ -32,5 +32,5 @@ LGraphReflect.prototype.processInputCode = function()
 
 }
 
-LiteGraph.registerNodeType("texture/reflect", LGraphReflect);
+LiteGraph.registerNodeType("texture/"+LGraphReflect.title, LGraphReflect);
 

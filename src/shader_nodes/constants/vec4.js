@@ -47,4 +47,4 @@ LGraphConstVec4.prototype.valueToString = function()
     return "vec4("+this.properties["v1"].toFixed(3)+","+this.properties["v2"].toFixed(3)+","+this.properties["v3"].toFixed(3)+","+this.properties["v4"].toFixed(3)+")";
 }
 
-LiteGraph.registerNodeType("constants/ConstVec4", LGraphConstVec4);
+LiteGraph.registerNodeType("constants/"+LGraphConstVec4.title, LGraphConstVec4);

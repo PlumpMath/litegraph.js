@@ -52,7 +52,7 @@ LGraphShader.prototype.processInputCode = function() {
 
     var shader = this.shader_piece.createShader(color_code,normal_code,world_offset_code);
     this.graph.shader_output = shader;
-    var texture_nodes = this.graph.findNodesByType("texture/textureSample");// we need to find all the textures used in the graph
+    var texture_nodes = this.graph.findNodesByType("texture/"+LGraphTexture.title);// we need to find all the textures used in the graph
     this.graph.shader_textures = [];
     // we set all the names in one array
     // useful to render nodes
@@ -63,4 +63,4 @@ LGraphShader.prototype.processInputCode = function() {
 
 
 
-LiteGraph.registerNodeType("core/ShaderNode",LGraphShader);
+LiteGraph.registerNodeType("core/"+ LGraphShader.title ,LGraphShader);

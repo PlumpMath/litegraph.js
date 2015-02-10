@@ -16,7 +16,7 @@ function LGraphCubemap()
     }
 }
 
-LGraphCubemap.title = "textureSampleCube";
+LGraphCubemap.title = "TextureSampleCube";
 LGraphCubemap.desc = "textureSampleCube";
 
 LGraphCubemap.prototype.onDropFile = function(data, filename, file)
@@ -88,5 +88,5 @@ LGraphCubemap.prototype.processInputCode = function()
 }
 
 
-LiteGraph.registerNodeType("texture/TextureSampleCube", LGraphCubemap );
+LiteGraph.registerNodeType("texture/"+LGraphCubemap.title, LGraphCubemap );
 window.LGraphCubemap = LGraphCubemap;

@@ -8,7 +8,7 @@ function LGraphOperation()
     this.shader_piece = POperation; // hardcoded for testing
 }
 
-LGraphOperation.title = "operation";
+LGraphOperation.title = "Operation";
 LGraphOperation.desc = "operation between A and B";
 
 LGraphOperation.prototype.onExecute = function()
@@ -32,4 +32,4 @@ LGraphOperation.prototype.processInputCode = function()
 }
 
 
-LiteGraph.registerNodeType("texture/Operation", LGraphOperation );
+LiteGraph.registerNodeType("texture/"+LGraphOperation.title, LGraphOperation );

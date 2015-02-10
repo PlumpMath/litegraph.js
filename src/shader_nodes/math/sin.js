@@ -20,5 +20,5 @@ LGraphSin.desc = "sine of input";
 
 
 LGraph1ParamNode.inherit(LGraphSin);
-LiteGraph.registerNodeType("math/sin", LGraphSin);
+LiteGraph.registerNodeType("math/"+LGraphSin.title, LGraphSin);
 
