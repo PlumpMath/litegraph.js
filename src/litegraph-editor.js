@@ -111,6 +111,9 @@ Editor.prototype.onLoadButton = function()
 
 Editor.prototype.onSaveButton = function()
 {
+    var json = this.graph.serialize();
+    var data = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(json));
+    window.open(data);
 }
 
 Editor.prototype.onPlayButton = function()

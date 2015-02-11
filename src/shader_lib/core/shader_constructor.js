@@ -15,6 +15,8 @@ ShaderConstructor.createShader = function (color_code, normal_code, world_offset
     }
     try {
         var shader = new GL.Shader(vertex_code,fragment_code);
+        shader.vertex_code = vertex_code;
+        shader.fragment_code = fragment_code;
         return shader;
     }
     catch(err) {
@@ -101,14 +103,29 @@ ShaderConstructor.createFragmentCode = function (code,normal,offset) {
             ";
     for(var k in code.fragment.getHeader())
         r += k;
+    for(var k in normal.fragment.getHeader())
+        r += k;
     // body
     r += "void main() {\n\
             ";
-    var ids = code.fragment.getBodyIds();
-    var body_hash = code.fragment.getBody();
+    if (includes["v_normal"] || normal.getOutputVar())
+        r += "vec3 normal = v_normal;\n\
+            ";
+    var ids = normal.fragment.getBodyIds();
+    var body_hash = normal.fragment.getBody();
     for (var i = 0, l = ids.length; i < l; i++) {
         r += body_hash[ids[i]];
     }
+    if(normal.getOutputVar())
+        r += "normal = "+normal.getOutputVar()+".xyz;\n\
+            ";
+
+    ids = code.fragment.getBodyIds();
+    body_hash = code.fragment.getBody();
+    for (var i = 0, l = ids.length; i < l; i++) {
+        r += body_hash[ids[i]];
+    }
+
     r += "gl_FragColor = "+code.getOutputVar()+";\n";
 
     r += "\n}\n\

@@ -6,47 +6,7 @@ function demo()
 
 function multiConnection()
 {
-	var node_vec = LiteGraph.createNode("coordinates/textureCoords");
-    node_vec.pos = [200,200];
-	graph.add(node_vec);
-
-    var node_tex = LiteGraph.createNode("texture/textureSample");
-    node_tex.pos = [400,200];
-    graph.add(node_tex);
-
-    var node_prev = LiteGraph.createNode("texture/preview");
-    node_prev.pos = [1000,100];
-    graph.add(node_prev);
-
-    var node_shader = LiteGraph.createNode("core/ShaderNode");
-    node_shader.pos = [1000,600];
-    graph.add(node_shader);
-
-    node_vec.connect(0,node_tex,0 );
-    node_tex.connect(1,node_shader,0 );
-    node_tex.connect(0,node_prev,0 );
-
-
-    var node_vec = LiteGraph.createNode("coordinates/pixelNormalWS");
-    node_vec.pos = [100,500];
-    graph.add(node_vec);
-
-    var node_cam = LiteGraph.createNode("coordinates/cameraToPixelWS");
-    node_cam.pos = [100,600];
-    graph.add(node_cam);
-
-    var node_refl = LiteGraph.createNode("texture/reflect");
-    node_refl.pos = [300,550];
-    graph.add(node_refl);
-
-    var node_tex = LiteGraph.createNode("texture/TextureSampleCube");
-    node_tex.pos = [500,500];
-    graph.add(node_tex);
-
-    node_vec.connect(0,node_refl,0 );
-    node_cam.connect(0,node_refl,1 );
-    node_refl.connect(0,node_tex,0 );
-
+    graph.loadFromURL("graphs/graph.json");
 }
 
 function sortTest()

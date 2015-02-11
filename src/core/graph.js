@@ -812,6 +812,8 @@ LGraph.prototype.serialize = function()
 
     var data = {
 //		graph: this.graph,
+        shader_textures: this.shader_textures,
+        //shader_output: this.shader_output, this creates a cycle
 
         iteration: this.iteration,
         frame: this.frame,
@@ -826,6 +828,25 @@ LGraph.prototype.serialize = function()
     return data;
 }
 
+
+/**
+ * Loads a graph from a url and calls configure
+ * @method loadFromURL
+ * @param {String} url configure a graph from a JSON string
+ * @param {Function} on_complete callback
+ */
+LGraph.prototype.loadFromURL = function (url, on_complete){
+
+    var that = this;
+    HttpRequest( url, null, function(data) {
+        that.configure(JSON.parse(data));
+        if(on_complete)
+            on_complete(graph);
+    }, function(err){
+        if(on_complete)
+            on_complete(null);
+    });
+}
 
 /**
  * Configure a graph from a JSON string

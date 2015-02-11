@@ -913,7 +913,8 @@ LGraphCanvas.prototype.onNodeSelected = function (n) {
 }
 
 LGraphCanvas.prototype.processNodeSelected = function (n, e) {
-    LiteGraph.dispatchEvent("hola", this);
+    if(LiteGraph.debug)
+        console.log(n);
     n.selected = true;
     if (n.onSelected)
         n.onSelected();

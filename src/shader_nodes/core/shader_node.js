@@ -59,6 +59,7 @@ LGraphShader.prototype.processInputCode = function() {
     for(var i = 0; i < texture_nodes.length; ++i){
         this.graph.shader_textures.push(texture_nodes[i].properties.name);
     }
+
 }
 
 

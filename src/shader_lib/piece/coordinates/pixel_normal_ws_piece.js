@@ -14,7 +14,7 @@ PPixelNormalWS.getVertexCode = function (output, input) {
 }
 
 PPixelNormalWS.getFragmentCode = function (output, input) {
-        var code = "vec3 pixel_normal_ws = v_normal;\n\
+        var code = "vec3 pixel_normal_ws = normal;\n\
             ";
 
     return code;
