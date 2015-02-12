@@ -8,12 +8,7 @@ function LGraphCubemap()
     this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
 
     this.shader_piece = PTextureSampleCube; // hardcoded for testing
-
-    // default cube map
-    if(typeof(gl) != "undefined" && gl.textures["cubemap"]){
-        this.properties.name = "cubemap";
-        this._drop_texture = gl.textures["cubemap"];
-    }
+    this.properties.name = "cube";
 }
 
 LGraphCubemap.title = "TextureSampleCube";

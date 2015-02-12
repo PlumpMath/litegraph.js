@@ -59,6 +59,11 @@ LGraphShader.prototype.processInputCode = function() {
     for(var i = 0; i < texture_nodes.length; ++i){
         this.graph.shader_textures.push(texture_nodes[i].properties.name);
     }
+    texture_nodes = this.graph.findNodesByType("texture/"+LGraphCubemap.title);// we need to find all the textures used in the graph
+    for(var i = 0; i < texture_nodes.length; ++i){
+        this.graph.shader_textures.push(texture_nodes[i].properties.name);
+    }
+
 
 }
 

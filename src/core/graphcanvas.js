@@ -273,6 +273,8 @@ LGraphCanvas.prototype.setCanvas = function (canvas) {
         //prepare reader
         var reader = new FileReader();
         reader.onload = function (event) {
+            if(that.gl)
+                that.gl.makeCurrent();
             //console.log(event.target);
             var data = event.target.result;
             node.onDropFile(data, filename, file);
@@ -1247,6 +1249,8 @@ LGraphCanvas.prototype.drawBackCanvas = function () {
         ctx.start();
 
     //clear
+    if(this.onClearRect)
+        this.onClearRect();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     //reset in case of error

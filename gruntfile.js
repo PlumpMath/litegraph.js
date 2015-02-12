@@ -17,7 +17,7 @@ module.exports = function (grunt) {
         replace: {
             remove_declares: {
                 src: ['dist/<%= pkg.name %>.js', 'dist/nodes_for_shader_editor.js'],
-                dest: 'dist/',
+                dest: ['dist/'],
                 replacements: [
                     {
                         from: /(require|declare)\((.*?)\);/g,
@@ -25,16 +25,16 @@ module.exports = function (grunt) {
                     }
                 ],
             },
-            union_shaders: {
-                src: ['dist/<%= pkg.name %>.js'],
-                dest: 'dist/<%= pkg.name %>.js',
+            populate_projects: {
+                src: ['dist/<%= pkg.name %>.js', 'dist/nodes_for_shader_editor.js'],
+                dest: ['../vik-shader-editor/js/external/'],
                 replacements: [
                     {
                         from: /(require|declare)\((.*?)\);/g,
                         to: ''
                     }
                 ],
-            }
+            },
         },
         uglify: {
             options: {
@@ -43,7 +43,7 @@ module.exports = function (grunt) {
             dist: {
                 files: {
                     'dist/nodes_for_shader_editor.min.js': ['<%= Object.keys(concat_in_order.your_target.files)[0] %>'], // to extract the destination file from concat
-                    'dist/<%= pkg.name %>.min.js': ['<%= Object.keys(concat_in_order.your_target.files)[1] %>'] // to extract the destination file from concat
+                    'dist/<%= pkg.name %>.min.js': ['<%= Object.keys(concat_in_order.your_target.files)[1] %>'], // to extract the destination file from concat
                 }
             }
         },
@@ -78,6 +78,8 @@ module.exports = function (grunt) {
 
 
     grunt.registerTask('default', ['qunit', 'jshint', 'concat_in_order', 'replace:remove_declares', 'uglify']);
+    grunt.registerTask('fill_projects', ['qunit', 'jshint', 'concat_in_order', 'replace:populate_projects', 'uglify']);
+
 
 }
 ;

@@ -8,8 +8,8 @@ function LGraphTexture()
     this.addOutput("A","number", {number:1});
     this.addInput("UVs","vec2");
     this.properties = {name:"", url:""};
-    this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
-
+    //this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
+    this.size = [170,165];
     this.shader_piece = PTextureSample; // hardcoded for testing
 
     // default texture
@@ -47,7 +47,7 @@ LGraphTexture.MODE_VALUES = {
 
 LGraphTexture.getTexture = function(name)
 {
-    var container = LGraphTexture.textures_container || gl.textures;
+    var container =  gl.textures ||LGraphTexture.textures_container; // changedo order, otherwise it bugs with the multiple context
 
     if(!container)
         throw("Cannot load texture, container of textures not found");
@@ -184,7 +184,7 @@ LGraphTexture.prototype.onDrawBackground = function(ctx)
 
     if( this._drop_texture && ctx.webgl )
     {
-        ctx.drawImage( this._drop_texture, 0,0,this.size[0],this.size[1]);
+        ctx.drawImage(this._drop_texture,this.size[1]* 0.05,this.size[1]* 0.2,this.size[0]* 0.75,this.size[1]* 0.75);
         //this._drop_texture.renderQuad(this.pos[0],this.pos[1],this.size[0],this.size[1]);
         return;
     }
@@ -218,7 +218,7 @@ LGraphTexture.prototype.onDrawBackground = function(ctx)
         ctx.translate(0,this.size[1]);
         ctx.scale(1,-1);
     }
-    ctx.drawImage(this._canvas,0,0,this.size[0],this.size[1]);
+    ctx.drawImage(this._canvas,this.size[1]* 0.05,this.size[1]* 0.2,this.size[0]* 0.75,this.size[1]* 0.75);
     ctx.restore();
 }
 

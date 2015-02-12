@@ -14,7 +14,7 @@ ShaderConstructor.createShader = function (color_code, normal_code, world_offset
         console.log(fragment_code);
     }
     try {
-        var shader = new GL.Shader(vertex_code,fragment_code);
+        var shader = {};
         shader.vertex_code = vertex_code;
         shader.fragment_code = fragment_code;
         return shader;
@@ -47,9 +47,9 @@ ShaderConstructor.createVertexCode = function (code, normal,offset) {
     if (includes["u_time"])
         r += "uniform float u_time;\n";
     if (includes["u_eye"])
-        r += "uniform vec3 u_eye;\n"+
-            "uniform mat4 u_mvp;\n"+
-            "uniform mat4 u_model;\n";
+        r += "uniform vec3 u_eye;\n";
+    r += "uniform mat4 u_mvp;\n"+
+         "uniform mat4 u_model;\n";
 
     for(var k in code.vertex.getHeader())
         r += k;

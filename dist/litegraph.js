@@ -3,8 +3,8 @@
 // LGraph CLASS                                  
 //*********************************************************************************
 
-
-
+require(LiteGraph);
+declare(LGraph);
 
 /**
  * LGraph is the class that contain a full graph. We instantiate one and add nodes to it, and then we can run the execution loop.
@@ -899,9 +899,9 @@ LGraph.prototype.onNodeTrace = function(node, msg, color)
 // LGraphCanvas: LGraph renderer CLASS                                  
 //*********************************************************************************
 
-
-
-
+require(LiteGraph);
+require(LGraphNode);
+declare(LGraphCanvas);
 
 /**
  * The Global Scope. It contains all the registered node classes.
@@ -1170,6 +1170,8 @@ LGraphCanvas.prototype.setCanvas = function (canvas) {
         //prepare reader
         var reader = new FileReader();
         reader.onload = function (event) {
+            if(that.gl)
+                that.gl.makeCurrent();
             //console.log(event.target);
             var data = event.target.result;
             node.onDropFile(data, filename, file);
@@ -2144,6 +2146,8 @@ LGraphCanvas.prototype.drawBackCanvas = function () {
         ctx.start();
 
     //clear
+    if(this.onClearRect)
+        this.onClearRect();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     //reset in case of error
@@ -3085,8 +3089,8 @@ LGraphCanvas.prototype.processContextualMenu = function (node, event) {
  + onDropFile
  */
 
-
-
+require(LiteGraph);
+declare(LGraphNode);
 
 /**
  * Base Class for all the node type classes
@@ -4028,7 +4032,7 @@ LGraphNode.prototype.getInputCode = function(slot)
 // *************************************************************
 
 
-
+declare(LiteGraph);
 
 /**
  * The Global Scope. It contains all the registered node classes.
@@ -4051,7 +4055,7 @@ var LiteGraph = {
     NODE_DEFAULT_BGCOLOR: "#444",
     NODE_DEFAULT_BOXCOLOR: "#AEF",
     NODE_SELECTED_COLOR: "#FFF",
-    NODE_DEFAULT_SHAPE: "round",
+    NODE_DEFAULT_SHAPE: "box", // round circle box
     MAX_NUMBER_OF_NODES: 1000, //avoid infinite loops
     DEFAULT_POSITION: [100,100],//default node position
     node_images_path: "",
@@ -4631,7 +4635,7 @@ if( !window["requestAnimationFrame"] )
  * Created by vik on 26/01/2015.
  */
 
-
+declare(CodePiece);
 
 CodePiece.VERTEX = 1;
 CodePiece.FRAGMENT = 2;
@@ -4729,8 +4733,8 @@ LiteGraph.CodeLib = {};
  * Created by vik on 26/01/2015.
  */
 
-
-
+require(CodePiece);
+declare(ShaderCode);
 
 function ShaderCode(vertex, fragment, out_var)
 {
@@ -4778,7 +4782,7 @@ ShaderConstructor.createShader = function (color_code, normal_code, world_offset
         console.log(fragment_code);
     }
     try {
-        var shader = new GL.Shader(vertex_code,fragment_code);
+        var shader = {};
         shader.vertex_code = vertex_code;
         shader.fragment_code = fragment_code;
         return shader;
@@ -4811,9 +4815,9 @@ ShaderConstructor.createVertexCode = function (code, normal,offset) {
     if (includes["u_time"])
         r += "uniform float u_time;\n";
     if (includes["u_eye"])
-        r += "uniform vec3 u_eye;\n"+
-            "uniform mat4 u_mvp;\n"+
-            "uniform mat4 u_model;\n";
+        r += "uniform vec3 u_eye;\n";
+    r += "uniform mat4 u_mvp;\n"+
+         "uniform mat4 u_model;\n";
 
     for(var k in code.vertex.getHeader())
         r += k;
@@ -4877,8 +4881,8 @@ ShaderConstructor.createFragmentCode = function (code,normal,offset) {
 
 
 
-
-
+require(CodePiece);
+declare(P1ParamFunc);
 
 
 
@@ -4941,8 +4945,8 @@ LiteGraph.CodeLib["floor"] = new P1ParamFunc (undefined, "floor");
 LiteGraph.CodeLib["ceil"] = new P1ParamFunc (undefined, "ceil");
 LiteGraph.CodeLib["fract"] = new P1ParamFunc (undefined, "fract");
 
-
-
+require(CodePiece);
+declare(P2ParamFunc);
 
 
 // object representing glsl 2 param function
@@ -5001,8 +5005,8 @@ LiteGraph.CodeLib["max"] = new P2ParamFunc (undefined, "max");
 LiteGraph.CodeLib["step"] = new P2ParamFunc (undefined, "step");
 
 
-
-
+require(CodePiece);
+declare(P3ParamFunc);
 
 
 // object representing glsl 2 param function
@@ -5058,8 +5062,8 @@ LiteGraph.CodeLib["mix"] = new P3ParamFunc (undefined, "mix");
 
 
 
-
-
+require(CodePiece);
+declare(PConstant);
 
 
 
@@ -5100,8 +5104,8 @@ PConstant.prototype.getCode = function (output_var, value, scope) {
 }
 
 
-
-
+require(CodePiece);
+declare(PCameraToPixelWS);
 
 var PCameraToPixelWS = {};
 
@@ -5129,8 +5133,8 @@ PCameraToPixelWS.getCode = function (output, input) {
     return new ShaderCode(vertex, fragment, "camera_to_pixel_ws");
 }
 
-
-
+require(CodePiece);
+declare(PPixelNormalWS);
 
 
 var PPixelNormalWS = {};
@@ -5163,8 +5167,8 @@ PPixelNormalWS.getCode = function (output, input) {
 }
 
 
-
-
+require(CodePiece);
+declare(PUVs);
 
 var PUVs = {};
 
@@ -5193,8 +5197,8 @@ PUVs.getCode = function (output, input) {
 }
 
 
-
-
+require(CodePiece);
+declare(PVertexPosWS);
 
 var PVertexPosWS = {};
 
@@ -5221,8 +5225,8 @@ PVertexPosWS.getCode = function (output, input) {
 }
 
 
-
-
+require(CodePiece);
+declare(PMixer);
 
 var PMixer = {};
 
@@ -5250,8 +5254,8 @@ PMixer.getCode = function (output, tex1, tex2, alpha) {
 }
 
 
-
-
+require(CodePiece);
+declare(POperation);
 
 var POperation = {};
 
@@ -5282,8 +5286,8 @@ POperation.getCode = function (output, op, input1, input2) {
 }
 
 
-
-
+require(CodePiece);
+declare(PReflect);
 
 var PReflect = {};
 
@@ -5323,8 +5327,8 @@ PReflect.getCode = function (output, incident, normal) {
 
 
 
-
-
+require(CodePiece);
+declare(PSmooth);
 
 var PSmooth = {};
 
@@ -5363,8 +5367,8 @@ PSmooth.getCode = function (output ,lower, upper, x) {
 
 
 
-
-
+require(CodePiece);
+declare(PTextureSampleCube);
 
 var PTextureSampleCube = {};
 
@@ -5399,8 +5403,8 @@ PTextureSampleCube.getCode = function (output, input, texture_id) {
 
 
 
-
-
+require(CodePiece);
+declare(PTextureSample);
 
 var PTextureSample = {};
 
@@ -5433,9 +5437,9 @@ PTextureSample.getCode = function (output, input, texture_id) {
 
 
 
-
-
-
+require(ShaderCode);
+require(CodePiece);
+declare(PTime);
 
 var PTime = {};
 
