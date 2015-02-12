@@ -3,8 +3,8 @@
 // LGraph CLASS                                  
 //*********************************************************************************
 
-require(LiteGraph);
-declare(LGraph);
+
+
 
 /**
  * LGraph is the class that contain a full graph. We instantiate one and add nodes to it, and then we can run the execution loop.
@@ -899,9 +899,9 @@ LGraph.prototype.onNodeTrace = function(node, msg, color)
 // LGraphCanvas: LGraph renderer CLASS                                  
 //*********************************************************************************
 
-require(LiteGraph);
-require(LGraphNode);
-declare(LGraphCanvas);
+
+
+
 
 /**
  * The Global Scope. It contains all the registered node classes.
@@ -3089,8 +3089,8 @@ LGraphCanvas.prototype.processContextualMenu = function (node, event) {
  + onDropFile
  */
 
-require(LiteGraph);
-declare(LGraphNode);
+
+
 
 /**
  * Base Class for all the node type classes
@@ -4032,7 +4032,7 @@ LGraphNode.prototype.getInputCode = function(slot)
 // *************************************************************
 
 
-declare(LiteGraph);
+
 
 /**
  * The Global Scope. It contains all the registered node classes.
@@ -4635,7 +4635,7 @@ if( !window["requestAnimationFrame"] )
  * Created by vik on 26/01/2015.
  */
 
-declare(CodePiece);
+
 
 CodePiece.VERTEX = 1;
 CodePiece.FRAGMENT = 2;
@@ -4733,8 +4733,8 @@ LiteGraph.CodeLib = {};
  * Created by vik on 26/01/2015.
  */
 
-require(CodePiece);
-declare(ShaderCode);
+
+
 
 function ShaderCode(vertex, fragment, out_var)
 {
@@ -4881,8 +4881,8 @@ ShaderConstructor.createFragmentCode = function (code,normal,offset) {
 
 
 
-require(CodePiece);
-declare(P1ParamFunc);
+
+
 
 
 
@@ -4945,8 +4945,8 @@ LiteGraph.CodeLib["floor"] = new P1ParamFunc (undefined, "floor");
 LiteGraph.CodeLib["ceil"] = new P1ParamFunc (undefined, "ceil");
 LiteGraph.CodeLib["fract"] = new P1ParamFunc (undefined, "fract");
 
-require(CodePiece);
-declare(P2ParamFunc);
+
+
 
 
 // object representing glsl 2 param function
@@ -5005,8 +5005,8 @@ LiteGraph.CodeLib["max"] = new P2ParamFunc (undefined, "max");
 LiteGraph.CodeLib["step"] = new P2ParamFunc (undefined, "step");
 
 
-require(CodePiece);
-declare(P3ParamFunc);
+
+
 
 
 // object representing glsl 2 param function
@@ -5062,8 +5062,8 @@ LiteGraph.CodeLib["mix"] = new P3ParamFunc (undefined, "mix");
 
 
 
-require(CodePiece);
-declare(PConstant);
+
+
 
 
 
@@ -5104,8 +5104,8 @@ PConstant.prototype.getCode = function (output_var, value, scope) {
 }
 
 
-require(CodePiece);
-declare(PCameraToPixelWS);
+
+
 
 var PCameraToPixelWS = {};
 
@@ -5133,8 +5133,8 @@ PCameraToPixelWS.getCode = function (output, input) {
     return new ShaderCode(vertex, fragment, "camera_to_pixel_ws");
 }
 
-require(CodePiece);
-declare(PPixelNormalWS);
+
+
 
 
 var PPixelNormalWS = {};
@@ -5167,8 +5167,8 @@ PPixelNormalWS.getCode = function (output, input) {
 }
 
 
-require(CodePiece);
-declare(PUVs);
+
+
 
 var PUVs = {};
 
@@ -5197,8 +5197,8 @@ PUVs.getCode = function (output, input) {
 }
 
 
-require(CodePiece);
-declare(PVertexPosWS);
+
+
 
 var PVertexPosWS = {};
 
@@ -5225,8 +5225,8 @@ PVertexPosWS.getCode = function (output, input) {
 }
 
 
-require(CodePiece);
-declare(PMixer);
+
+
 
 var PMixer = {};
 
@@ -5254,8 +5254,8 @@ PMixer.getCode = function (output, tex1, tex2, alpha) {
 }
 
 
-require(CodePiece);
-declare(POperation);
+
+
 
 var POperation = {};
 
@@ -5286,8 +5286,8 @@ POperation.getCode = function (output, op, input1, input2) {
 }
 
 
-require(CodePiece);
-declare(PReflect);
+
+
 
 var PReflect = {};
 
@@ -5327,8 +5327,8 @@ PReflect.getCode = function (output, incident, normal) {
 
 
 
-require(CodePiece);
-declare(PSmooth);
+
+
 
 var PSmooth = {};
 
@@ -5367,8 +5367,8 @@ PSmooth.getCode = function (output ,lower, upper, x) {
 
 
 
-require(CodePiece);
-declare(PTextureSampleCube);
+
+
 
 var PTextureSampleCube = {};
 
@@ -5403,8 +5403,8 @@ PTextureSampleCube.getCode = function (output, input, texture_id) {
 
 
 
-require(CodePiece);
-declare(PTextureSample);
+
+
 
 var PTextureSample = {};
 
@@ -5437,9 +5437,9 @@ PTextureSample.getCode = function (output, input, texture_id) {
 
 
 
-require(ShaderCode);
-require(CodePiece);
-declare(PTime);
+
+
+
 
 var PTime = {};
 

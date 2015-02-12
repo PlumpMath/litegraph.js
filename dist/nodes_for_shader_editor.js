@@ -1,6 +1,6 @@
 
 
-declare(LGraph1ParamNode);
+
 
 function LGraph1ParamNode()
 {
@@ -79,7 +79,7 @@ LGraph1ParamNode.prototype.getCodeName = function()
 
 
 
-declare(LGraph2ParamNode);
+
 
 function LGraph2ParamNode()
 {
@@ -1017,8 +1017,8 @@ LGraphVecToComps.prototype.onExecute = function()
 LiteGraph.registerNodeType("coordinates/"+LGraphVecToComps.title , LGraphVecToComps);
 
 
-require(LGraph1ParamNode);
-declare(LGraphAbs);
+
+
 
 function LGraphAbs()
 {
@@ -1043,8 +1043,8 @@ LiteGraph.registerNodeType("math/"+LGraphAbs.title, LGraphAbs);
 
 
 
-require(LGraph1ParamNode);
-declare(LGraphCos);
+
+
 
 function LGraphCos()
 {
@@ -1069,8 +1069,8 @@ LiteGraph.registerNodeType("math/"+LGraphCos.title, LGraphCos);
 
 
 
-require(LGraph1ParamNode);
-declare(LGraphSin);
+
+
 
 function LGraphSin()
 {
