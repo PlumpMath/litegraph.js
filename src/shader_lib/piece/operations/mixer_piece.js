@@ -12,8 +12,7 @@ PMixer.getVertexCode = function (output, tex1, tex2, alpha) {
 }
 
 PMixer.getFragmentCode = function (output, tex1, tex2, alpha) {
-    return "vec4 "+output+" = mix("+tex1+","+tex2+","+alpha+"); \n\
-            ";
+    return "vec4 "+output+" = mix("+tex1+","+tex2+","+alpha+"); \n";
 }
 
 PMixer.getCode = function (output, tex1, tex2, alpha) {

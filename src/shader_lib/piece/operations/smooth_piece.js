@@ -19,8 +19,7 @@ PSmooth.getVertexCode = function(output ,lower, upper, x) {
 
 PSmooth.getFragmentCode = function(output ,lower, upper, x) {
 
-    var code = "float "+output+" = smoothstep("+lower+","+upper+", "+x+");\n\
-            ";
+    var code = "float "+output+" = smoothstep("+lower+","+upper+", "+x+");\n";
     return code;
 }
 

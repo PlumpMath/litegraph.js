@@ -12,8 +12,7 @@ function PConstant (type, name) {
 
 PConstant.prototype.getVertexCode = function (output_var, value, scope) {
     if(scope == CodePiece.VERTEX || scope == CodePiece.BOTH){
-        var code = this.type+" " +output_var+" = "+value+";\n\
-                ";
+        var code = this.type+" " +output_var+" = "+value+";\n";
         return code;
     }
     return "";
@@ -21,8 +20,7 @@ PConstant.prototype.getVertexCode = function (output_var, value, scope) {
 
 PConstant.prototype.getFragmentCode = function (output_var, value, scope) {
     if(scope == CodePiece.FRAGMENT || scope == CodePiece.BOTH){
-        var code = this.type+" " +output_var+" = "+value+";\n\
-                ";
+        var code = this.type+" " +output_var+" = "+value+";\n";
         return code;
     }
     return "";

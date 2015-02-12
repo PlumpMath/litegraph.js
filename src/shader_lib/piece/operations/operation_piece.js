@@ -13,8 +13,7 @@ POperation.getVertexCode = function (output, op, input1, input2) {
 }
 
 POperation.getFragmentCode = function (output, op, input1, input2) {
-    return "vec4 "+output+" = "+input1+" "+op+" "+input2+"; \n\
-            ";
+    return "vec4 "+output+" = "+input1+" "+op+" "+input2+"; \n";
 }
 
 

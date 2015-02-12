@@ -8,14 +8,12 @@ PPixelNormalWS.id = "pixel_normal_ws";
 PPixelNormalWS.includes = {u_model: 1, a_normal: 1, v_normal: 1};
 
 PPixelNormalWS.getVertexCode = function (output, input) {
-        var code = "v_normal = (u_model * vec4(a_normal, 0.0)).xyz;\n\
-                ";
+    var code = "v_normal = (u_model * vec4(a_normal, 0.0)).xyz;\n";
     return code;
 }
 
 PPixelNormalWS.getFragmentCode = function (output, input) {
-        var code = "vec3 pixel_normal_ws = normal;\n\
-            ";
+    var code = "vec3 pixel_normal_ws = normal;\n";
 
     return code;
 }

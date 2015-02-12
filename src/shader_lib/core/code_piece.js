@@ -29,12 +29,13 @@ CodePiece.prototype.getBody = function()
 
 CodePiece.prototype.setBody = function(s)
 {
-    var id = s.hashCode();
-    if(typeof(this.body_hash[id]) === 'undefined' ){
-        this.body_hash[id] = s;
-        this.body_ids.unshift(id);
+    if(s != ""){
+        var id = s.hashCode();
+        if(typeof(this.body_hash[id]) === 'undefined' ){
+            this.body_hash[id] = s;
+            this.body_ids.unshift(id);
+        }
     }
-
 };
 
 CodePiece.prototype.getHeader = function()

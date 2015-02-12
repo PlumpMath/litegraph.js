@@ -9,8 +9,7 @@ PUVs.includes = {a_coord:1, v_coord: 1};
 PUVs.already_included = false; // TODO add multiple times same line
 
 PUVs.getVertexCode = function (output, input) {
-    return "v_coord = a_coord;\n\
-            ";
+    return "v_coord = a_coord;\n";
 }
 
 PUVs.getFragmentCode = function (output, input) {

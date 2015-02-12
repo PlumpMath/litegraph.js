@@ -12,8 +12,7 @@ function P2ParamFunc (type, name) {
 
 P2ParamFunc.prototype.getVertexCode = function (out_var, a, b, scope, out_type) {
     if(scope == CodePiece.VERTEX || scope == CodePiece.BOTH){
-        var code = (out_type || this.type)+" " +out_var+" = "+this.name+"("+a+","+b+");\n\
-                ";
+        var code = (out_type || this.type)+" " +out_var+" = "+this.name+"("+a+","+b+");\n";
         return code;
     }
     return "";
@@ -21,8 +20,7 @@ P2ParamFunc.prototype.getVertexCode = function (out_var, a, b, scope, out_type) 
 
 P2ParamFunc.prototype.getFragmentCode = function (out_var, a, b, scope, out_type) {
     if(scope == CodePiece.FRAGMENT || scope == CodePiece.BOTH){
-        var code = (out_type || this.type)+" " +out_var+" = "+this.name+"("+a+","+b+");\n\
-                ";
+        var code = (out_type || this.type)+" " +out_var+" = "+this.name+"("+a+","+b+");\n";
         return code;
     }
     return "";

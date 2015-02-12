@@ -12,8 +12,7 @@ function P1ParamFunc (type, name) {
 
 P1ParamFunc.prototype.getVertexCode = function (out_var, a, scope, out_type) {
     if(scope == CodePiece.VERTEX || scope == CodePiece.BOTH){
-        var code = (out_type || this.type)+" " +out_var+" = "+this.name+"("+a+");\n\
-                ";
+        var code = (out_type || this.type)+" " +out_var+" = "+this.name+"("+a+");\n";
         return code;
     }
     return "";
@@ -21,8 +20,7 @@ P1ParamFunc.prototype.getVertexCode = function (out_var, a, scope, out_type) {
 
 P1ParamFunc.prototype.getFragmentCode = function (out_var, a, scope, out_type) {
     if(scope == CodePiece.FRAGMENT || scope == CodePiece.BOTH){
-        var code = (out_type || this.type)+" " +out_var+" = "+this.name+"("+a+");\n\
-                ";
+        var code = (out_type || this.type)+" " +out_var+" = "+this.name+"("+a+");\n";
         return code;
     }
     return "";

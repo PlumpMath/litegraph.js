@@ -19,8 +19,7 @@ PReflect.getVertexCode = function(output,incident, normal) {
 
 PReflect.getFragmentCode = function(output,incident, normal) {
 
-    var code = "vec3 "+output+"= reflect("+incident+","+normal+");\n\
-            ";
+    var code = "vec3 "+output+"= reflect("+incident+","+normal+");\n";
     return code;
 }
 

@@ -12,8 +12,7 @@ PTextureSample.getVertexCode = function (output, input, texture_id) {
 
 PTextureSample.getFragmentCode = function (output, input, texture_id) {
     input = input || "v_coord";
-    var code = "vec4 " + output + " = texture2D(" + texture_id + ", " + input + ");\n\
-                ";
+    var code = "vec4 " + output + " = texture2D(" + texture_id + ", " + input + ");\n";
     return code;
 }
 
@@ -24,7 +23,7 @@ PTextureSample.getCode = function (output, input, texture_id) {
 
     var fragment = new CodePiece();
     fragment.setBody(this.getFragmentCode(output, input, texture_id));
-    fragment.addHeaderLine("uniform sampler2D "+texture_id+";\n      ");
+    fragment.addHeaderLine("uniform sampler2D "+texture_id+";\n");
     fragment.setIncludes(PTextureSample.includes);
 
     return new ShaderCode(vertex, fragment, output);
