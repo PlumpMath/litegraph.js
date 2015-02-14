@@ -19,6 +19,8 @@ ShaderCode.prototype.getOutputVar = function()
 
 ShaderCode.prototype.merge = function (other_code)
 {
+    this.vertex.order = this.order;
+    this.fragment.order = this.order;
     this.vertex.merge(other_code.vertex);
     this.fragment.merge(other_code.fragment);
 
@@ -29,6 +31,7 @@ ShaderCode.prototype.clone = function ()
     var vertex = this.vertex.clone();
     var fragment = this.fragment.clone();
     var cloned = new ShaderCode(vertex,fragment,this.output_var);
+    cloned.order = this.order;
     return cloned;
 };
 

@@ -17,6 +17,7 @@ LGraphUVs.desc = "Texture coordinates";
 LGraphUVs.prototype.onExecute = function()
 {
     this.codes[0] = this.shader_piece.getCode(); // I need to check texture id
+    this.codes[0].order = this.order;
 }
 
 LGraphUVs.prototype.setFloatValue = function(old_value,new_value) {

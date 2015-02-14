@@ -7,7 +7,8 @@ function LGraphTexture()
     this.addOutput("B","number", {number:1});
     this.addOutput("A","number", {number:1});
     this.addInput("UVs","vec2");
-    this.properties = {name:"", url:""};
+    this.properties =  this.properties || {};
+    this.properties.name = "";
     //this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
     this.size = [170,165];
     this.shader_piece = PTextureSample; // hardcoded for testing
@@ -47,7 +48,7 @@ LGraphTexture.MODE_VALUES = {
 
 LGraphTexture.getTexture = function(name)
 {
-    var container =  gl.textures ||LGraphTexture.textures_container; // changedo order, otherwise it bugs with the multiple context
+    var container =  gl.textures || LGraphTexture.textures_container; // changedo order, otherwise it bugs with the multiple context
 
     if(!container)
         throw("Cannot load texture, container of textures not found");
@@ -267,6 +268,7 @@ LGraphTexture.prototype.processInputCode = function()
     if(input_code){
         var texture_name = "u_" + (this.properties.name ? this.properties.name : "default_name") + "_texture"; // TODO check if there is a texture
         var color_output = this.codes[1] = this.shader_piece.getCode("color_"+this.id, input_code.getOutputVar(), texture_name); // 1 it's the color output
+        color_output.order = this.order;
 
         color_output.merge(input_code);
         var r_chan = color_output.clone();
@@ -288,19 +290,6 @@ LGraphTexture.prototype.processInputCode = function()
 
 }
 
-// the code is the same than LiteGraph
-LGraphTexture.prototype.configure = function(obj)
-{
-    if(obj == null) return null;
-    var r = JSON.parse( JSON.stringify( obj ) );
-
-    for(var i in r)
-        if(i != "_drop_texture")
-            this[i] = r[i];
-    this.shader_piece = PTextureSample; // hardcoded for testing
-
-
-}
 
 LiteGraph.registerNodeType("texture/"+LGraphTexture.title, LGraphTexture );
 window.LGraphTexture = LGraphTexture;

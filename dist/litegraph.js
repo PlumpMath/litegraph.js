@@ -70,6 +70,8 @@ LGraph.prototype.clear = function()
     //this.graph = {};
     this.debug = true;
 
+    LiteGraph.graph_max_steps = 0;
+
     this.change();
 
     this.sendActionToCanvas("clear");
@@ -209,8 +211,71 @@ LGraph.prototype.runStep = function(num)
 
 LGraph.prototype.updateExecutionOrder = function()
 {
+    //this._nodes_in_order = this.computeExecutionBFS();
     this._nodes_in_order = this.computeExecutionOrder();
 }
+
+//This is more internal, it computes the order and returns it
+LGraph.prototype.computeExecutionBFS = function()
+{
+
+    var L = [];
+    var M = {};
+    var visited_links = {}; //to avoid repeating links
+    var visited_nodes = {}; //to avoid repeating links
+    var remaining_links = {}; //to a
+    var node_output = this.findNodesByType("core/Shader")[0]; // our main output
+    var nodes_ordered = [node_output];
+    for (var i = 0;  i < nodes_ordered.length; ++i) {
+        var n = nodes_ordered[i];
+        visited_nodes[n.id] = i; //visited in step i for last time
+        if(n.inputs){
+            for (var j = 0; j < n.inputs.length; j++) {
+                var input = n.inputs[j];
+                //not connected
+                if (input == null || input.link == null )
+                    continue;
+
+
+                var link_id = input.link;
+                var link = this.links[link_id];
+                if (!link) continue;
+
+                //already visited link (ignore it)
+//                if (visited_links[ link.id ])
+//                    continue;
+
+                var origin_node = this.getNodeById(link.origin_id);
+                if (origin_node == null) {
+                    visited_links[ link.id ] = true;
+                    continue;
+                }
+
+                visited_links[link.id] = true; //mark as visited
+                nodes_ordered.push(origin_node); //if no more links, then add to Starters array
+
+            }
+        }
+        if(i > LiteGraph.graph_max_steps){
+            throw("the graph has a loop");
+        }
+    }
+    var sortable = [];
+    for (var node_id in visited_nodes)
+        sortable.push([this.getNodeById( node_id ), visited_nodes[node_id]])
+    sortable.sort(function(a, b) {return a[1] - b[1]})
+
+    var nodes_ordered = [];
+    for(var i = sortable.length-1; i>=0; --i ){
+        var n = sortable[i][0];
+        n.order = i;
+        nodes_ordered.push(n);
+    }
+
+    return nodes_ordered;
+
+}
+
 
 //This is more internal, it computes the order and returns it
 LGraph.prototype.computeExecutionOrder = function()
@@ -293,7 +358,7 @@ LGraph.prototype.computeExecutionOrder = function()
 
     //save order number in the node
     for(var i in L)
-        L[i].order = i;
+        L[i].order = parseInt(i);
 
     return L;
 }
@@ -426,13 +491,16 @@ LGraph.prototype.remove = function(node)
         return; //cannot be removed
 
     //disconnect inputs
-    if(node.inputs)
+    if(node.inputs){
         for(var i = 0; i < node.inputs.length; i++)
         {
             var slot = node.inputs[i];
             if(slot.link != null)
                 node.disconnectInput(i);
         }
+        LiteGraph.graph_max_steps -= node.inputs.length;
+    }
+
 
     //disconnect outputs
     if(node.outputs)
@@ -444,6 +512,7 @@ LGraph.prototype.remove = function(node)
         }
 
     node.id = -1;
+
 
     //callback
     if(node.onRemoved)
@@ -1091,7 +1160,8 @@ LGraphCanvas.prototype.setCanvas = function (canvas) {
     }
 
     var ctx = this.ctx = canvas.getContext("2d");
-    if (ctx == null) {
+    if (ctx == null)
+    {
         console.warn("This canvas seems to be WebGL, enabling WebGL renderer");
         this.enableWebGL();
     }
@@ -1776,10 +1846,10 @@ LGraphCanvas.prototype.processKeyUp = function (e) {
 }
 
 LGraphCanvas.prototype.processMouseWheel = function (e) {
+
     if (!this.graph) return;
     if (!this.allow_dragcanvas) return;
-
-    var delta = (e.wheelDeltaY != null ? e.wheelDeltaY : e.detail * -60);
+    var delta = (e.wheelDelta != null ? e.wheelDelta : e.detail * -60);
 
     this.adjustMouseEvent(e);
 
@@ -1980,7 +2050,7 @@ LGraphCanvas.prototype.sendToBack = function (n) {
 
 LGraphCanvas.prototype.computeVisibleNodes = function () {
     var visible_nodes = [];
-    for (var i in this.graph._nodes) {
+    for (var i = this.graph._nodes.length -1; i >= 0; --i) {
         var n = this.graph._nodes[i];
 
         //skip rendering nodes in live mode
@@ -2080,7 +2150,7 @@ LGraphCanvas.prototype.drawFrontCanvas = function () {
         var visible_nodes = this.computeVisibleNodes();
         this.visible_nodes = visible_nodes;
 
-        for (var i in visible_nodes) {
+        for (var i = visible_nodes.length-1; i >= 0 ; --i) {
             var node = visible_nodes[i];
 
             //transform coords system
@@ -2583,11 +2653,11 @@ LGraphCanvas.prototype.drawConnections = function (ctx) {
     ctx.strokeStyle = "#AAA";
     ctx.globalAlpha = this.editor_alpha;
     //for every node
-    for (var n in this.graph._nodes) {
+    for (var n = this.graph._nodes.length-1; n >= 0 ; --n) {
         var node = this.graph._nodes[n];
         //for every input (we render just inputs because it is easier as every slot can only have one input)
         if (node.inputs && node.inputs.length)
-            for (var i in node.inputs) {
+            for (var i = node.inputs.length-1; i >= 0; --i) {
                 var input = node.inputs[i];
                 if (!input || input.link == null)
                     continue;
@@ -3120,7 +3190,7 @@ LGraphNode.prototype._ctor = function( title )
     this.connections = [];
 
     //local data
-    this.properties = {};
+    this.properties =  {};
     this.data = null; //persistent local data
     this.flags = {
         //skip_title_render: true,
@@ -4066,6 +4136,8 @@ var LiteGraph = {
     throw_errors: true,
     registered_node_types: {},
 
+    graph_max_steps:0,
+
     /**
      * Register a node class so it can be listed when the user wants to create a new one
      * @method registerNodeType
@@ -4129,6 +4201,9 @@ var LiteGraph = {
         if(!node.pos) node.pos = LiteGraph.DEFAULT_POSITION.concat();
         if(!node.shader_piece) node.shader_piece = null;
         if(!node.codes) node.codes = [];
+        if(node.extraproperties)
+            for(var i in node.extraproperties)
+                node.properties[i] = node.extraproperties[i];
         //extra options
         if(options)
         {
@@ -4136,7 +4211,21 @@ var LiteGraph = {
                 node[i] = options[i];
         }
 
+        if(node.inputs)
+            this.graph_max_steps += node.inputs.length;
         return node;
+    },
+
+
+    extendNodeTypeProperties: function(base_class, method_name, proto_method)
+    {
+        if(!base_class.prototype)
+            throw("Cannot register a simple object, it must be a class with a prototype");
+
+        //extend class
+        base_class.prototype.extraproperties = base_class.prototype.extraproperties || {};
+        base_class.prototype.extraproperties[method_name] = proto_method;
+
     },
 
     /**
@@ -4188,7 +4277,8 @@ var LiteGraph = {
                 categories[ this.registered_node_types[i].category ] = 1;
         var result = [];
         for(var i in categories)
-            result.push(i);
+            if(i != "core")
+                result.push(i);
         return result;
     },
 
@@ -4613,6 +4703,12 @@ LiteGraph.dispatchEvent = function(name, obj, element)
     }
 }
 
+// to improve a lot
+LiteGraph.removeExtension = function(name){
+    var no_ext_name = name.split('.')[0];
+    return no_ext_name;
+}
+
 
 /*
  LiteGraph.createNodetypeWrapper = function( class_object )
@@ -4660,14 +4756,22 @@ CodePiece.prototype.getBody = function()
     return this.body_hash;
 };
 
-CodePiece.prototype.setBody = function(s)
+CodePiece.prototype.setBody = function(s, other_order)
 {
     if(s != ""){
         var id = s.hashCode();
-        if(typeof(this.body_hash[id]) === 'undefined' ){
-            this.body_hash[id] = s;
+        if(this.body_hash[id] && this.body_hash[id].order > other_order){
+            this.body_hash[id].order = this.order;
+            var index = this.body_ids.indexOf(id);
+            this.body_ids.splice(index, 1);
             this.body_ids.unshift(id);
         }
+
+        if(typeof(this.body_hash[id]) === 'undefined' ){
+            this.body_hash[id] = {"str":s, order:this.order}; // we save the order
+            this.body_ids.unshift(id);
+        }
+
     }
 };
 
@@ -4707,7 +4811,7 @@ CodePiece.prototype.merge = function (input_code)
     var ids = input_code.getBodyIds();
     var body_hash = input_code.getBody();
     for (var i = ids.length-1; i >= 0; i--) {
-        this.setBody(body_hash[ids[i]]);
+        this.setBody(body_hash[ids[i]].str, input_code.order);
     }
 
     for (var inc in input_code.getHeader()) { this.header[inc] = input_code.header[inc]; }
@@ -4750,6 +4854,8 @@ ShaderCode.prototype.getOutputVar = function()
 
 ShaderCode.prototype.merge = function (other_code)
 {
+    this.vertex.order = this.order;
+    this.fragment.order = this.order;
     this.vertex.merge(other_code.vertex);
     this.fragment.merge(other_code.fragment);
 
@@ -4760,6 +4866,7 @@ ShaderCode.prototype.clone = function ()
     var vertex = this.vertex.clone();
     var fragment = this.fragment.clone();
     var cloned = new ShaderCode(vertex,fragment,this.output_var);
+    cloned.order = this.order;
     return cloned;
 };
 
@@ -4828,8 +4935,10 @@ ShaderConstructor.createVertexCode = function (code, normal,offset) {
         r += "      v_pos = (u_model * vec4(a_vertex,1.0)).xyz;\n";
     var ids = code.vertex.getBodyIds();
     var body_hash = code.vertex.getBody();
+    console.log(ids);
+    console.log(body_hash);
     for (var i = 0, l = ids.length; i < l; i++) {
-        r += "      "+body_hash[ids[i]];
+        r += "      "+body_hash[ids[i]].str;
     }
     r += "      gl_Position = u_mvp * vec4(a_vertex,1.0);\n"+
         "}\n";
@@ -4862,7 +4971,7 @@ ShaderConstructor.createFragmentCode = function (code,normal,offset) {
     var ids = normal.fragment.getBodyIds();
     var body_hash = normal.fragment.getBody();
     for (var i = 0, l = ids.length; i < l; i++) {
-        r += "      "+body_hash[ids[i]];
+        r += "      "+body_hash[ids[i]].str;
     }
     if(normal.getOutputVar())
         r += "      normal = "+normal.getOutputVar()+".xyz;\n";
@@ -4870,7 +4979,7 @@ ShaderConstructor.createFragmentCode = function (code,normal,offset) {
     ids = code.fragment.getBodyIds();
     body_hash = code.fragment.getBody();
     for (var i = 0, l = ids.length; i < l; i++) {
-        r += "      "+body_hash[ids[i]];
+        r += "      "+body_hash[ids[i]].str;
     }
 
     r += "      gl_FragColor = "+code.getOutputVar()+";\n"+

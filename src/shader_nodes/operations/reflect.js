@@ -26,6 +26,7 @@ LGraphReflect.prototype.processInputCode = function()
 
     // (output, incident, normal)
     var output_code = this.codes[0] = this.shader_piece.getCode("reflect_"+this.id, code_incident.getOutputVar(), code_normal.getOutputVar(), CodePiece.FRAGMENT, "vec3"); // output var must be fragment
+    output_code.order = this.order;
 
     output_code.merge(code_normal);
     output_code.merge(code_incident);

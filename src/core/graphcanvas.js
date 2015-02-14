@@ -194,7 +194,8 @@ LGraphCanvas.prototype.setCanvas = function (canvas) {
     }
 
     var ctx = this.ctx = canvas.getContext("2d");
-    if (ctx == null) {
+    if (ctx == null)
+    {
         console.warn("This canvas seems to be WebGL, enabling WebGL renderer");
         this.enableWebGL();
     }
@@ -879,10 +880,10 @@ LGraphCanvas.prototype.processKeyUp = function (e) {
 }
 
 LGraphCanvas.prototype.processMouseWheel = function (e) {
+
     if (!this.graph) return;
     if (!this.allow_dragcanvas) return;
-
-    var delta = (e.wheelDeltaY != null ? e.wheelDeltaY : e.detail * -60);
+    var delta = (e.wheelDelta != null ? e.wheelDelta : e.detail * -60);
 
     this.adjustMouseEvent(e);
 
@@ -1083,7 +1084,7 @@ LGraphCanvas.prototype.sendToBack = function (n) {
 
 LGraphCanvas.prototype.computeVisibleNodes = function () {
     var visible_nodes = [];
-    for (var i in this.graph._nodes) {
+    for (var i = this.graph._nodes.length -1; i >= 0; --i) {
         var n = this.graph._nodes[i];
 
         //skip rendering nodes in live mode
@@ -1183,7 +1184,7 @@ LGraphCanvas.prototype.drawFrontCanvas = function () {
         var visible_nodes = this.computeVisibleNodes();
         this.visible_nodes = visible_nodes;
 
-        for (var i in visible_nodes) {
+        for (var i = visible_nodes.length-1; i >= 0 ; --i) {
             var node = visible_nodes[i];
 
             //transform coords system
@@ -1686,11 +1687,11 @@ LGraphCanvas.prototype.drawConnections = function (ctx) {
     ctx.strokeStyle = "#AAA";
     ctx.globalAlpha = this.editor_alpha;
     //for every node
-    for (var n in this.graph._nodes) {
+    for (var n = this.graph._nodes.length-1; n >= 0 ; --n) {
         var node = this.graph._nodes[n];
         //for every input (we render just inputs because it is easier as every slot can only have one input)
         if (node.inputs && node.inputs.length)
-            for (var i in node.inputs) {
+            for (var i = node.inputs.length-1; i >= 0; --i) {
                 var input = node.inputs[i];
                 if (!input || input.link == null)
                     continue;

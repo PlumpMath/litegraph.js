@@ -61,7 +61,7 @@ LGraphNode.prototype._ctor = function( title )
     this.connections = [];
 
     //local data
-    this.properties = {};
+    this.properties =  {};
     this.data = null; //persistent local data
     this.flags = {
         //skip_title_render: true,

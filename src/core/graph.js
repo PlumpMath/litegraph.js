@@ -70,6 +70,8 @@ LGraph.prototype.clear = function()
     //this.graph = {};
     this.debug = true;
 
+    LiteGraph.graph_max_steps = 0;
+
     this.change();
 
     this.sendActionToCanvas("clear");
@@ -209,8 +211,71 @@ LGraph.prototype.runStep = function(num)
 
 LGraph.prototype.updateExecutionOrder = function()
 {
+    //this._nodes_in_order = this.computeExecutionBFS();
     this._nodes_in_order = this.computeExecutionOrder();
 }
+
+//This is more internal, it computes the order and returns it
+LGraph.prototype.computeExecutionBFS = function()
+{
+
+    var L = [];
+    var M = {};
+    var visited_links = {}; //to avoid repeating links
+    var visited_nodes = {}; //to avoid repeating links
+    var remaining_links = {}; //to a
+    var node_output = this.findNodesByType("core/Shader")[0]; // our main output
+    var nodes_ordered = [node_output];
+    for (var i = 0;  i < nodes_ordered.length; ++i) {
+        var n = nodes_ordered[i];
+        visited_nodes[n.id] = i; //visited in step i for last time
+        if(n.inputs){
+            for (var j = 0; j < n.inputs.length; j++) {
+                var input = n.inputs[j];
+                //not connected
+                if (input == null || input.link == null )
+                    continue;
+
+
+                var link_id = input.link;
+                var link = this.links[link_id];
+                if (!link) continue;
+
+                //already visited link (ignore it)
+//                if (visited_links[ link.id ])
+//                    continue;
+
+                var origin_node = this.getNodeById(link.origin_id);
+                if (origin_node == null) {
+                    visited_links[ link.id ] = true;
+                    continue;
+                }
+
+                visited_links[link.id] = true; //mark as visited
+                nodes_ordered.push(origin_node); //if no more links, then add to Starters array
+
+            }
+        }
+        if(i > LiteGraph.graph_max_steps){
+            throw("the graph has a loop");
+        }
+    }
+    var sortable = [];
+    for (var node_id in visited_nodes)
+        sortable.push([this.getNodeById( node_id ), visited_nodes[node_id]])
+    sortable.sort(function(a, b) {return a[1] - b[1]})
+
+    var nodes_ordered = [];
+    for(var i = sortable.length-1; i>=0; --i ){
+        var n = sortable[i][0];
+        n.order = i;
+        nodes_ordered.push(n);
+    }
+
+    return nodes_ordered;
+
+}
+
 
 //This is more internal, it computes the order and returns it
 LGraph.prototype.computeExecutionOrder = function()
@@ -293,7 +358,7 @@ LGraph.prototype.computeExecutionOrder = function()
 
     //save order number in the node
     for(var i in L)
-        L[i].order = i;
+        L[i].order = parseInt(i);
 
     return L;
 }
@@ -426,13 +491,16 @@ LGraph.prototype.remove = function(node)
         return; //cannot be removed
 
     //disconnect inputs
-    if(node.inputs)
+    if(node.inputs){
         for(var i = 0; i < node.inputs.length; i++)
         {
             var slot = node.inputs[i];
             if(slot.link != null)
                 node.disconnectInput(i);
         }
+        LiteGraph.graph_max_steps -= node.inputs.length;
+    }
+
 
     //disconnect outputs
     if(node.outputs)
@@ -444,6 +512,7 @@ LGraph.prototype.remove = function(node)
         }
 
     node.id = -1;
+
 
     //callback
     if(node.onRemoved)

@@ -385,6 +385,7 @@ LGraphCamToPixelWS.desc = "The vector from camera to pixel";
 LGraphCamToPixelWS.prototype.onExecute = function()
 {
     this.codes[0] = this.shader_piece.getCode(); // I need to check texture id
+    this.codes[0].order = this.order;
 }
 
 
@@ -406,6 +407,7 @@ LGraphPixelNormalWS.desc = "The normal in world space";
 LGraphPixelNormalWS.prototype.onExecute = function()
 {
     this.codes[0] = this.shader_piece.getCode(); // I need to check texture id
+    this.codes[0].order = this.order;
 }
 
 
@@ -431,6 +433,7 @@ LGraphUVs.desc = "Texture coordinates";
 LGraphUVs.prototype.onExecute = function()
 {
     this.codes[0] = this.shader_piece.getCode(); // I need to check texture id
+    this.codes[0].order = this.order;
 }
 
 LGraphUVs.prototype.setFloatValue = function(old_value,new_value) {
@@ -477,13 +480,13 @@ LiteGraph.registerNodeType("coordinates/"+LGraphVertexPosWS.title, LGraphVertexP
 
 function LGraphShader()
 {
-
+    this.uninstantiable = true;
     this.addInput("color","vec4", {vec4:1});
     this.addInput("normal","vec3", {vec3:1});
     this.addInput("world position offset","vec3", {vec3:1});
 
     //inputs: ["base color","metallic", "specular", "roughness", "emissive color", "opacity", "opacitiy mask", "normal", "world position offset", "world displacement", "tesselation multiplier", "subsurface color", "ambient occlusion", "refraction"],
-    this.size = [200,200];
+    this.size = [125,250];
     this.shader_piece = ShaderConstructor;
 }
 
@@ -589,7 +592,8 @@ function LGraphTexture()
     this.addOutput("B","number", {number:1});
     this.addOutput("A","number", {number:1});
     this.addInput("UVs","vec2");
-    this.properties = {name:"", url:""};
+    this.properties =  this.properties || {};
+    this.properties.name = "";
     //this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
     this.size = [170,165];
     this.shader_piece = PTextureSample; // hardcoded for testing
@@ -629,7 +633,7 @@ LGraphTexture.MODE_VALUES = {
 
 LGraphTexture.getTexture = function(name)
 {
-    var container =  gl.textures ||LGraphTexture.textures_container; // changedo order, otherwise it bugs with the multiple context
+    var container =  gl.textures || LGraphTexture.textures_container; // changedo order, otherwise it bugs with the multiple context
 
     if(!container)
         throw("Cannot load texture, container of textures not found");
@@ -849,6 +853,7 @@ LGraphTexture.prototype.processInputCode = function()
     if(input_code){
         var texture_name = "u_" + (this.properties.name ? this.properties.name : "default_name") + "_texture"; // TODO check if there is a texture
         var color_output = this.codes[1] = this.shader_piece.getCode("color_"+this.id, input_code.getOutputVar(), texture_name); // 1 it's the color output
+        color_output.order = this.order;
 
         color_output.merge(input_code);
         var r_chan = color_output.clone();
@@ -870,19 +875,6 @@ LGraphTexture.prototype.processInputCode = function()
 
 }
 
-// the code is the same than LiteGraph
-LGraphTexture.prototype.configure = function(obj)
-{
-    if(obj == null) return null;
-    var r = JSON.parse( JSON.stringify( obj ) );
-
-    for(var i in r)
-        if(i != "_drop_texture")
-            this[i] = r[i];
-    this.shader_piece = PTextureSample; // hardcoded for testing
-
-
-}
 
 LiteGraph.registerNodeType("texture/"+LGraphTexture.title, LGraphTexture );
 window.LGraphTexture = LGraphTexture;
@@ -893,11 +885,12 @@ function LGraphCubemap()
     this.addOutput("Cubemap","Cubemap");
     this.addOutput("Color","vec4", {vec3:1, vec4:1});
     this.addInput("vec3","vec3");
-    this.properties = {name:""};
+    this.properties =  this.properties || {};
+    this.properties.name = "";
     this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
 
     this.shader_piece = PTextureSampleCube; // hardcoded for testing
-    this.properties.name = "cube";
+    this.size = [170,165];
 }
 
 LGraphCubemap.title = "TextureSampleCube";
@@ -944,17 +937,19 @@ LGraphCubemap.prototype.onExecute = function()
 
 LGraphCubemap.prototype.onDrawBackground = function(ctx)
 {
-    if( this.flags.collapsed || this.size[1] <= 20)
-        return;
+    //    if( this.flags.collapsed || this.size[1] <= 20)
+//        return;
+//
+//    if(!ctx.webgl)
+//        return;
+//
+//    var cube_mesh = gl.meshes["cube"];
+//    if(!cube_mesh)
+//        cube_mesh = gl.meshes["cube"] = GL.Mesh.cube({size:1});
+//
+//    //var view = mat4.lookAt( mat4.create(), [0,0
 
-    if(!ctx.webgl)
-        return;
 
-    var cube_mesh = gl.meshes["cube"];
-    if(!cube_mesh)
-        cube_mesh = gl.meshes["cube"] = GL.Mesh.cube({size:1});
-
-    //var view = mat4.lookAt( mat4.create(), [0,0
 }
 
 
@@ -962,12 +957,12 @@ LGraphCubemap.prototype.processInputCode = function()
 {
 
     var input_code = this.getInputCode(0); // get input in link 0
-
-    var texture_name = "u_" + (this.properties.name ? this.properties.name : "default_name") + "_texture"; // TODO check if there is a texture
-    var color_code = this.codes[1] = this.shader_piece.getCode("color_"+this.id, input_code.getOutputVar(), texture_name);
-
-    color_code.merge(input_code);
-
+    if(input_code){
+        var texture_name = "u_" + (this.properties.name ? this.properties.name : "default_name") + "_texture"; // TODO check if there is a texture
+        var color_code = this.codes[1] = this.shader_piece.getCode("color_"+this.id, input_code.getOutputVar(), texture_name);
+        color_code.order = this.order;
+        color_code.merge(input_code);
+    }
 
 }
 
@@ -1127,6 +1122,7 @@ LGraphMixer.prototype.processInputCode = function()
     if(code_A && code_B){
         // (out_var, a, b, c, scope, out_type)
         output_code = this.codes[0] = this.shader_piece.getCode( "mixed_"+this.id, code_A.getOutputVar(), code_B.getOutputVar(),alpha, CodePiece.FRAGMENT, "vec4"); // output var must be fragment
+        output_code.order = this.order;
         // if the alpha is an input, otherwise hardcoded
         if(code_alpha){
             output_code.merge(code_alpha);
@@ -1211,6 +1207,7 @@ LGraphReflect.prototype.processInputCode = function()
 
     // (output, incident, normal)
     var output_code = this.codes[0] = this.shader_piece.getCode("reflect_"+this.id, code_incident.getOutputVar(), code_normal.getOutputVar(), CodePiece.FRAGMENT, "vec3"); // output var must be fragment
+    output_code.order = this.order;
 
     output_code.merge(code_normal);
     output_code.merge(code_incident);

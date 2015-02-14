@@ -38,6 +38,8 @@ var LiteGraph = {
     throw_errors: true,
     registered_node_types: {},
 
+    graph_max_steps:0,
+
     /**
      * Register a node class so it can be listed when the user wants to create a new one
      * @method registerNodeType
@@ -101,6 +103,9 @@ var LiteGraph = {
         if(!node.pos) node.pos = LiteGraph.DEFAULT_POSITION.concat();
         if(!node.shader_piece) node.shader_piece = null;
         if(!node.codes) node.codes = [];
+        if(node.extraproperties)
+            for(var i in node.extraproperties)
+                node.properties[i] = node.extraproperties[i];
         //extra options
         if(options)
         {
@@ -108,7 +113,21 @@ var LiteGraph = {
                 node[i] = options[i];
         }
 
+        if(node.inputs)
+            this.graph_max_steps += node.inputs.length;
         return node;
+    },
+
+
+    extendNodeTypeProperties: function(base_class, method_name, proto_method)
+    {
+        if(!base_class.prototype)
+            throw("Cannot register a simple object, it must be a class with a prototype");
+
+        //extend class
+        base_class.prototype.extraproperties = base_class.prototype.extraproperties || {};
+        base_class.prototype.extraproperties[method_name] = proto_method;
+
     },
 
     /**
@@ -160,7 +179,8 @@ var LiteGraph = {
                 categories[ this.registered_node_types[i].category ] = 1;
         var result = [];
         for(var i in categories)
-            result.push(i);
+            if(i != "core")
+                result.push(i);
         return result;
     },
 
@@ -583,6 +603,12 @@ LiteGraph.dispatchEvent = function(name, obj, element)
     } else {// for IE
         element.fireEvent("on" + event.eventType, event);
     }
+}
+
+// to improve a lot
+LiteGraph.removeExtension = function(name){
+    var no_ext_name = name.split('.')[0];
+    return no_ext_name;
 }
 
 

@@ -32,6 +32,7 @@ LGraphMixer.prototype.processInputCode = function()
     if(code_A && code_B){
         // (out_var, a, b, c, scope, out_type)
         output_code = this.codes[0] = this.shader_piece.getCode( "mixed_"+this.id, code_A.getOutputVar(), code_B.getOutputVar(),alpha, CodePiece.FRAGMENT, "vec4"); // output var must be fragment
+        output_code.order = this.order;
         // if the alpha is an input, otherwise hardcoded
         if(code_alpha){
             output_code.merge(code_alpha);

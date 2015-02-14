@@ -60,8 +60,10 @@ ShaderConstructor.createVertexCode = function (code, normal,offset) {
         r += "      v_pos = (u_model * vec4(a_vertex,1.0)).xyz;\n";
     var ids = code.vertex.getBodyIds();
     var body_hash = code.vertex.getBody();
+    console.log(ids);
+    console.log(body_hash);
     for (var i = 0, l = ids.length; i < l; i++) {
-        r += "      "+body_hash[ids[i]];
+        r += "      "+body_hash[ids[i]].str;
     }
     r += "      gl_Position = u_mvp * vec4(a_vertex,1.0);\n"+
         "}\n";
@@ -94,7 +96,7 @@ ShaderConstructor.createFragmentCode = function (code,normal,offset) {
     var ids = normal.fragment.getBodyIds();
     var body_hash = normal.fragment.getBody();
     for (var i = 0, l = ids.length; i < l; i++) {
-        r += "      "+body_hash[ids[i]];
+        r += "      "+body_hash[ids[i]].str;
     }
     if(normal.getOutputVar())
         r += "      normal = "+normal.getOutputVar()+".xyz;\n";
@@ -102,7 +104,7 @@ ShaderConstructor.createFragmentCode = function (code,normal,offset) {
     ids = code.fragment.getBodyIds();
     body_hash = code.fragment.getBody();
     for (var i = 0, l = ids.length; i < l; i++) {
-        r += "      "+body_hash[ids[i]];
+        r += "      "+body_hash[ids[i]].str;
     }
 
     r += "      gl_FragColor = "+code.getOutputVar()+";\n"+

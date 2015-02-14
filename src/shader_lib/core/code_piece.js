@@ -27,14 +27,22 @@ CodePiece.prototype.getBody = function()
     return this.body_hash;
 };
 
-CodePiece.prototype.setBody = function(s)
+CodePiece.prototype.setBody = function(s, other_order)
 {
     if(s != ""){
         var id = s.hashCode();
-        if(typeof(this.body_hash[id]) === 'undefined' ){
-            this.body_hash[id] = s;
+        if(this.body_hash[id] && this.body_hash[id].order > other_order){
+            this.body_hash[id].order = this.order;
+            var index = this.body_ids.indexOf(id);
+            this.body_ids.splice(index, 1);
             this.body_ids.unshift(id);
         }
+
+        if(typeof(this.body_hash[id]) === 'undefined' ){
+            this.body_hash[id] = {"str":s, order:this.order}; // we save the order
+            this.body_ids.unshift(id);
+        }
+
     }
 };
 
@@ -74,7 +82,7 @@ CodePiece.prototype.merge = function (input_code)
     var ids = input_code.getBodyIds();
     var body_hash = input_code.getBody();
     for (var i = ids.length-1; i >= 0; i--) {
-        this.setBody(body_hash[ids[i]]);
+        this.setBody(body_hash[ids[i]].str, input_code.order);
     }
 
     for (var inc in input_code.getHeader()) { this.header[inc] = input_code.header[inc]; }

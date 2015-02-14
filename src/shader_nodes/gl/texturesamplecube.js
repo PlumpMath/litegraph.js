@@ -4,11 +4,12 @@ function LGraphCubemap()
     this.addOutput("Cubemap","Cubemap");
     this.addOutput("Color","vec4", {vec3:1, vec4:1});
     this.addInput("vec3","vec3");
-    this.properties = {name:""};
+    this.properties =  this.properties || {};
+    this.properties.name = "";
     this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
 
     this.shader_piece = PTextureSampleCube; // hardcoded for testing
-    this.properties.name = "cube";
+    this.size = [170,165];
 }
 
 LGraphCubemap.title = "TextureSampleCube";
@@ -55,17 +56,19 @@ LGraphCubemap.prototype.onExecute = function()
 
 LGraphCubemap.prototype.onDrawBackground = function(ctx)
 {
-    if( this.flags.collapsed || this.size[1] <= 20)
-        return;
+    //    if( this.flags.collapsed || this.size[1] <= 20)
+//        return;
+//
+//    if(!ctx.webgl)
+//        return;
+//
+//    var cube_mesh = gl.meshes["cube"];
+//    if(!cube_mesh)
+//        cube_mesh = gl.meshes["cube"] = GL.Mesh.cube({size:1});
+//
+//    //var view = mat4.lookAt( mat4.create(), [0,0
 
-    if(!ctx.webgl)
-        return;
 
-    var cube_mesh = gl.meshes["cube"];
-    if(!cube_mesh)
-        cube_mesh = gl.meshes["cube"] = GL.Mesh.cube({size:1});
-
-    //var view = mat4.lookAt( mat4.create(), [0,0
 }
 
 
@@ -73,12 +76,12 @@ LGraphCubemap.prototype.processInputCode = function()
 {
 
     var input_code = this.getInputCode(0); // get input in link 0
-
-    var texture_name = "u_" + (this.properties.name ? this.properties.name : "default_name") + "_texture"; // TODO check if there is a texture
-    var color_code = this.codes[1] = this.shader_piece.getCode("color_"+this.id, input_code.getOutputVar(), texture_name);
-
-    color_code.merge(input_code);
-
+    if(input_code){
+        var texture_name = "u_" + (this.properties.name ? this.properties.name : "default_name") + "_texture"; // TODO check if there is a texture
+        var color_code = this.codes[1] = this.shader_piece.getCode("color_"+this.id, input_code.getOutputVar(), texture_name);
+        color_code.order = this.order;
+        color_code.merge(input_code);
+    }
 
 }
 
