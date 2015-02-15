@@ -813,7 +813,6 @@ LGraphCanvas.prototype.processMouseUp = function (e) {
      */
 
     this.graph.change();
-    this.onUpdate();
     e.stopPropagation();
     e.preventDefault();
     return false;
@@ -907,9 +906,7 @@ LGraphCanvas.prototype.processMouseWheel = function (e) {
     return false; // prevent default
 }
 
-LGraphCanvas.prototype.onUpdate = function () {
 
-}
 
 LGraphCanvas.prototype.onNodeSelected = function (n) {
 

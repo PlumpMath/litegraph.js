@@ -286,6 +286,13 @@ LGraphTexture.prototype.processInputCode = function()
 //        this.codes[3]
 //        this.codes[4]
 //        this.codes[5]
+    } else {
+        this.codes[0] = LiteGraph.EMPTY_CODE;
+        this.codes[1] = LiteGraph.EMPTY_CODE;
+        this.codes[2] = LiteGraph.EMPTY_CODE;
+        this.codes[3] = LiteGraph.EMPTY_CODE;
+        this.codes[4] = LiteGraph.EMPTY_CODE;
+        this.codes[5] = LiteGraph.EMPTY_CODE;
     }
 
 }

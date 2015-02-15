@@ -13,20 +13,13 @@ ShaderConstructor.createShader = function (color_code, normal_code, world_offset
         console.log("fragment:");
         console.log(fragment_code);
     }
-    try {
-        var shader = {};
-        shader.vertex_code = vertex_code;
-        shader.fragment_code = fragment_code;
-        return shader;
-    }
-    catch(err) {
-        console.log("vertex:");
-        console.log(vertex_code);
-        console.log("fragment:");
-        console.log(fragment_code);
-        console.error(err);
-    }
-    return null;
+
+    var shader = {};
+    shader.vertex_code = vertex_code;
+    shader.fragment_code = fragment_code;
+    return shader;
+
+
 
 }
 
@@ -60,8 +53,6 @@ ShaderConstructor.createVertexCode = function (code, normal,offset) {
         r += "      v_pos = (u_model * vec4(a_vertex,1.0)).xyz;\n";
     var ids = code.vertex.getBodyIds();
     var body_hash = code.vertex.getBody();
-    console.log(ids);
-    console.log(body_hash);
     for (var i = 0, l = ids.length; i < l; i++) {
         r += "      "+body_hash[ids[i]].str;
     }

@@ -81,6 +81,9 @@ LGraphCubemap.prototype.processInputCode = function()
         var color_code = this.codes[1] = this.shader_piece.getCode("color_"+this.id, input_code.getOutputVar(), texture_name);
         color_code.order = this.order;
         color_code.merge(input_code);
+    } else {
+        this.codes[0] = LiteGraph.EMPTY_CODE;
+        this.codes[1] = LiteGraph.EMPTY_CODE;
     }
 
 }

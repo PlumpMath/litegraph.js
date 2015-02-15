@@ -39,6 +39,8 @@ LGraphMixer.prototype.processInputCode = function()
         }
         output_code.merge(code_A);
         output_code.merge(code_B);
+    } else {
+        this.codes[0] = LiteGraph.EMPTY_CODE;
     }
 
 }

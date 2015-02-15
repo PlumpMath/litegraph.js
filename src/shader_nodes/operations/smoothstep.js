@@ -31,12 +31,17 @@ LGraphSmooth.prototype.processInputCode = function()
     var x_var = x_code ? x_code.getOutputVar() :  "0.0";
 
     var output_code = this.codes[0] = this.shader_piece.getCode( "smoothed_"+this.id, lower, upper, x_var); // output var scope unknown
-    if(x_code)
+    if(x_code){
         output_code.merge(x_code);
-    if(lower_code)
-        output_code.merge(lower_code);
-    if(upper_code)
-        output_code.merge(upper_code);
+        if(lower_code)
+            output_code.merge(lower_code);
+        if(upper_code)
+            output_code.merge(upper_code);
+    } else {
+        output_code = LiteGraph.EMPTY_CODE;
+    }
+
+
 }
 
 LGraphSmooth.prototype.onDrawBackground = function(ctx)
