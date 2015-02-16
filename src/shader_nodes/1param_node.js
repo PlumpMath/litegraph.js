@@ -4,8 +4,8 @@ declare(LGraph1ParamNode);
 
 function LGraph1ParamNode()
 {
-    this.addOutput("result","vec3", this.getOutputTypes() );
-    this.addInput("A","vec3", this.getInputTypes());
+    this.addOutput("result","notype", this.getOutputTypes(), this.getOutputExtraInfo() );
+    this.addInput("A","notype", this.getInputTypes(), this.getInputExtraInfo());
 
 
     this.shader_piece = LiteGraph.CodeLib[this.getCodeName()]; // hardcoded for testing
@@ -73,6 +73,15 @@ LGraph1ParamNode.prototype.getCodeName = function()
     return this.code_name;
 }
 
+LGraph1ParamNode.prototype.getInputExtraInfo = function()
+{
+    return this.in_extra_info;
+}
+
+LGraph1ParamNode.prototype.getOutputExtraInfo = function()
+{
+    return this.out_extra_info;
+}
 
 //LiteGraph.registerNodeType("texture/reflect", LGraphReflect);
 

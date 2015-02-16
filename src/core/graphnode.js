@@ -71,6 +71,9 @@ LGraphNode.prototype._ctor = function( title )
 
     this.shader_piece = null;
     this.codes = []; //output codes in each output link channel
+
+
+    this.T_type = {}; // template type
 }
 
 /**
@@ -413,6 +416,7 @@ LGraphNode.prototype.removeOutput = function(slot)
         this.onOutputRemoved(slot);
 }
 
+
 /**
  * add a new input slot to use in this node
  * @method addInput
@@ -471,6 +475,7 @@ LGraphNode.prototype.removeInput = function(slot)
     this.size = this.computeSize();
     if(this.onInputRemoved)
         this.onInputRemoved(slot);
+
 }
 
 /**
@@ -632,7 +637,7 @@ LGraphNode.prototype.connect = function(slot, node, target_slot)
     else if( !output.type ||  //generic output
         !node.inputs[target_slot].type || //generic input
         output.type == node.inputs[target_slot].type || //same type
-        LiteGraph.compareNodeTypes(output,node.inputs[target_slot]))
+        LiteGraph.compareNodeTypes(output,node.inputs[target_slot])) //compare with multiple types
     {
         //info: link structure => [ 0:link_id, 1:start_node_id, 2:start_slot, 3:end_node_id, 4:end_slot ]
         //var link = [ this.graph.last_link_id++, this.id, slot, node.id, target_slot ];
@@ -644,6 +649,11 @@ LGraphNode.prototype.connect = function(slot, node, target_slot)
         output.links.push( link.id );
         node.inputs[target_slot].link = link.id;
 
+        if(node.infereTypes && node.inputs[target_slot].use_t){ // use Template type
+            node.infereTypes( output, node.inputs[target_slot], this);
+        }
+
+        console.log(node);
         this.setDirtyCanvas(false,true);
         this.graph.onConnectionChange();
     }
@@ -712,6 +722,7 @@ LGraphNode.prototype.disconnectOutput = function(slot, target_node)
         output.links = null;
     }
 
+    this.resetTypes();
     this.setDirtyCanvas(false,true);
     this.graph.onConnectionChange();
     return true;
@@ -962,6 +973,56 @@ LGraphNode.prototype.getInputCode = function(slot)
     return null;
 
 }
+
+LGraphNode.prototype.infereTypes = function( output, input)
+{
+    for(var i in this.inputs){
+        var inp = this.inputs[i];
+        if(this.inputs[i].use_t){
+            inp.types = output.types;
+            inp.label = Object.keys(output.types)[0]; // as it can have more than one property atm we extract the first one
+        }
+    }
+
+    for(var i in this.outputs){
+        var out = this.outputs[i];
+        if(this.outputs[i].use_t){
+            out.types = output.types;
+            out.label = Object.keys(output.types)[0]; // as it can have more than one property atm we extract the first one
+        }
+    }
+}
+
+LGraphNode.prototype.resetTypes = function( )
+{
+
+    var inputs_connected = false;
+    for(var i in this.inputs){
+        inputs_connected = inputs_connected || this.inputs[i].link != null ;
+        if(inputs_connected)
+            return;
+    }
+
+
+
+    for(var i in this.inputs){
+        var inp = this.inputs[i];
+        if(this.inputs[i].use_t){
+            inp.types = {};
+            inp.label = null; // as it can have more than one property atm we extract the first one
+        }
+    }
+
+    for(var i in this.outputs){
+        var out = this.outputs[i];
+        if(this.outputs[i].use_t){
+            out.types = {};
+            out.label = null; // as it can have more than one property atm we extract the first one
+        }
+    }
+}
+
+
 
 
 

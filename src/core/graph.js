@@ -223,6 +223,8 @@ LGraph.prototype.updateExecutionOrder = function()
 {
     //this._nodes_in_order = this.computeExecutionBFS();
     this._nodes_in_order = this.computeExecutionOrder();
+
+    LiteGraph.dispatchEvent("contentChange", null, null);
 }
 
 //This is more internal, it computes the order and returns it

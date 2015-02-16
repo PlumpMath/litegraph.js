@@ -6,7 +6,7 @@ function LGraphTexture()
     this.addOutput("G","number", {number:1});
     this.addOutput("B","number", {number:1});
     this.addOutput("A","number", {number:1});
-    this.addInput("UVs","vec2");
+    this.addInput("UVs","vec2", {vec2:1});
     this.properties =  this.properties || {};
     this.properties.name = "";
     //this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
@@ -116,9 +116,8 @@ LGraphTexture.getNoiseTexture = function()
     return texture;
 }
 
-LGraphTexture.prototype.onDropFile = function(data, filename, file)
-{
-    console.log([data, filename, file]);
+LGraphTexture.loadTextureFromFile = function(data, filename, file){
+
     if(!data)
     {
         this._drop_texture = null;
@@ -127,7 +126,7 @@ LGraphTexture.prototype.onDropFile = function(data, filename, file)
     else
     {
         var texture = null;
-        var no_ext_name = filename.split('.')[0];
+        var no_ext_name = LiteGraph.removeExtension(filename);
         if( typeof(data) == "string" )
             gl.textures[no_ext_name] = texture = GL.Texture.fromURL( data );
         else if( filename.toLowerCase().indexOf(".dds") != -1 )
@@ -138,9 +137,20 @@ LGraphTexture.prototype.onDropFile = function(data, filename, file)
             var url = URL.createObjectURL(blob);
             texture = GL.Texture.fromURL( url );
         }
+        texture.name = no_ext_name;;
+        return texture;
+    }
 
-        this._drop_texture = texture;
-        this.properties.name = no_ext_name;
+}
+
+LGraphTexture.prototype.onDropFile = function(data, filename, file)
+{
+    var tex = LGraphTexture.loadTextureFromFile(data, filename, file);
+    if(tex){
+        this._drop_texture = tex;
+        this._last_tex = this._drop_texture;
+        this.properties.name = tex.name;
+        this._drop_texture.current_ctx = LiteGraph.current_ctx;
     }
 }
 
@@ -161,11 +171,16 @@ LGraphTexture.prototype.onExecute = function()
 {
     this.processInputCode();
 
-    if(this._drop_texture)
-    {
-        this.setOutputData(0, this._drop_texture);
-        return;
+    if(this._drop_texture ){
+
+        if(this._drop_texture.current_ctx != LiteGraph.current_ctx){
+            this._drop_texture = LGraphTexture.getTexture( this.properties.name );
+        }
+            this.setOutputData(0, this._drop_texture);
+            return;
     }
+
+
 
     if(!this.properties.name)
         return;
@@ -192,7 +207,7 @@ LGraphTexture.prototype.onDrawBackground = function(ctx)
 
 
     //Different texture? then get it from the GPU
-    if(this._last_preview_tex != this._last_tex)
+    //if(this._last_preview_tex != this._last_tex)
     {
         if(ctx.webgl)
         {

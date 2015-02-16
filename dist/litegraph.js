@@ -223,6 +223,8 @@ LGraph.prototype.updateExecutionOrder = function()
 {
     //this._nodes_in_order = this.computeExecutionBFS();
     this._nodes_in_order = this.computeExecutionOrder();
+
+    LiteGraph.dispatchEvent("contentChange", null, null);
 }
 
 //This is more internal, it computes the order and returns it
@@ -1070,6 +1072,8 @@ LGraphCanvas.prototype.clear = function () {
 
     this.connections_width = 4;
 
+    //this.is_rendering = false;
+
     if (this.onClear) this.onClear();
     //this.UIinit();
 }
@@ -1259,7 +1263,9 @@ LGraphCanvas.prototype.setCanvas = function (canvas) {
             //console.log(event.target);
             var data = event.target.result;
             node.onDropFile(data, filename, file);
-            that.onUpdate();
+            if(that.onDropFile)
+                that.onDropFile(data, filename, file);
+            LiteGraph.dispatchEvent("contentChange", null, null);
         };
 
         //read data
@@ -1394,8 +1400,12 @@ LGraphCanvas.prototype.startRendering = function () {
     renderFrame.call(this);
 
     function renderFrame() {
-        if (!this.pause_rendering)
+        if (!this.pause_rendering){
+//            if(this.ctx && this.ctx.webgl)
+//                this.ctx.makeCurrent();
             this.draw();
+        }
+
 
         var window = this.getCanvasWindow();
         if (this.is_rendering)
@@ -1568,7 +1578,7 @@ LGraphCanvas.prototype.processMouseDown = function (e) {
      */
 
     this.graph.change();
-    this.onUpdate(); // callback
+
 
     //this is to ensure to defocus(blur) if a text input element is on focus
     if (!ref_window.document.activeElement || (ref_window.document.activeElement.nodeName.toLowerCase() != "input" && ref_window.document.activeElement.nodeName.toLowerCase() != "textarea"))
@@ -2798,6 +2808,12 @@ LGraphCanvas.prototype.resize = function (width, height) {
     if (this.canvas.width == width && this.canvas.height == height)
         return;
 
+    if(this.ctx && this.ctx.webgl){
+        this.ctx.makeCurrent();
+        gl.canvas.width = width;
+        gl.canvas.height = height;
+        gl.viewport(0, 0, width, height);
+    }
     this.canvas.width = width;
     this.canvas.height = height;
     this.bgcanvas.width = this.canvas.width;
@@ -3211,6 +3227,9 @@ LGraphNode.prototype._ctor = function( title )
 
     this.shader_piece = null;
     this.codes = []; //output codes in each output link channel
+
+
+    this.T_type = {}; // template type
 }
 
 /**
@@ -3553,6 +3572,7 @@ LGraphNode.prototype.removeOutput = function(slot)
         this.onOutputRemoved(slot);
 }
 
+
 /**
  * add a new input slot to use in this node
  * @method addInput
@@ -3611,6 +3631,7 @@ LGraphNode.prototype.removeInput = function(slot)
     this.size = this.computeSize();
     if(this.onInputRemoved)
         this.onInputRemoved(slot);
+
 }
 
 /**
@@ -3772,7 +3793,7 @@ LGraphNode.prototype.connect = function(slot, node, target_slot)
     else if( !output.type ||  //generic output
         !node.inputs[target_slot].type || //generic input
         output.type == node.inputs[target_slot].type || //same type
-        LiteGraph.compareNodeTypes(output,node.inputs[target_slot]))
+        LiteGraph.compareNodeTypes(output,node.inputs[target_slot])) //compare with multiple types
     {
         //info: link structure => [ 0:link_id, 1:start_node_id, 2:start_slot, 3:end_node_id, 4:end_slot ]
         //var link = [ this.graph.last_link_id++, this.id, slot, node.id, target_slot ];
@@ -3784,6 +3805,11 @@ LGraphNode.prototype.connect = function(slot, node, target_slot)
         output.links.push( link.id );
         node.inputs[target_slot].link = link.id;
 
+        if(node.infereTypes && node.inputs[target_slot].use_t){ // use Template type
+            node.infereTypes( output, node.inputs[target_slot], this);
+        }
+
+        console.log(node);
         this.setDirtyCanvas(false,true);
         this.graph.onConnectionChange();
     }
@@ -3852,6 +3878,7 @@ LGraphNode.prototype.disconnectOutput = function(slot, target_node)
         output.links = null;
     }
 
+    this.resetTypes();
     this.setDirtyCanvas(false,true);
     this.graph.onConnectionChange();
     return true;
@@ -4103,6 +4130,56 @@ LGraphNode.prototype.getInputCode = function(slot)
 
 }
 
+LGraphNode.prototype.infereTypes = function( output, input)
+{
+    for(var i in this.inputs){
+        var inp = this.inputs[i];
+        if(this.inputs[i].use_t){
+            inp.types = output.types;
+            inp.label = Object.keys(output.types)[0]; // as it can have more than one property atm we extract the first one
+        }
+    }
+
+    for(var i in this.outputs){
+        var out = this.outputs[i];
+        if(this.outputs[i].use_t){
+            out.types = output.types;
+            out.label = Object.keys(output.types)[0]; // as it can have more than one property atm we extract the first one
+        }
+    }
+}
+
+LGraphNode.prototype.resetTypes = function( )
+{
+
+    var inputs_connected = false;
+    for(var i in this.inputs){
+        inputs_connected = inputs_connected || this.inputs[i].link != null ;
+        if(inputs_connected)
+            return;
+    }
+
+
+
+    for(var i in this.inputs){
+        var inp = this.inputs[i];
+        if(this.inputs[i].use_t){
+            inp.types = {};
+            inp.label = null; // as it can have more than one property atm we extract the first one
+        }
+    }
+
+    for(var i in this.outputs){
+        var out = this.outputs[i];
+        if(this.outputs[i].use_t){
+            out.types = {};
+            out.label = null; // as it can have more than one property atm we extract the first one
+        }
+    }
+}
+
+
+
 
 
 
@@ -4148,6 +4225,10 @@ var LiteGraph = {
     registered_node_types: {},
 
     graph_max_steps:0,
+
+    CANVAS_WEBGL: 1,
+    CANVAS_2D: 2,
+    current_ctx: 0,
 
     /**
      * Register a node class so it can be listed when the user wants to create a new one
@@ -4681,10 +4762,12 @@ LiteGraph.extendClass = function ( target, origin )
 
 LiteGraph.compareNodeTypes = function(output,input)
 {
-    if(!output.types ||!input.types )
+    var out_types = Object.keys(output.types).length ? output.types : output.types_list;
+    var in_types = Object.keys(input.types).length ? input.types : input.types_list;
+    if(!out_types || !in_types )
         return false;
-    for (key in output.types) {
-        if (input.types.hasOwnProperty(key)) {
+    for (key in out_types) {
+        if (in_types.hasOwnProperty(key)) {
             return true;
         }
     }
@@ -4893,12 +4976,6 @@ ShaderConstructor.createShader = function (color_code, normal_code, world_offset
 
     var vertex_code = this.createVertexCode(color_code, normal_code, world_offset_code);
     var fragment_code = this.createFragmentCode(color_code, normal_code, world_offset_code);
-    if(LiteGraph.debug){
-        console.log("vertex:");
-        console.log(vertex_code);
-        console.log("fragment:");
-        console.log(fragment_code);
-    }
 
     var shader = {};
     shader.vertex_code = vertex_code;
@@ -4911,7 +4988,10 @@ ShaderConstructor.createShader = function (color_code, normal_code, world_offset
 
 ShaderConstructor.createVertexCode = function (code, normal,offset) {
 
-    var includes = code.vertex.includes;
+    var includes = {};
+    for (var line in code.vertex.includes) { includes[line] = 1; }
+    for (var line in normal.vertex.includes) { includes[line] = 1; }
+    for (var line in offset.vertex.includes) { includes[line] = 1; }
     // header
     var r = "precision highp float;\n"+
         "attribute vec3 a_vertex;\n"+
@@ -4919,7 +4999,7 @@ ShaderConstructor.createVertexCode = function (code, normal,offset) {
         "attribute vec2 a_coord;\n";
     if (includes["v_coord"])
         r += "varying vec2 v_coord;\n";
-    if (includes["v_normal"])
+    if (includes["v_normal"] || normal != LiteGraph.EMPTY_CODE)
         r += "varying vec3 v_normal;\n";
     if (includes["v_pos"])
         r += "varying vec3 v_pos;\n";
@@ -4949,12 +5029,16 @@ ShaderConstructor.createVertexCode = function (code, normal,offset) {
 }
 
 ShaderConstructor.createFragmentCode = function (code,normal,offset) {
-    var includes = code.fragment.includes;
+
+    var includes = {};
+    for (var line in code.fragment.includes) { includes[line] = 1; }
+    for (var line in normal.fragment.includes) { includes[line] = 1; }
+    for (var line in offset.fragment.includes) { includes[line] = 1; }
     // header
     var r = "precision highp float;\n";
     if (includes["v_coord"])
         r += "varying vec2 v_coord;\n";
-    if (includes["v_normal"])
+    if (includes["v_normal"] || normal != LiteGraph.EMPTY_CODE )
         r += "varying vec3 v_normal;\n";
     if (includes["v_pos"])
         r += "varying vec3 v_pos;\n";
@@ -4962,6 +5046,7 @@ ShaderConstructor.createFragmentCode = function (code,normal,offset) {
         r += "uniform float u_time;\n";
     if (includes["u_eye"])
         r += "uniform vec3 u_eye;\n";
+    r += "uniform vec4 u_color;\n";
     for(var k in code.fragment.getHeader())
         r += k;
     for(var k in normal.fragment.getHeader())
@@ -4984,7 +5069,7 @@ ShaderConstructor.createFragmentCode = function (code,normal,offset) {
         r += "      "+body_hash[ids[i]].str;
     }
 
-    r += "      gl_FragColor = "+code.getOutputVar()+";\n"+
+    r += "       gl_FragColor = "+code.getOutputVar()+";\n"+
         "}";
 
     return r;

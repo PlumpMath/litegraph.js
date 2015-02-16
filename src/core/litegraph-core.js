@@ -40,6 +40,10 @@ var LiteGraph = {
 
     graph_max_steps:0,
 
+    CANVAS_WEBGL: 1,
+    CANVAS_2D: 2,
+    current_ctx: 0,
+
     /**
      * Register a node class so it can be listed when the user wants to create a new one
      * @method registerNodeType
@@ -572,10 +576,12 @@ LiteGraph.extendClass = function ( target, origin )
 
 LiteGraph.compareNodeTypes = function(output,input)
 {
-    if(!output.types ||!input.types )
+    var out_types = Object.keys(output.types).length ? output.types : output.types_list;
+    var in_types = Object.keys(input.types).length ? input.types : input.types_list;
+    if(!out_types || !in_types )
         return false;
-    for (key in output.types) {
-        if (input.types.hasOwnProperty(key)) {
+    for (key in out_types) {
+        if (in_types.hasOwnProperty(key)) {
             return true;
         }
     }

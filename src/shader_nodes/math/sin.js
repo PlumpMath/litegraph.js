@@ -5,8 +5,10 @@ declare(LGraphSin);
 function LGraphSin()
 {
     this.code_name = "sin";
-    this.output_types = {number:1, vec3:1, vec4:1, vec2:1};
-    this.intput_types = {number:1, vec3:1, vec4:1, vec2:1};
+    this.output_types = { };
+    this.out_extra_info = {types_list: {number:1, vec3:1, vec4:1, vec2:1},   use_t:1};
+    this.intput_types = { };
+    this.in_extra_info = {types_list: {number:1, vec3:1, vec4:1, vec2:1},   use_t:1};
     this.output_type = "float";
     LGraph1ParamNode.call( this);
     console.log(this);
