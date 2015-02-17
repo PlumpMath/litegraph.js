@@ -365,6 +365,7 @@ LGraphNode.prototype.triggerOutput = function(slot,param)
  */
 LGraphNode.prototype.addOutput = function(name,type,types, extra_info)
 {
+    types = types ||{};
     var o = {name:name,type:type,types:types,links:null};
     if(extra_info)
         for(var i in extra_info)
@@ -426,6 +427,7 @@ LGraphNode.prototype.removeOutput = function(slot)
  */
 LGraphNode.prototype.addInput = function(name,type,types,extra_info)
 {
+    types = types ||{};
     var o = {name:name,type:type,link:null, types:types};
     if(extra_info)
         for(var i in extra_info)
@@ -758,6 +760,8 @@ LGraphNode.prototype.disconnectInput = function(slot)
     if(!input) return false;
     var link_id = this.inputs[slot].link;
     this.inputs[slot].link = null;
+    this.resetTypes();
+
 
     //remove other side
     var link_info = this.graph.links[ link_id ];
