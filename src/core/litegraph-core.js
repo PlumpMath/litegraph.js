@@ -4,8 +4,6 @@
 // *************************************************************
 
 
-declare(LiteGraph);
-
 /**
  * The Global Scope. It contains all the registered node classes.
  *

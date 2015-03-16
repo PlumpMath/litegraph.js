@@ -29,6 +29,7 @@ LGraphConstVec2.prototype.setValue = function(v1,v2)
 LGraphConstVec2.prototype.onExecute = function()
 {
     this.codes[0] = this.shader_piece.getCode("vec2_"+this.id, this.valueToString(), CodePiece.FRAGMENT); // need to check scope
+    this.codes[0].order = this.order;
 }
 
 LGraphConstVec2.prototype.onDrawBackground = function(ctx)

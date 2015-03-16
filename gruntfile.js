@@ -14,6 +14,23 @@ module.exports = function (grunt) {
                 }
             }
         },
+        neuter: {
+            nodes: {
+                options:{
+                    template: "{%= src %}",
+                    basePath: 'src/shader_nodes/'
+                },
+                src: [ 'src/shader_nodes/**/*.js'],
+                dest: 'dist/nodes_for_shader_editor.js'
+            },
+            litegraph: {
+                options:{
+                    template: "{%= src %}"
+                },
+                src: [ 'src/core/*.js', 'src/shader_lib/**/*.js'],
+                dest: 'dist/<%= pkg.name %>.js'
+            }
+        },
         replace: {
             remove_declares: {
                 src: ['dist/<%= pkg.name %>.js', 'dist/nodes_for_shader_editor.js'],
@@ -74,10 +91,12 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-qunit');
     grunt.loadNpmTasks('grunt-concat-in-order');
     grunt.loadNpmTasks('grunt-text-replace');
-
+    grunt.loadNpmTasks('grunt-neuter');
 
 
     grunt.registerTask('default', ['qunit', 'jshint', 'concat_in_order', 'replace:remove_declares', 'uglify']);
+    grunt.registerTask('build', ['qunit', 'jshint', 'neuter:nodes', 'neuter:litegraph', 'replace:remove_declares', 'uglify']);
+    grunt.registerTask('build_and_fill_projects', ['qunit', 'jshint', 'neuter:nodes', 'neuter:litegraph', 'replace:populate_projects', 'uglify']);
     grunt.registerTask('fill_projects', ['qunit', 'jshint', 'concat_in_order', 'replace:populate_projects', 'uglify']);
 
 

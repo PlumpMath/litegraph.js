@@ -1,35 +1,68 @@
+require('2param_node');
+
 
 function LGraphOperation()
 {
-    this.addOutput("Result","vec4",{vec4:1, vec3:1});
-    this.addInput("A","vec3", {vec4:1, vec3:1, float:1});
-    this.addInput("B","vec3", {vec4:1, vec3:1, float:1});
+    this.output_types = null;
+    this.out_extra_info = {types_list: {float:1, vec3:1, vec4:1, vec2:1},   use_t:1};
+    this.intput_typesA = null;
+    this.in_extra_infoA = {types_list: {float:1, vec3:1, vec4:1, vec2:1},   use_t:1}
+    this.intput_typesB = null;
+    this.in_extra_infoB = {types_list: {float:1, vec3:1, vec4:1, vec2:1},   use_t:1};
 
-    this.shader_piece = POperation; // hardcoded for testing
+    this.number_piece = new PConstant("float"); // hardcoded when the inputs are null
+    this.properties = { A:0.0, B:0.0};
+
+    LGraph2ParamNode.call( this);
+}
+LGraphOperation.prototype = Object.create(LGraph2ParamNode);
+LGraphOperation.prototype.constructor = LGraphOperation;
+
+
+
+LGraphOperation.prototype.infereTypes = function( output, target_slot) {
+    this.in_conected_using_T++;
+    var input = this.inputs[target_slot];
+    if(input.use_t && this.in_conected_using_T == 1){
+        for(var k in output.types)
+            this.T_types[k] = output.types[k];
+    }
+
+//    var output_type = Object.keys(output.types)[0];
+//    if(target_slot == 2 && output_type == "number")
+//        return;
+//
+//    this.in_conected_using_T++;
+//    var input = this.inputs[target_slot];
+//    if (input.use_t && this.in_conected_using_T == 1) {
+//        for (var k in output.types)
+//            this.T_types[k] = output.types[k];
+//    }
 }
 
-LGraphOperation.title = "Operation";
-LGraphOperation.desc = "operation between A and B";
 
-LGraphOperation.prototype.onExecute = function()
+LGraphOperation.prototype.onGetNullCode = function(slot)
 {
-
-    this.processInputCode();
+    if(slot == 0){
+        return this.number_piece.getCode("float_"+this.id, this.properties["A"].toFixed(3), CodePiece.FRAGMENT); // need to check scope;
+    } else if(slot == 1){
+        return this.number_piece.getCode("float_"+this.id, this.properties["B"].toFixed(3), CodePiece.FRAGMENT); // need to check scope;
+    }
 
 }
 
-LGraphOperation.prototype.processInputCode = function()
+LGraphOperation.prototype.onDrawBackground = function(ctx)
 {
+    this.inputs[0].label = "A";
+    if(!this.isInputConnected(0))
+        this.inputs[0].label += "="+this.properties["A"].toFixed(3);
 
-    var code_A = this.getInputCode(0);
-    var code_B = this.getInputCode(1);
-
-    var output_code = this.codes[0] = this.shader_piece.getCode( "result_"+this.id, "+",  code_A.getOutputVar(), code_B.getOutputVar()); // output var must be fragment
-
-    output_code.merge(code_A);
-    output_code.merge(code_B);
-
+    this.inputs[1].label = "B";
+    if(!this.isInputConnected(1))
+        this.inputs[1].label += "="+this.properties["B"].toFixed(3);
 }
 
 
-LiteGraph.registerNodeType("texture/"+LGraphOperation.title, LGraphOperation );
+LiteGraph.extendClass(LGraphOperation,LGraph2ParamNode);
+
+

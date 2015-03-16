@@ -1,12 +1,11 @@
 
-require(LGraph1ParamNode);
-declare(LGraphCos);
+require('1param_node');
 
 function LGraphCos()
 {
     this.code_name = "cos";
-    this.output_types = {number:1, vec3:1, vec4:1, vec2:1};
-    this.intput_types = {number:1, vec3:1, vec4:1, vec2:1};
+    this.output_types = {float:1, vec3:1, vec4:1, vec2:1};
+    this.intput_types = {float:1, vec3:1, vec4:1, vec2:1};
     this.output_type = "float";
 
     LGraph1ParamNode.call( this);
@@ -20,6 +19,6 @@ LGraphCos.title = "Cos";
 LGraphCos.desc = "cosine of input";
 
 
-LGraph1ParamNode.inherit(LGraphCos);
+LiteGraph.extendClass(LGraphCos,LGraph1ParamNode);
 LiteGraph.registerNodeType("math/"+LGraphCos.title, LGraphCos);
 

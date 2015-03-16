@@ -3,8 +3,7 @@
 // LGraph CLASS                                  
 //*********************************************************************************
 
-require(LiteGraph);
-declare(LGraph);
+require('./litegraph-core');
 
 /**
  * LGraph is the class that contain a full graph. We instantiate one and add nodes to it, and then we can run the execution loop.

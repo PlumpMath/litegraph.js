@@ -2,8 +2,8 @@
  * Created by vik on 26/01/2015.
  */
 
-require(CodePiece);
-declare(ShaderCode);
+require('./code_piece');
+
 
 function ShaderCode(vertex, fragment, out_var)
 {

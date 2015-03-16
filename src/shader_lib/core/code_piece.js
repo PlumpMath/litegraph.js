@@ -2,7 +2,6 @@
  * Created by vik on 26/01/2015.
  */
 
-declare(CodePiece);
 
 CodePiece.VERTEX = 1;
 CodePiece.FRAGMENT = 2;

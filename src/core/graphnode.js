@@ -30,8 +30,7 @@
  + onDropFile
  */
 
-require(LiteGraph);
-declare(LGraphNode);
+require('./litegraph-core');
 
 /**
  * Base Class for all the node type classes
@@ -53,7 +52,7 @@ LGraphNode.prototype._ctor = function( title )
 
     this.pos = [10,10];
     this.id = -1; //not know till not added
-    this.type = null;
+    this.types = null;
 
     //inputs available: array of inputs
     this.inputs = [];
@@ -73,7 +72,9 @@ LGraphNode.prototype._ctor = function( title )
     this.codes = []; //output codes in each output link channel
 
 
-    this.T_type = {}; // template type
+    this.T_types = {}; // template types
+    this.in_using_T = 0; // number of inputs using T types
+    this.in_conected_using_T = 0; // number of connected inputs  using T types
 }
 
 /**
@@ -153,7 +154,8 @@ LGraphNode.prototype.serialize = function()
         inputs: this.inputs,
         outputs: this.outputs,
         shader_piece: this.shader_piece,
-        codes: this.codes
+        codes: this.codes,
+        T_types: this.T_types
     };
 
     if(this.properties)
@@ -429,9 +431,14 @@ LGraphNode.prototype.addInput = function(name,type,types,extra_info)
 {
     types = types ||{};
     var o = {name:name,type:type,link:null, types:types};
-    if(extra_info)
+    if(extra_info){
         for(var i in extra_info)
             o[i] = extra_info[i];
+        if(extra_info.use_t){
+            this.in_using_T++;
+        }
+    }
+
 
     if(!this.inputs) this.inputs = [];
     this.inputs.push(o);
@@ -636,10 +643,10 @@ LGraphNode.prototype.connect = function(slot, node, target_slot)
             output.links = [];
         output.links.push({id:node.id, slot: -1});
     }
-    else if( !output.type ||  //generic output
-        !node.inputs[target_slot].type || //generic input
+    else if( //!output.type ||  //generic output
+        //!node.inputs[target_slot].type || //generic input
         output.type == node.inputs[target_slot].type || //same type
-        LiteGraph.compareNodeTypes(output,node.inputs[target_slot])) //compare with multiple types
+        node.compareNodeTypes(output,target_slot)) //compare with multiple types
     {
         //info: link structure => [ 0:link_id, 1:start_node_id, 2:start_slot, 3:end_node_id, 4:end_slot ]
         //var link = [ this.graph.last_link_id++, this.id, slot, node.id, target_slot ];
@@ -651,8 +658,8 @@ LGraphNode.prototype.connect = function(slot, node, target_slot)
         output.links.push( link.id );
         node.inputs[target_slot].link = link.id;
 
-        if(node.infereTypes && node.inputs[target_slot].use_t){ // use Template type
-            node.infereTypes( output, node.inputs[target_slot], this);
+        if( node.inputs[target_slot].use_t){ // use Template type
+            node.infereTypes( output, target_slot, this);
         }
 
         console.log(node);
@@ -758,6 +765,7 @@ LGraphNode.prototype.disconnectInput = function(slot)
 
     var input = this.inputs[slot];
     if(!input) return false;
+    if(input.use_t) this.in_conected_using_T--;
     var link_id = this.inputs[slot].link;
     this.inputs[slot].link = null;
     this.resetTypes();
@@ -940,7 +948,6 @@ LGraphNode.prototype.collapse = function()
  * Forces the node to do not move or realign on Z
  * @method pin
  **/
-
 LGraphNode.prototype.pin = function(v)
 {
     if(v === undefined)
@@ -978,52 +985,106 @@ LGraphNode.prototype.getInputCode = function(slot)
 
 }
 
-LGraphNode.prototype.infereTypes = function( output, input)
+LGraphNode.prototype.onGetNullCode = function(slot)
 {
-    for(var i in this.inputs){
-        var inp = this.inputs[i];
-        if(this.inputs[i].use_t){
-            inp.types = output.types;
-            inp.label = Object.keys(output.types)[0]; // as it can have more than one property atm we extract the first one
-        }
+
+}
+
+/**
+ * increments the counter of the inputs using template vars
+ * and then updates the inputs type with the output given
+ * @method infereTypes
+ **/
+LGraphNode.prototype.infereTypes = function( output, target_slot)
+{
+    this.in_conected_using_T++;
+    var input = this.inputs[target_slot];
+    if(input.use_t && this.in_conected_using_T == 1){
+        for(var k in output.types)
+            this.T_types[k] = output.types[k];
     }
 
-    for(var i in this.outputs){
-        var out = this.outputs[i];
-        if(this.outputs[i].use_t){
-            out.types = output.types;
-            out.label = Object.keys(output.types)[0]; // as it can have more than one property atm we extract the first one
-        }
-    }
+
+//    for(var i in this.inputs){
+//        var inp = this.inputs[i];
+//        if(this.inputs[i].use_t){
+//            inp.types = output.types;
+//            inp.label = Object.keys(output.types)[0]; // as it can have more than one property atm we extract the first one
+//        }
+//    }
+//
+//    for(var j in this.outputs){
+//        var out = this.outputs[j];
+//        if(this.outputs[j].use_t){
+//            out.types = output.types;
+//            out.label = Object.keys(output.types)[0]; // as it can have more than one property atm we extract the first one
+//        }
+//    }
+
 }
 
 LGraphNode.prototype.resetTypes = function( )
 {
 
-    var inputs_connected = false;
-    for(var i in this.inputs){
-        inputs_connected = inputs_connected || this.inputs[i].link != null ;
-        if(inputs_connected)
-            return;
-    }
+    if( !this.in_conected_using_T )
+        for(var k in this.T_types)
+            delete this.T_types[k];
 
+//    var inputs_connected = false;
+//    for(var i in this.inputs){
+//        inputs_connected = inputs_connected || this.inputs[i].link != null ;
+//        if(inputs_connected)
+//            return;
+//    }
+//
+//
+//
+//    for(var i in this.inputs){
+//        var inp = this.inputs[i];
+//        if(this.inputs[i].use_t){
+//            inp.types = {};
+//            inp.label = null; // as it can have more than one property atm we extract the first one
+//        }
+//    }
+//
+//    for(var i in this.outputs){
+//        var out = this.outputs[i];
+//        if(this.outputs[i].use_t){
+//            out.types = {};
+//            out.label = null; // as it can have more than one property atm we extract the first one
+//        }
+//    }
+}
 
+/**
+ * increments the counter of the inputs using template vars
+ * and then updates the inputs type with the output given
+ * @method infereTypes
+ **/
+LGraphNode.prototype.compareNodeTypes = function(output, slot_id)
+{
+    var input_slot = this.inputs[slot_id];
+    console.log(this.title);
+    console.log(input_slot);
+    var out_types = Object.keys(output.types).length ? output.types : output.types_list;
+    var in_types = null;
+    var ret = false;
+    if(input_slot.use_t){
+        in_types = Object.keys(this.T_types) == 0 ? null : this.T_types;
+        ret = true;
+    }  else if (Object.keys(input_slot.types).length)
+        in_types = input_slot.types;
+    else
+        in_types = input_slot.types_list;
 
-    for(var i in this.inputs){
-        var inp = this.inputs[i];
-        if(this.inputs[i].use_t){
-            inp.types = {};
-            inp.label = null; // as it can have more than one property atm we extract the first one
+    if(!out_types || !in_types )
+        return ret;
+    for (key in out_types) {
+        if (in_types.hasOwnProperty(key)) {
+            return true;
         }
     }
-
-    for(var i in this.outputs){
-        var out = this.outputs[i];
-        if(this.outputs[i].use_t){
-            out.types = {};
-            out.label = null; // as it can have more than one property atm we extract the first one
-        }
-    }
+    return false;
 }
 
 

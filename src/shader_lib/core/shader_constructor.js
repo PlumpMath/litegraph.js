@@ -90,6 +90,7 @@ ShaderConstructor.createFragmentCode = function (code,normal,offset) {
     var body_hash = normal.fragment.getBody();
     for (var i = 0, l = ids.length; i < l; i++) {
         r += "      "+body_hash[ids[i]].str;
+
     }
     if(normal.getOutputVar())
         r += "      normal = "+normal.getOutputVar()+".xyz;\n";

@@ -24,6 +24,7 @@ LGraphConstant.prototype.setValue = function(v)
 LGraphConstant.prototype.onExecute = function()
 {
     this.codes[0] = this.shader_piece.getCode("float_"+this.id, this.properties["value"].toFixed(3), CodePiece.FRAGMENT); // need to check scope
+    this.codes[0].order = this.order;
 
     this.setOutputData(0, parseFloat( this.properties["value"] ) );
 }

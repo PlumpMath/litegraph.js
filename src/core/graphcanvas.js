@@ -2,9 +2,10 @@
 // LGraphCanvas: LGraph renderer CLASS                                  
 //*********************************************************************************
 
-require(LiteGraph);
-require(LGraphNode);
-declare(LGraphCanvas);
+
+require('./litegraph-core');
+require('./graphnode');
+
 
 /**
  * The Global Scope. It contains all the registered node classes.
@@ -276,14 +277,14 @@ LGraphCanvas.prototype.setCanvas = function (canvas) {
         //prepare reader
         var reader = new FileReader();
         reader.onload = function (event) {
-            if(that.gl)
-                that.gl.makeCurrent();
             //console.log(event.target);
             var data = event.target.result;
-            node.onDropFile(data, filename, file);
+            node.onDropFile(data, filename, file, null, gl);
             if(that.onDropFile)
                 that.onDropFile(data, filename, file);
             LiteGraph.dispatchEvent("contentChange", null, null);
+
+
         };
 
         //read data
@@ -939,6 +940,7 @@ LGraphCanvas.prototype.processNodeSelected = function (n, e) {
     if (this.onNodeSelected)
         this.onNodeSelected(n);
 
+    console.log(n);
     //if(this.node_in_panel) this.showNodePanel(n);
 }
 
@@ -1443,8 +1445,8 @@ LGraphCanvas.prototype.drawNode = function (node, ctx) {
                 var slot = node.inputs[i];
 
                 ctx.globalAlpha = editor_alpha;
-                if (this.connecting_node != null && this.connecting_output.type != 0 && node.inputs[i].type != 0 &&
-                    (this.connecting_output.type != node.inputs[i].type && !LiteGraph.compareNodeTypes(this.connecting_output, node.inputs[i])))
+                if (this.connecting_node != null && this.connecting_output.type != 0 &&
+                    (this.connecting_output.type != node.inputs[i].type && !node.compareNodeTypes(this.connecting_output, i)))
                     ctx.globalAlpha = 0.4 * editor_alpha;
 
                 ctx.fillStyle = slot.link != null ? "#7F7" : "#AAA";

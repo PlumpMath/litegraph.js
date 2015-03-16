@@ -28,7 +28,6 @@ P1ParamFunc.prototype.getFragmentCode = function (out_var, a, scope, out_type) {
 
 
 /**
- * Run N steps (cycles) of the graph
  * @param {out_var} name of the output var
  *  @param {a} value a in the function
  *  @param {b} value a in the function

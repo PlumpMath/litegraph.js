@@ -4,14 +4,14 @@ function LGraphMixer()
     this.addOutput("Result","vec4",{vec4:1, vec3:1});
     this.addInput("A","vec3", {vec4:1, vec3:1, float:1});
     this.addInput("B","vec3", {vec4:1, vec3:1, float:1});
-    this.addInput("alpha","number", {float:1});
+    this.addInput("alpha","number", {float:1, number:1});
 
     this.properties = { alpha:0.5};
     this.options = { alpha:{min:0, max:1, step:0.01}};
     this.shader_piece = LiteGraph.CodeLib["mix"];
 }
 
-LGraphMixer.title = "Lerp";
+LGraphMixer.title = "Mix";
 LGraphMixer.desc = "Lerp between A and B";
 
 LGraphMixer.prototype.onExecute = function()
@@ -53,4 +53,4 @@ LGraphMixer.prototype.onDrawBackground = function(ctx)
         this.inputs[2].label += "="+this.properties["alpha"].toFixed(3);
 }
 
-LiteGraph.registerNodeType("texture/"+LGraphMixer.title, LGraphMixer );
+//LiteGraph.registerNodeType("texture/"+LGraphMixer.title, LGraphMixer );

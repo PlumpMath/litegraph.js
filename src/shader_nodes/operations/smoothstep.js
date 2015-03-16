@@ -1,10 +1,10 @@
 
 function LGraphSmooth()
 {
-    this.addOutput("Result","number",{number:1, number:1});
-    this.addInput("lower","number", {number:1});
-    this.addInput("upper","number", {number:1});
-    this.addInput("x","number", {number:1});
+    this.addOutput("Result","float",{float:1});
+    this.addInput("lower","float", {float:1});
+    this.addInput("upper","float", {float:1});
+    this.addInput("x","float", {float:1});
 
     this.properties = { lower:0.0,
                         upper:1.5};
@@ -31,6 +31,7 @@ LGraphSmooth.prototype.processInputCode = function()
     var x_var = x_code ? x_code.getOutputVar() :  "0.0";
 
     var output_code = this.codes[0] = this.shader_piece.getCode( "smoothed_"+this.id, lower, upper, x_var); // output var scope unknown
+    output_code.order = this.order;
     if(x_code){
         output_code.merge(x_code);
         if(lower_code)

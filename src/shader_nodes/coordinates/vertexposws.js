@@ -13,6 +13,7 @@ LGraphVertexPosWS.desc = "Vertex position in WS";
 LGraphVertexPosWS.prototype.onExecute = function()
 {
     this.codes[0] = this.shader_piece.getCode(); // I need to check texture id
+    this.codes[0].order = this.order;
 }
 
 
