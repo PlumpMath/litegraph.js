@@ -2,13 +2,14 @@
 function LGraphCubemap()
 {
     this.addOutput("Cubemap","Cubemap");
-    this.addOutput("Color","vec4", {vec4:1});
+    this.addOutput("Color","vec3", {vec3:1});
     this.addInput("vec3","vec3");
     this.properties =  this.properties || {};
     this.properties.name = "";
     this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
 
     this.shader_piece = PTextureSampleCube; // hardcoded for testing
+    this.vector_piece = new PReflected();
     this.size = [170,165];
 }
 
@@ -75,7 +76,7 @@ LGraphCubemap.prototype.onDrawBackground = function(ctx)
 LGraphCubemap.prototype.processInputCode = function()
 {
 
-    var input_code = this.getInputCode(0); // get input in link 0
+    var input_code = this.getInputCode(0) || this.onGetNullCode(0); // get input in link 0
     if(input_code){
         var texture_name = "u_" + (this.properties.name ? this.properties.name : "default_name") + "_texture"; // TODO check if there is a texture
         var color_code = this.codes[1] = this.shader_piece.getCode("color_"+this.id, input_code.getOutputVar(), texture_name);
@@ -88,6 +89,12 @@ LGraphCubemap.prototype.processInputCode = function()
 
 }
 
+LGraphCubemap.prototype.onGetNullCode = function(slot)
+{
+    if(slot == 0)
+        return this.vector_piece.getCode();
+
+}
 
 LiteGraph.registerNodeType("texture/"+LGraphCubemap.title, LGraphCubemap );
 window.LGraphCubemap = LGraphCubemap;

@@ -1,7 +1,7 @@
 function LGraphTexture()
 {
     this.addOutput("Texture","Texture",{Texture:1});
-    this.addOutput("Color","vec4", {vec4:1});
+    this.addOutput("Color","vec3", {vec3:1});
     this.addOutput("R","float", {float:1});
     this.addOutput("G","float", {float:1});
     this.addOutput("B","float", {float:1});
@@ -9,6 +9,9 @@ function LGraphTexture()
     this.addInput("UVs","vec2", {vec2:1});
     this.properties =  this.properties || {};
     this.properties.name = "";
+    this.properties.sampler_type = {};
+    this.properties.sampler_type.multichoice = [ 'Color', 'Normal' ];
+
     //this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
     this.size = [170,165];
     this.shader_piece = PTextureSample; // hardcoded for testing

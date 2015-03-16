@@ -612,17 +612,22 @@ LiteGraph.registerNodeType("coordinates/"+LGraphVertexPosWS.title, LGraphVertexP
 function LGraphShader()
 {
     this.uninstantiable = true;
-    this.addInput("color","vec4", {vec4:1});
-    this.addInput("normal","vec3", {vec3:1});
+    this.addInput("albedo","vec3", {vec3:1});
+    this.addInput("normal","vec3", {vec3:1}); // tangent space normal, if written
+    this.addInput("emission","vec3", {vec4:1});
+    this.addInput("specular","number", {number:1}); // specular power in 0..1 range
+    this.addInput("gloss","number", {number:1});
+    this.addInput("alpha","number", {number:1});
     this.addInput("world position offset","vec3", {vec3:1});
+
 
     //inputs: ["base color","metallic", "specular", "roughness", "emissive color", "opacity", "opacitiy mask", "normal", "world position offset", "world displacement", "tesselation multiplier", "subsurface color", "ambient occlusion", "refraction"],
     this.size = [125,250];
     this.shader_piece = ShaderConstructor;
 }
 
-LGraphShader.title = "Shader";
-LGraphShader.desc = "Shader Main Node";
+LGraphShader.title = "Output";
+LGraphShader.desc = "Output Main Node";
 
 
 LGraphShader.prototype.setValue = function(v)
@@ -650,13 +655,15 @@ LGraphShader.prototype.onWidget = function(e,widget)
 
 LGraphShader.prototype.processInputCode = function() {
 
-
-
     var color_code = this.getInputCode(0) || LiteGraph.EMPTY_CODE; // 0 it's the color
     var normal_code = this.getInputCode(1) || LiteGraph.EMPTY_CODE; // 1 it's the normal
-    var world_offset_code = this.getInputCode(2) || LiteGraph.EMPTY_CODE; // 1 it's the position offset
+    var emission_code = this.getInputCode(2) || LiteGraph.EMPTY_CODE; // 2 it's the emission
+    var specular_code = this.getInputCode(3) || LiteGraph.EMPTY_CODE; // 3 it's the specular
+    var gloss_code = this.getInputCode(4) || LiteGraph.EMPTY_CODE; //  4 it's the gloss
+    var alpha_code = this.getInputCode(5) || LiteGraph.EMPTY_CODE; //  5 it's the alpha
+    var world_offset_code = this.getInputCode(6) || LiteGraph.EMPTY_CODE; // 1 it's the position offset
 
-    var shader = this.shader_piece.createShader(color_code,normal_code,world_offset_code);
+    var shader = this.shader_piece.createShader(color_code,normal_code,emission_code,specular_code,gloss_code,alpha_code,world_offset_code);
     this.graph.shader_output = shader;
     var texture_nodes = this.graph.findNodesByType("texture/"+LGraphTexture.title);// we need to find all the textures used in the graph
     this.graph.shader_textures = [];
@@ -719,7 +726,7 @@ window.LGraphTexturePreview = LGraphTexturePreview;
 function LGraphTexture()
 {
     this.addOutput("Texture","Texture",{Texture:1});
-    this.addOutput("Color","vec4", {vec4:1});
+    this.addOutput("Color","vec3", {vec3:1});
     this.addOutput("R","float", {float:1});
     this.addOutput("G","float", {float:1});
     this.addOutput("B","float", {float:1});
@@ -727,6 +734,9 @@ function LGraphTexture()
     this.addInput("UVs","vec2", {vec2:1});
     this.properties =  this.properties || {};
     this.properties.name = "";
+    this.properties.sampler_type = {};
+    this.properties.sampler_type.multichoice = [ 'Color', 'Normal' ];
+
     //this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
     this.size = [170,165];
     this.shader_piece = PTextureSample; // hardcoded for testing
@@ -1049,13 +1059,14 @@ window.LGraphTexture = LGraphTexture;
 function LGraphCubemap()
 {
     this.addOutput("Cubemap","Cubemap");
-    this.addOutput("Color","vec4", {vec4:1});
+    this.addOutput("Color","vec3", {vec3:1});
     this.addInput("vec3","vec3");
     this.properties =  this.properties || {};
     this.properties.name = "";
     this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
 
     this.shader_piece = PTextureSampleCube; // hardcoded for testing
+    this.vector_piece = new PReflected();
     this.size = [170,165];
 }
 
@@ -1122,7 +1133,7 @@ LGraphCubemap.prototype.onDrawBackground = function(ctx)
 LGraphCubemap.prototype.processInputCode = function()
 {
 
-    var input_code = this.getInputCode(0); // get input in link 0
+    var input_code = this.getInputCode(0) || this.onGetNullCode(0); // get input in link 0
     if(input_code){
         var texture_name = "u_" + (this.properties.name ? this.properties.name : "default_name") + "_texture"; // TODO check if there is a texture
         var color_code = this.codes[1] = this.shader_piece.getCode("color_"+this.id, input_code.getOutputVar(), texture_name);
@@ -1135,6 +1146,12 @@ LGraphCubemap.prototype.processInputCode = function()
 
 }
 
+LGraphCubemap.prototype.onGetNullCode = function(slot)
+{
+    if(slot == 0)
+        return this.vector_piece.getCode();
+
+}
 
 LiteGraph.registerNodeType("texture/"+LGraphCubemap.title, LGraphCubemap );
 window.LGraphCubemap = LGraphCubemap;

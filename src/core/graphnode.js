@@ -662,7 +662,6 @@ LGraphNode.prototype.connect = function(slot, node, target_slot)
             node.infereTypes( output, target_slot, this);
         }
 
-        console.log(node);
         this.setDirtyCanvas(false,true);
         this.graph.onConnectionChange();
     }
