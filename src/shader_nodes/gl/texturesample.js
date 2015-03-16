@@ -12,7 +12,7 @@ function LGraphTexture()
     //this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
     this.size = [170,165];
     this.shader_piece = PTextureSample; // hardcoded for testing
-
+    this.uvs_piece = PUVs;
     // default texture
 //    if(typeof(gl) != "undefined" && gl.textures["default"]){
 //        this.properties.name = "default";
@@ -237,7 +237,7 @@ LGraphTexture.prototype.onDrawBackground = function(ctx)
         ctx.translate(0,this.size[1]);
         ctx.scale(1,-1);
     }
-    ctx.drawImage(this._canvas,this.size[1]* 0.05,this.size[1]* 0.2,this.size[0]* 0.75,this.size[1]* 0.75);
+    ctx.drawImage(this._canvas,this.size[1]* 0.05,this.size[1]* 0.1,this.size[0]* 0.75,this.size[1]* 0.75);
     ctx.restore();
 }
 
@@ -281,7 +281,8 @@ LGraphTexture.generateLowResTexturePreview = function(tex)
 LGraphTexture.prototype.processInputCode = function()
 {
 
-    var input_code = this.getInputCode(0);
+    var input_code = this.getInputCode(0) || this.onGetNullCode(0);
+
 
     if(input_code){
         var texture_name = "u_" + (this.properties.name ? this.properties.name : "default_name") + "_texture"; // TODO check if there is a texture
@@ -315,6 +316,12 @@ LGraphTexture.prototype.processInputCode = function()
 
 }
 
+LGraphTexture.prototype.onGetNullCode = function(slot)
+{
+    if(slot == 0)
+        return this.uvs_piece.getCode();
+
+}
 
 LiteGraph.registerNodeType("texture/"+LGraphTexture.title, LGraphTexture );
 window.LGraphTexture = LGraphTexture;
