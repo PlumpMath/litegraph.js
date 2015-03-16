@@ -660,8 +660,11 @@ LGraphCanvas.prototype.processMouseMove = function (e) {
                 var slot = this.isOverNodeInput(n, e.canvasX, e.canvasY, pos);
                 if (slot != -1 && n.inputs[slot]) {
                     var slot_type = n.inputs[slot].type;
-                    if (slot_type == this.connecting_output.type || !slot_type || !this.connecting_output.type)
-                        this._highlight_input = pos;
+                    //if (slot_type == this.connecting_output.type || !slot_type || !this.connecting_output.type)
+                     if(this.connecting_node != null &&
+                        (this.connecting_output.type == n.inputs[slot].type ||
+                        n.compareNodeTypes(this.connecting_node, this.connecting_output,  slot)))
+                            this._highlight_input = pos;
                 }
                 else
                     this._highlight_input = null;
@@ -1445,9 +1448,10 @@ LGraphCanvas.prototype.drawNode = function (node, ctx) {
                 var slot = node.inputs[i];
 
                 ctx.globalAlpha = editor_alpha;
-                if (this.connecting_node != null && this.connecting_output.type != 0 &&
-                    (this.connecting_output.type != node.inputs[i].type && !node.compareNodeTypes(this.connecting_output, i)))
-                    ctx.globalAlpha = 0.4 * editor_alpha;
+                if (this.connecting_node != null  &&
+                    (this.connecting_output.type != node.inputs[i].type &&
+                    !node.compareNodeTypes(this.connecting_node, this.connecting_output, i)))
+                        ctx.globalAlpha = 0.4 * editor_alpha;
 
                 ctx.fillStyle = slot.link != null ? "#7F7" : "#AAA";
 

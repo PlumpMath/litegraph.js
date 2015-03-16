@@ -646,7 +646,7 @@ LGraphNode.prototype.connect = function(slot, node, target_slot)
     else if( //!output.type ||  //generic output
         //!node.inputs[target_slot].type || //generic input
         output.type == node.inputs[target_slot].type || //same type
-        node.compareNodeTypes(output,target_slot)) //compare with multiple types
+        node.compareNodeTypes(this,output,target_slot)) //compare with multiple types
     {
         //info: link structure => [ 0:link_id, 1:start_node_id, 2:start_slot, 3:end_node_id, 4:end_slot ]
         //var link = [ this.graph.last_link_id++, this.id, slot, node.id, target_slot ];
@@ -1061,14 +1061,18 @@ LGraphNode.prototype.resetTypes = function( )
  * and then updates the inputs type with the output given
  * @method infereTypes
  **/
-LGraphNode.prototype.compareNodeTypes = function(output, slot_id)
+LGraphNode.prototype.compareNodeTypes = function(connecting_node, connection_slot, slot_id)
 {
     var input_slot = this.inputs[slot_id];
-    console.log(this.title);
-    console.log(input_slot);
-    var out_types = Object.keys(output.types).length ? output.types : output.types_list;
+    var out_types = null;
     var in_types = null;
     var ret = false;
+    if(connection_slot.use_t){
+        out_types = Object.keys(connecting_node.T_types) == 0 ? null : connecting_node.T_types;
+    } else {
+        out_types = Object.keys(connection_slot.types).length ? connection_slot.types : connection_slot.types_list;
+    }
+    out_types = Object.keys(connection_slot.types).length ? connection_slot.types : connection_slot.types_list;
     if(input_slot.use_t){
         in_types = Object.keys(this.T_types) == 0 ? null : this.T_types;
         ret = true;
