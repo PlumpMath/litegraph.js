@@ -34,6 +34,7 @@ var LiteGraph = {
 
     debug: false,
     throw_errors: true,
+    showcode:true,
     registered_node_types: {},
 
     graph_max_steps:0,
@@ -42,7 +43,11 @@ var LiteGraph = {
     CANVAS_2D: 2,
     current_ctx: 0,
 
-    /**
+    COLOR_MAP:0,
+    NORMAL_MAP:1,
+    BUMP_MAP:2,
+
+/**
      * Register a node class so it can be listed when the user wants to create a new one
      * @method registerNodeType
      * @param {String} type name of the node and path
