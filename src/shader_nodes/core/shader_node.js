@@ -9,7 +9,7 @@ function LGraphShader()
     this.addInput("albedo","vec3", {vec3:1});
     this.addInput("normal","vec3", {vec3:1}); // tangent space normal, if written
     this.addInput("emission","vec3", {vec3:1});
-    this.addInput("specular","number", {number:1}); // specular power in 0..1 range
+    this.addInput("specular","vec3", {vec3:1}); // specular power in 0..1 range
     this.addInput("gloss","number", {number:1});
     this.addInput("alpha","number", {number:1});
     this.addInput("bump offset","vec3", {vec3:1});

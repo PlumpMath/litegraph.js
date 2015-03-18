@@ -4,7 +4,7 @@ declare(PTextureSample);
 var PTextureSample = {};
 
 PTextureSample.id = "texture_sample";
-PTextureSample.includes = {v_pos:1, v_coord:1};
+PTextureSample.includes = {v_pos:1, v_coord:1, camera_to_pixel_ws:1, u_eye:1};
 
 PTextureSample.getVertexCode = function (output, input, texture_id, texture_type) {
     var code = new CodePiece()
@@ -27,26 +27,17 @@ PTextureSample.getFragmentCode = function (output, input, texture_id, texture_ty
     var code = new CodePiece();
     code.setIncludes(PTextureSample.includes);
     var code_str = "";
-    if( texture_type == LiteGraph.COLOR_MAP) {
+    code.addHeaderLine("uniform sampler2D " + texture_id + ";\n");
+    if( texture_type == LiteGraph.COLOR_MAP || texture_type == LiteGraph.SPECULAR_MAP) {
         code_str = "vec4 " + output + " = texture2D(" + texture_id + ", " + input + ");\n";
-        code.addHeaderLine("uniform sampler2D "+texture_id+";\n");
-
-    }  else if (texture_type == LiteGraph.NORMAL_MAP){
+    }  else if (texture_type == LiteGraph.NORMAL_MAP) {
         code_str = "vec4 " + output + " = texture2D(" + texture_id + ", " + input + ");\n";
-        code_str += "      "+output+" = (2.0 * "+output+" )-1.0;\n";
-        code.addHeaderLine("uniform sampler2D "+texture_id+";\n");
-    }   if( texture_type == LiteGraph.BUMP_MAP){
-        code_str = "vec4 " + output + " = texture2D(" + texture_id + ", " + input + ");\n" +
-            "       vec3 dPositiondx = dFdx(v_pos);\n" +
-            "       vec3 dPositiondy = dFdy(v_pos);\n" +
-            "       float depth = "+output+".a;\n" +
-            "       float dDepthdx = dFdx(depth);\n" +
-            "       float dDepthdy = dFdy(depth);\n" +
-            "       dPositiondx -= 10.0 * dDepthdx * v_normal;\n" +
-            "       dPositiondy -= 10.0 * dDepthdy * v_normal;\n" +
-            "       normal = normalize(cross(dPositiondx, dPositiondy));\n";
-
-        code.addHeaderLine("uniform sampler2D "+texture_id+";\n");
+        code_str += "      " + output + " = (2.0 * " + output + " )-1.0;\n";
+    }
+    else if( texture_type == LiteGraph.TANGENT_MAP){
+        code_str = "vec4 " + output + " = texture2D(" + texture_id + ", " + input + ");\n";
+        code_str += "      " + output + " = (2.0 * " + output + " )-1.0;\n";
+        code_str += "      "+output+" = vec4(TBN * "+output+".xyz, 1.0);\n";
         code.setIncludes(PTextureSample.includes);
     }
 

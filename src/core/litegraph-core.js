@@ -45,7 +45,8 @@ var LiteGraph = {
 
     COLOR_MAP:0,
     NORMAL_MAP:1,
-    BUMP_MAP:2,
+    TANGENT_MAP:2,
+    SPECULAR_MAP:3,
 
 /**
      * Register a node class so it can be listed when the user wants to create a new one
@@ -186,7 +187,7 @@ var LiteGraph = {
                 categories[ this.registered_node_types[i].category ] = 1;
         var result = [];
         for(var i in categories)
-            if(i != "core")
+           // if(i != "core")
                 result.push(i);
         return result;
     },

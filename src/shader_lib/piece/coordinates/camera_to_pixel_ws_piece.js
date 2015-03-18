@@ -5,7 +5,7 @@ declare(PCameraToPixelWS);
 var PCameraToPixelWS = {};
 
 PCameraToPixelWS.id = "cameratopixelws";
-PCameraToPixelWS.includes = {v_pos:1, u_eye: 1};
+PCameraToPixelWS.includes = {v_pos:1, u_eye: 1, camera_to_pixel_ws:1};
 
 PCameraToPixelWS.getVertexCode = function (output, input) {
     var vertex = new CodePiece();
@@ -15,7 +15,7 @@ PCameraToPixelWS.getVertexCode = function (output, input) {
 
 PCameraToPixelWS.getFragmentCode = function (output, input) {
     var fragment = new CodePiece();
-    fragment.setBody("vec3 camera_to_pixel_ws = normalize(v_pos - u_eye);\n");
+    fragment.setBody("");
     fragment.setIncludes(PCameraToPixelWS.includes);
     return fragment;
 }

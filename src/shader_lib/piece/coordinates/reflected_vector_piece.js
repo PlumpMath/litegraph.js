@@ -5,7 +5,7 @@ declare(PReflected);
 // object representing glsl 2 param function
 function PReflected () {
     this.id = "reflected_vector";
-    this.includes = {v_pos:1, v_normal:1, u_eye: 1, v_coord:1};
+    this.includes = {v_pos:1, v_normal:1, u_eye: 1, v_coord:1, camera_to_pixel_ws:1};
 }
 
 PReflected.prototype.getVertexCode = function () {
@@ -13,8 +13,7 @@ PReflected.prototype.getVertexCode = function () {
 }
 
 PReflected.prototype.getFragmentCode = function () {
-    return  "vec3 camera_to_pixel_ws = normalize(v_pos - u_eye);\n" +
-            "       vec3 pixel_normal_ws = normal;\n" +
+    return  "       vec3 pixel_normal_ws = normal;\n" +
             "       vec3 reflected_vector = reflect(camera_to_pixel_ws,pixel_normal_ws);\n";
 }
 

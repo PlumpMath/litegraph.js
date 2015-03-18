@@ -114,21 +114,30 @@ ShaderConstructor.createFragmentCode = function (albedo,normal,emission,specular
         r += k;
     for(var k in normal.fragment.getHeader())
         r += k;
+    for(var k in specular.fragment.getHeader())
+        r += k;
     // body
     r += "void main() {\n";
     r += "      vec3 normal = normalize(v_normal);\n";
 
+    if (includes["camera_to_pixel_ws"])
+        r += "      vec3 camera_to_pixel_ws = normalize(v_pos - u_eye);\n";
+
+
     var ids = normal.fragment.getBodyIds();
     var body_hash = normal.fragment.getBody();
     if(ids.length > 0){
-        //https://www.opengl.org/discussion_boards/showthread.php/162857-Computing-the-tangent-space-in-the-fragment-shader
-        r +="      vec3 Q1 = dFdx(v_pos);\n" +
-            "      vec3 Q2 = dFdy(v_pos);\n" +
-            "      vec2 st1 = dFdx(v_coord);\n" +
-            "      vec2 st2 = dFdy(v_coord);\n" +
-            "      vec3 T = normalize(Q1*st2.t - Q2*st1.t);\n" +
-            "      vec3 B = normalize(-Q1*st2.s + Q2*st1.s);\n" +
-            "      mat3 TBN = mat3(T, B, v_normal);\n";
+        // http://www.thetenthplanet.de/archives/1180
+        r+="       vec3 dp1 = dFdx( v_pos );\n" +
+            "      vec3 dp2 = dFdy( v_pos );\n" +
+            "      vec2 duv1 = dFdx( v_coord );\n" +
+            "      vec2 duv2 = dFdy( v_coord );\n" +
+            "      vec3 dp2perp = cross( dp2, v_normal );\n" +
+            "      vec3 dp1perp = cross( v_normal, dp1 );\n" +
+            "      vec3 tangent = dp2perp * duv1.x + dp1perp * duv2.x;\n" +
+            "      vec3 bitangent = dp2perp * duv1.y + dp1perp * duv2.y;\n" +
+            "      float invmax = inversesqrt( max( dot(tangent,tangent), dot(bitangent,bitangent) ) );\n" +
+            "      mat3 TBN = mat3( tangent * invmax, bitangent * invmax, v_normal );\n";
     }
 
 
@@ -137,8 +146,7 @@ ShaderConstructor.createFragmentCode = function (albedo,normal,emission,specular
 
     }
     if(ids.length > 0)
-        r += "      normal = "+normal.getOutputVar()+".xyz * TBN;\n" +
-             "      normal = normalize(normal);\n";
+        r += "      normal = normalize("+normal.getOutputVar()+".xyz);\n";
 
     ids = albedo.fragment.getBodyIds();
     body_hash = albedo.fragment.getBody();
@@ -146,11 +154,27 @@ ShaderConstructor.createFragmentCode = function (albedo,normal,emission,specular
         r += "      "+body_hash[ids[i]].str;
     }
 
+    ids = specular.fragment.getBodyIds();
+    body_hash = specular.fragment.getBody();
+    for (var i = 0, l = ids.length; i < l; i++) {
+        r += "      "+body_hash[ids[i]].str;
+    }
 
     r +="      float ambient_color = 0.3;\n" +
         "      vec3 light_dir = normalize(vec3(0.5,0.5,0.5));\n" +
         "      float lambertian = max(dot(light_dir,normal), 0.0);\n" +
-        "      gl_FragColor = vec4(ambient_color*("+albedo.getOutputVar()+").xyz + lambertian*("+albedo.getOutputVar()+").xyz, 1.0);\n" +
+        "      vec3 reflect_dir = reflect(light_dir, normal);\n" +
+        "      float spec_angle = max(dot(reflect_dir, camera_to_pixel_ws), 0.0);\n";
+
+    if(ids.length == 0){
+        r += "      float specular = pow(spec_angle, 4.0);\n";
+    } else{
+        r +="      float specular = "+specular.getOutputVar()+".r * spec_angle;\n";
+    }
+    r +="      gl_FragColor = vec4(ambient_color*("+albedo.getOutputVar()+").xyz +" +
+        "      lambertian*("+albedo.getOutputVar()+").xyz +" +
+        "      specular * vec3(1.0)" +
+        "      , 1.0);\n" +
         "}";
 
     return r;
