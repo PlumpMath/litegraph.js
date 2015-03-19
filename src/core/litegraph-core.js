@@ -47,7 +47,7 @@ var LiteGraph = {
     NORMAL_MAP:1,
     TANGENT_MAP:2,
     SPECULAR_MAP:3,
-
+    BUMP_MAP:4,
 /**
      * Register a node class so it can be listed when the user wants to create a new one
      * @method registerNodeType

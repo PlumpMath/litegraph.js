@@ -13,7 +13,7 @@ function LGraphTexture()
     this.properties.name = "";
     this.properties.texture_type = "Color";
     this.multichoice = {texture_type:[ 'Color', 'Normal map', 'Specular map' ],
-                        normal_map_type:[ 'Tangent space', 'Model space' ]};
+                        normal_map_type:[ 'Tangent space', 'Model space', 'Bump map' ]};
     this.reloadonchange = {texture_type: 1};
 
 
@@ -134,7 +134,7 @@ LGraphTexture.loadTextureFromFile = function(data, filename, file, callback, gl)
         var texture = null;
         var no_ext_name = LiteGraph.removeExtension(filename);
         if( typeof(data) == "string" )
-            gl.textures[no_ext_name] = texture = GL.Texture.fromURL( data, {}, callback, gl );
+            gl.textures[no_ext_name] = texture = GL.Texture.fromURL( data, {minFilter:gl.LINEAR_MIPMAP_LINEAR}, callback, gl );
         else if( filename.toLowerCase().indexOf(".dds") != -1 )
             texture = GL.Texture.fromDDSInMemory(data, gl);
         else
@@ -299,8 +299,15 @@ LGraphTexture.prototype.processInputCode = function()
 
     var input_code = this.getInputCode(0) || this.onGetNullCode(0);
     var texture_type = 0;
-    if(this.properties.texture_type == "Normal map"  )
-        texture_type =  this.properties.normal_map_type == "Tangent space" ? LiteGraph.TANGENT_MAP : LiteGraph.NORMAL_MAP;
+    if(this.properties.texture_type == "Normal map"  ){
+        if(this.properties.normal_map_type == "Tangent space")
+            texture_type =  LiteGraph.TANGENT_MAP
+        else if(this.properties.normal_map_type == "Model space")
+            texture_type = LiteGraph.NORMAL_MAP;
+        else if(this.properties.normal_map_type == "Bump map")
+            texture_type = LiteGraph.BUMP_MAP;
+    }
+
     else
         texture_type = LiteGraph.COLOR_MAP;
 
