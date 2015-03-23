@@ -920,9 +920,10 @@ LGraph.prototype.loadFromURL = function (url, on_complete, params){
 
     var that = this;
     HttpRequest( url, null, function(data) {
-        that.configure(JSON.parse(data));
+        var obj = JSON.parse(data);
+        that.configure(obj);
         if(on_complete)
-            on_complete(params);
+            on_complete(obj);
     }, function(err){
         if(on_complete)
             on_complete(null);

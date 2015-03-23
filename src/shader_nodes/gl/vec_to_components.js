@@ -31,7 +31,6 @@ LGraphVecToComps.prototype.onExecute = function()
         var v_chan = input_code.clone();
         v_chan.output_var = input_code.getOutputVar()+".v";
         this.codes[4] = v_chan;
-
     }
 }
 

@@ -1,7 +1,7 @@
 function LGraphTexture()
 {
     this.addOutput("Texture","Texture",{Texture:1});
-    this.addOutput("Color","vec3", {vec3:1});
+    this.addOutput("Color","vec4", {vec4:1});
     this.addOutput("R","float", {float:1});
     this.addOutput("G","float", {float:1});
     this.addOutput("B","float", {float:1});

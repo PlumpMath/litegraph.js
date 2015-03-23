@@ -2,7 +2,7 @@
 function LGraphCubemap()
 {
     this.addOutput("Cubemap","Cubemap");
-    this.addOutput("Color","vec3", {vec3:1});
+    this.addOutput("Color","vec4", {vec4:1});
     this.addInput("vec3","vec3");
     this.properties =  this.properties || {};
     this.properties.name = "";

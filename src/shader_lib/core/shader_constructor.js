@@ -42,7 +42,7 @@ ShaderConstructor.createVertexCode = function (albedo,normal,emission,specular,g
     r += "varying vec3 v_pos;\n";
     if (includes["u_time"])
         r += "uniform float u_time;\n";
-    if (includes["u_eye"])
+    //if (includes["u_eye"])
         r += "uniform vec3 u_eye;\n";
     r += "uniform mat4 u_mvp;\n"+
          "uniform mat4 u_model;\n" +
@@ -106,11 +106,11 @@ ShaderConstructor.createFragmentCode = function (albedo,normal,emission,specular
         r += "varying vec2 v_coord;\n";
     //if (includes["v_normal"] || normal != LiteGraph.EMPTY_CODE )
         r += "varying vec3 v_normal;\n";
-    if (includes["v_pos"])
+    //if (includes["v_pos"])
         r += "varying vec3 v_pos;\n";
     if (includes["u_time"])
         r += "uniform float u_time;\n";
-    if (includes["u_eye"])
+    //if (includes["u_eye"])
         r += "uniform vec3 u_eye;\n";
     r += "uniform vec4 u_color;\n";
     for(var k in albedo.fragment.getHeader())

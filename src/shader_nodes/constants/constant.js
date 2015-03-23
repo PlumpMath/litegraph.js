@@ -2,10 +2,10 @@
 //Constant
 function LGraphConstant()
 {
-    this.addOutput("value","number", {number:1});
+    this.addOutput("value","float", {float:1});
     this.properties = { value:1.0 };
 
-    this.editable = { property:"value", type:"number" };
+    this.editable = { property:"value", type:"float" };
 
     this.shader_piece = new PConstant("float"); // hardcoded for testing
 }

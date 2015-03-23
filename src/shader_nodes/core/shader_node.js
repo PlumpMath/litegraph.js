@@ -6,13 +6,13 @@
 function LGraphShader()
 {
     this.uninstantiable = true;
-    this.addInput("albedo","vec3", {vec3:1});
-    this.addInput("normal","vec3", {vec3:1}); // tangent space normal, if written
-    this.addInput("emission","vec3", {vec3:1});
+    this.addInput("albedo","vec3", {vec3:1, vec4:1});
+    this.addInput("normal","vec3", {vec3:1, vec4:1}); // tangent space normal, if written
+    this.addInput("emission","vec3", {vec3:1, vec4:1});
     this.addInput("specular","float", {float:1}); // specular power in 0..1 range
     this.addInput("gloss","float", {float:1});
     this.addInput("alpha","float", {float:1});
-    this.addInput("displacement","vec3", {vec3:1});
+    this.addInput("displacement","vec3", {vec3:1, vec4:1});
 
 
     //inputs: ["base color","metallic", "specular", "roughness", "emissive color", "opacity", "opacitiy mask", "normal", "world position offset", "world displacement", "tesselation multiplier", "subsurface color", "ambient occlusion", "refraction"],
