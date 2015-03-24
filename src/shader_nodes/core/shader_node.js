@@ -16,6 +16,22 @@ function LGraphShader()
 
 
     //inputs: ["base color","metallic", "specular", "roughness", "emissive color", "opacity", "opacitiy mask", "normal", "world position offset", "world displacement", "tesselation multiplier", "subsurface color", "ambient occlusion", "refraction"],
+    this.properties = { color:"#ffffff",
+                        gloss:4.0,
+                        displacement_factor:1.0,
+                        light_dir_x: 1.0,
+                        light_dir_y: 1.0,
+                        light_dir_z: 1.0
+    };
+
+    this.options = {
+        gloss:{step:0.01},
+        displacement_factor:{step:0.01},
+        light_dir_x:{min:-1, max:1, step:0.01},
+        light_dir_y:{min:-1, max:1, step:0.01},
+        light_dir_z:{min:-1, max:1, step:0.01}
+    };
+
     this.size = [125,250];
     this.shader_piece = ShaderConstructor;
 }
@@ -67,7 +83,7 @@ LGraphShader.prototype.processInputCode = function() {
 
 
 
-    var shader = this.shader_piece.createShader(color_code,normal_code,emission_code,specular_code,gloss_code,alpha_code,world_offset_code);
+    var shader = this.shader_piece.createShader(this.properties ,color_code,normal_code,emission_code,specular_code,gloss_code,alpha_code,world_offset_code);
     this.graph.shader_output = shader;
     var texture_nodes = this.graph.findNodesByType("texture/"+LGraphTexture.title);// we need to find all the textures used in the graph
     this.graph.shader_textures = [];
