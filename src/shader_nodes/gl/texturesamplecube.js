@@ -37,7 +37,7 @@ LGraphCubemap.prototype.onDropFile = function(data, filename, file)
 LGraphCubemap.prototype.onExecute = function()
 {
 
-    this.processInputCode();
+    this.processNodePath();
     if(this._drop_texture)
     {
         this.setOutputData(0, this._drop_texture);
@@ -72,14 +72,20 @@ LGraphCubemap.prototype.onDrawBackground = function(ctx)
 
 }
 
-
-LGraphCubemap.prototype.processInputCode = function()
+LGraphCubemap.prototype.processNodePath = function()
 {
+    var input = this.getInputNodePath(0);
+    input.push(this);
+    this.node_path[1] = input;
 
+}
+
+LGraphCubemap.prototype.processInputCode = function(scope)
+{
     var input_code = this.getInputCode(0) || this.onGetNullCode(0); // get input in link 0
     if(input_code){
         var texture_name = "u_" + (this.properties.name ? this.properties.name : "default_name") + "_texture"; // TODO check if there is a texture
-        var color_code = this.codes[1] = this.shader_piece.getCode("color_"+this.id, input_code.getOutputVar(), texture_name);
+        var color_code = this.codes[1] = this.shader_piece.getCode("color_"+this.id, input_code.getOutputVar(), texture_name, scope);
         color_code.order = this.order;
         color_code.merge(input_code);
     } else {

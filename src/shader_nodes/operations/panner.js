@@ -19,18 +19,27 @@ LGraphPanner.desc = "Moves the input";
 
 LGraphPanner.prototype.onExecute = function()
 {
-    this.processInputCode();
+    this.processNodePath();
+}
+
+LGraphPanner.prototype.processNodePath = function()
+{
+    var input1 = this.getInputNodePath(0);
+    var input2 = this.getInputNodePath(1);
+    var input = input1.concat(input2);
+    input.push(this);
+    this.node_path[0] = input;
 }
 
 
-LGraphPanner.prototype.processInputCode = function()
+LGraphPanner.prototype.processInputCode = function(scope)
 {
 
-    var code_input = this.getInputCode(0) || this.onGetNullCode(0);
+    var code_input = this.getInputCode(0) || this.onGetNullCode(0, scope);
     var code_time = this.getInputCode(1) || LiteGraph.EMPTY_CODE;
 
     //(out_var, input, dx, dy, scope, out_type)
-    var output_code = this.codes[0] = this.shader_piece.getCode("panner_"+this.id, code_input.getOutputVar(), code_time.getOutputVar() ,this.properties.SpeedX.toFixed(3), this.properties.SpeedY.toFixed(3), CodePiece.FRAGMENT, "vec2"); // output var must be fragment
+    var output_code = this.codes[0] = this.shader_piece.getCode("panner_"+this.id, code_input.getOutputVar(), code_time.getOutputVar() ,this.properties.SpeedX.toFixed(3), this.properties.SpeedY.toFixed(3), scope, "vec2"); // output var must be fragment
     output_code.order = this.order;
 
     if(code_time != LiteGraph.EMPTY_CODE)
@@ -40,7 +49,7 @@ LGraphPanner.prototype.processInputCode = function()
 
 }
 
-LGraphPanner.prototype.onGetNullCode = function(slot)
+LGraphPanner.prototype.onGetNullCode = function(slot, scope)
 {
     if(slot == 0)
         return this.uvs_piece.getCode();

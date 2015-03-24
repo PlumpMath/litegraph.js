@@ -11,12 +11,22 @@ LGraphTime.title = "Time";
 LGraphTime.desc = "Time since execution started";
 
 
-
 LGraphTime.prototype.onExecute = function()
 {
-    this.codes[0] = this.shader_piece.getCode(CodePiece.FRAGMENT); // need to check scope
-    this.codes[0].order = this.order;
+    this.processNodePath();
+}
 
+LGraphTime.prototype.processNodePath = function()
+{
+    var input = [];
+    this.node_path[0] = input;
+    input.push(this);
+}
+
+LGraphTime.prototype.processInputCode = function(scope)
+{
+    this.codes[0] = this.shader_piece.getCode(scope); // need to check scope
+    this.codes[0].order = this.order;
 }
 
 LiteGraph.registerNodeType("constants/"+LGraphTime.title , LGraphTime);

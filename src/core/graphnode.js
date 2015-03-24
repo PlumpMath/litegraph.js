@@ -70,7 +70,7 @@ LGraphNode.prototype._ctor = function( title )
 
     this.shader_piece = null;
     this.codes = []; //output codes in each output link channel
-
+    this.node_path = []; //this var stores the different functions that have to be executed in one graph path
 
     this.T_types = {}; // template types
     this.in_using_T = 0; // number of inputs using T types
@@ -981,7 +981,15 @@ LGraphNode.prototype.getInputCode = function(slot)
     if(link)
         return this.graph.getNodeById( link.origin_id ).codes[link.origin_slot];
     return null;
+}
 
+LGraphNode.prototype.getInputNodePath = function(slot)
+{
+    var link_id = this.inputs[slot].link;
+    var link = this.graph.links[link_id];
+    if(link)
+        return this.graph.getNodeById( link.origin_id ).node_path[link.origin_slot];
+    return [];
 }
 
 LGraphNode.prototype.onGetNullCode = function(slot)

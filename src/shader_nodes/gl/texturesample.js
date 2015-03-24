@@ -181,7 +181,7 @@ LGraphTexture.prototype.getExtraMenuOptions = function(graphcanvas)
 
 LGraphTexture.prototype.onExecute = function()
 {
-    this.processInputCode();
+    this.processNodePath();
 
     if(this._drop_texture ){
 
@@ -287,7 +287,20 @@ LGraphTexture.generateLowResTexturePreview = function(tex)
     return tex_canvas;
 }
 
-LGraphTexture.prototype.processInputCode = function()
+LGraphTexture.prototype.processNodePath = function()
+{
+    var input = this.getInputNodePath(0);
+    var cloned_input = input.slice(0);
+    cloned_input.push(this);
+    this.node_path[1] = cloned_input;
+    this.node_path[2] = cloned_input.slice(0);
+    this.node_path[3] = cloned_input.slice(0);
+    this.node_path[4] = cloned_input.slice(0);
+    this.node_path[5] = cloned_input.slice(0);
+
+}
+
+LGraphTexture.prototype.processInputCode = function(scope)
 {
     if(this.properties.texture_type == "Normal map") {
         if (!this.properties.hasOwnProperty("normal_map_type"))
@@ -314,7 +327,7 @@ LGraphTexture.prototype.processInputCode = function()
 
     if(input_code){
         var texture_name = "u_" + (this.properties.name ? this.properties.name : "default_name") + "_texture"; // TODO check if there is a texture
-        var color_output = this.codes[1] = this.shader_piece.getCode("color_"+this.id, input_code.getOutputVar(), texture_name, texture_type); // 1 it's the color output
+        var color_output = this.codes[1] = this.shader_piece.getCode("color_"+this.id, input_code.getOutputVar(), texture_name, texture_type, scope); // 1 it's the color output
         color_output.order = this.order;
 
         color_output.merge(input_code);

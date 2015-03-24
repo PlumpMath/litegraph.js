@@ -12,29 +12,37 @@ LGraph2ParamNode.prototype.constructor = LGraph2ParamNode;
 
 LGraph2ParamNode.prototype.onExecute = function()
 {
-    this.processInputCode();
+    this.processNodePath();
 }
 
-LGraph2ParamNode.prototype.processInputCode = function()
+LGraph2ParamNode.prototype.processNodePath = function()
 {
+    var input1 = this.getInputNodePath(0);
+    var input2 = this.getInputNodePath(1);
+    var input = input1.concat(input2);
+    input.push(this);
+    this.node_path[0] = input;
+}
 
+
+LGraph2ParamNode.prototype.processInputCode = function(scope)
+{
     var output_code = LiteGraph.EMPTY_CODE;
 
-    var code_A = this.getInputCode(0) || this.onGetNullCode(0);
-    var code_B = this.getInputCode(1) || this.onGetNullCode(1);
+    var code_A = this.getInputCode(0) || this.onGetNullCode(0, scope);
+    var code_B = this.getInputCode(1) || this.onGetNullCode(1 , scope);
     if(code_A && code_B){
         // (out_var, a, b, c, scope, out_type)
         output_code = this.codes[0] = this.shader_piece.getCode( this.getCodeName()+"_"+this.id,
             code_A.getOutputVar(),
             code_B.getOutputVar(),
-            this.getScope(),
+            scope,
             this.getOutputType()); // output var must be fragment
         // if the alpha is an input, otherwise hardcoded
         output_code.order = this.order;
         output_code.merge(code_A);
         output_code.merge(code_B);
     }
-
 
 }
 

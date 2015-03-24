@@ -34,7 +34,7 @@ var LiteGraph = {
 
     debug: false,
     throw_errors: true,
-    showcode:false,
+    showcode:true,
     registered_node_types: {},
 
     graph_max_steps:0,
@@ -111,6 +111,7 @@ var LiteGraph = {
         if(!node.pos) node.pos = LiteGraph.DEFAULT_POSITION.concat();
         if(!node.shader_piece) node.shader_piece = null;
         if(!node.codes) node.codes = [];
+        if(!node.node_path) node.node_path = [];
         if(node.extraproperties)
             for(var i in node.extraproperties)
                 node.properties[i] = node.extraproperties[i];

@@ -16,6 +16,23 @@ LGraphVecToComps.desc = "Vector To Components";
 
 LGraphVecToComps.prototype.onExecute = function()
 {
+    this.processNodePath();
+}
+
+LGraphVecToComps.prototype.processNodePath = function()
+{
+    var input = this.getInputNodePath(0);
+    input.push(this);
+    this.node_path[0] = input.slice(0);
+    this.node_path[1] = input.slice(0);
+    this.node_path[2] = input.slice(0);
+    this.node_path[3] = input.slice(0);
+
+
+}
+
+LGraphVecToComps.prototype.processInputCode = function(scope)
+{
     var input_code = this.getInputCode(0);
 
     if(input_code){
@@ -30,10 +47,7 @@ LGraphVecToComps.prototype.onExecute = function()
         this.codes[2] = z_chan;
         var v_chan = input_code.clone();
         v_chan.output_var = input_code.getOutputVar()+".v";
-        this.codes[4] = v_chan;
+        this.codes[3] = v_chan;
     }
 }
-
-
-
 LiteGraph.registerNodeType("coordinates/"+LGraphVecToComps.title , LGraphVecToComps);

@@ -12,18 +12,25 @@ LGraph1ParamNode.prototype.constructor = LGraph1ParamNode;
 
 LGraph1ParamNode.prototype.onExecute = function()
 {
-    this.processInputCode();
+    this.processNodePath();
+}
+
+LGraph1ParamNode.prototype.processNodePath = function()
+{
+    var input = this.getInputNodePath(0);
+    input.push(this);
+    this.node_path[0] = input;
 }
 
 
-LGraph1ParamNode.prototype.processInputCode = function()
+LGraph1ParamNode.prototype.processInputCode = function(scope)
 {
 
     var code_A = this.getInputCode(0); // normal
 
     if(code_A){
         // (output, incident, normal)
-        var output_code = this.codes[0] = this.shader_piece.getCode(this.getCodeName()+"_"+this.id, code_A.getOutputVar(), this.getScope(), this.getOutputType()); // output var must be fragment
+        var output_code = this.codes[0] = this.shader_piece.getCode(this.getCodeName()+"_"+this.id, code_A.getOutputVar(), scope, this.getOutputType()); // output var must be fragment
         output_code.order = this.order;
         output_code.merge(code_A);
     }

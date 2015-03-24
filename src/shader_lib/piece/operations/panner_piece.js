@@ -14,7 +14,7 @@ PPanner.prototype.getVertexCode = function (out_var, input, time, dx, dy, scope,
         var code = out_type+" " +out_var+" = "+input+";\n" +
             "      "+out_var+".x += "+dx+" * "+time+";\n" +
             "      "+out_var+".y += "+dy+" * "+time+";\n" +
-            "      "+out_var+".x += frac("+out_var+");\n";
+            "      "+out_var+" = fract("+out_var+");\n";
         return code;
     }
     return "";

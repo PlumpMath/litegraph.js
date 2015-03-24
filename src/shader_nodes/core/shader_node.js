@@ -46,16 +46,29 @@ LGraphShader.prototype.onWidget = function(e,widget)
 
 }
 
+LGraphShader.prototype.getFullCode = function(slot, scope) {
+    var path = this.getInputNodePath(slot);
+    if(slot == 6)
+        console.log(path);
+
+    for(var i = 0; i < path.length; ++i){
+        path[i].processInputCode(scope);
+    }
+    var code = this.getInputCode(slot) || LiteGraph.EMPTY_CODE; // 0 it's the color
+    return code;
+}
 
 LGraphShader.prototype.processInputCode = function() {
 
-    var color_code = this.getInputCode(0) || LiteGraph.EMPTY_CODE; // 0 it's the color
-    var normal_code = this.getInputCode(1) || LiteGraph.EMPTY_CODE; // 1 it's the normal
-    var emission_code = this.getInputCode(2) || LiteGraph.EMPTY_CODE; // 2 it's the emission
-    var specular_code = this.getInputCode(3) || LiteGraph.EMPTY_CODE; // 3 it's the specular
-    var gloss_code = this.getInputCode(4) || LiteGraph.EMPTY_CODE; //  4 it's the gloss
-    var alpha_code = this.getInputCode(5) || LiteGraph.EMPTY_CODE; //  5 it's the alpha
-    var world_offset_code = this.getInputCode(6) || LiteGraph.EMPTY_CODE; // 1 it's the position offset
+    var color_code = this.getFullCode(0, CodePiece.FRAGMENT);
+    var normal_code = this.getFullCode(1, CodePiece.FRAGMENT);
+    var emission_code = this.getFullCode(2, CodePiece.FRAGMENT);
+    var specular_code = this.getFullCode(3, CodePiece.FRAGMENT);
+    var gloss_code = this.getFullCode(4, CodePiece.FRAGMENT);
+    var alpha_code = this.getFullCode(5, CodePiece.FRAGMENT);
+    var world_offset_code = this.getFullCode(6, CodePiece.VERTEX);
+
+
 
     var shader = this.shader_piece.createShader(color_code,normal_code,emission_code,specular_code,gloss_code,alpha_code,world_offset_code);
     this.graph.shader_output = shader;
