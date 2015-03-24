@@ -88,11 +88,11 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
 }
 
 ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emission,specular,gloss,alpha,offset) {
-//    albedo.merge(normal);
-//    albedo.merge(emission);
-//    albedo.merge(specular);
-//    albedo.merge(gloss);
-//    albedo.merge(alpha);
+    albedo.merge(normal);
+    albedo.merge(emission);
+    albedo.merge(specular);
+    albedo.merge(gloss);
+    albedo.merge(alpha);
 //    this.options = {
 //        gloss:{step:0.01},
 //        displacement_factor:{step:0.01},
@@ -164,11 +164,11 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     }
 
 
-    for (var i = 0, l = ids.length; i < l; i++) {
-        r += "      "+body_hash[ids[i]].str;
-    }
-    if(ids.length > 0)
-        r += "      normal = normalize("+normal.getOutputVar()+".xyz);\n";
+//    for (var i = 0, l = ids.length; i < l; i++) {
+//        r += "      "+body_hash[ids[i]].str;
+//    }
+//    if(ids.length > 0)
+//        r += "      normal = normalize("+normal.getOutputVar()+".xyz);\n";
 
 //    ids = offset.fragment.getBodyIds();
 //    body_hash = offset.fragment.getBody();
@@ -186,9 +186,9 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
 
     ids = specular.fragment.getBodyIds();
     body_hash = specular.fragment.getBody();
-    for (var i = 0, l = ids.length; i < l; i++) {
-        r += "      "+body_hash[ids[i]].str;
-    }
+//    for (var i = 0, l = ids.length; i < l; i++) {
+//        r += "      "+body_hash[ids[i]].str;
+//    }
     if(ids.length == 0){
         r += "      float specular_intensity = 1.0;\n";
     } else{
@@ -197,15 +197,18 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
 
     ids = gloss.fragment.getBodyIds();
     body_hash = gloss.fragment.getBody();
-    for (var i = 0, l = ids.length; i < l; i++) {
-        r += "      "+body_hash[ids[i]].str;
-    }
+//    for (var i = 0, l = ids.length; i < l; i++) {
+//        r += "      "+body_hash[ids[i]].str;
+//    }
     if(ids.length == 0){
         r += "      float gloss = "+gloss_prop+";\n";
     } else{
         r +="      float gloss = "+gloss.getOutputVar()+";\n";
     }
 
+    ids = normal.fragment.getBodyIds();
+    if(ids.length > 0)
+        r += "      normal = normalize("+normal.getOutputVar()+".xyz);\n";
     r +="      float ambient_color = 0.3;\n" +
         "      vec3 light_dir = normalize("+light_dir+");\n" +
         "      float lambertian = max(dot(light_dir,normal), 0.0);\n" +
