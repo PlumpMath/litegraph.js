@@ -48,9 +48,6 @@ LGraphShader.prototype.onWidget = function(e,widget)
 
 LGraphShader.prototype.getFullCode = function(slot, scope) {
     var path = this.getInputNodePath(slot);
-    if(slot == 6)
-        console.log(path);
-
     for(var i = 0; i < path.length; ++i){
         path[i].processInputCode(scope);
     }
