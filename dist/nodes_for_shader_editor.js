@@ -329,13 +329,24 @@ LGraphConstColor.prototype.onDrawBackground = function(ctx)
 
 }
 
+
 LGraphConstColor.prototype.onExecute = function()
 {
-    this.codes[0] = this.shader_piece.getCode("vec3_"+this.id, LiteGraph.hexToColor(this.properties["color"]), CodePiece.FRAGMENT); // need to check scope
-    this.codes[0].order = this.order;
+    this.processNodePath();
 }
 
+LGraphConstColor.prototype.processNodePath = function()
+{
+    var input = [];
+    this.node_path[0] = input;
+    input.push(this);
+}
 
+LGraphConstColor.prototype.processInputCode = function(scope)
+{
+    this.codes[0] = this.shader_piece.getCode("vec3_"+this.id, LiteGraph.hexToColor(this.properties["color"]), scope); // need to check scope
+    this.codes[0].order = this.order;
+}
 
 LiteGraph.registerNodeType("constants/"+LGraphConstColor.title, LGraphConstColor);
 
@@ -365,10 +376,22 @@ LGraphConstant.prototype.setValue = function(v)
 
 LGraphConstant.prototype.onExecute = function()
 {
-    this.codes[0] = this.shader_piece.getCode("float_"+this.id, this.properties["value"].toFixed(3), CodePiece.FRAGMENT); // need to check scope
-    this.codes[0].order = this.order;
+    this.processNodePath();
 
     this.setOutputData(0, parseFloat( this.properties["value"] ) );
+}
+
+LGraphConstant.prototype.processNodePath = function()
+{
+    var input = [];
+    this.node_path[0] = input;
+    input.push(this);
+}
+
+LGraphConstant.prototype.processInputCode = function(scope)
+{
+    this.codes[0] = this.shader_piece.getCode("float_"+this.id, this.properties["value"].toFixed(3), scope); // need to check scope
+    this.codes[0].order = this.order;
 }
 
 LGraphConstant.prototype.onDrawBackground = function(ctx)
@@ -450,7 +473,19 @@ LGraphConstVec2.prototype.setValue = function(v1,v2)
 
 LGraphConstVec2.prototype.onExecute = function()
 {
-    this.codes[0] = this.shader_piece.getCode("vec2_"+this.id, this.valueToString(), CodePiece.FRAGMENT); // need to check scope
+    this.processNodePath();
+}
+
+LGraphConstVec2.prototype.processNodePath = function()
+{
+    var input = [];
+    this.node_path[0] = input;
+    input.push(this);
+}
+
+LGraphConstVec2.prototype.processInputCode = function(scope)
+{
+    this.codes[0] = this.shader_piece.getCode("vec2_"+this.id, this.valueToString(), scope); // need to check scope
     this.codes[0].order = this.order;
 }
 
@@ -500,7 +535,19 @@ LGraphConstVec3.prototype.setValue = function(v1,v2,v3)
 
 LGraphConstVec3.prototype.onExecute = function()
 {
-    this.codes[0] = this.shader_piece.getCode("vec3_"+this.id, this.valueToString(), CodePiece.FRAGMENT); // need to check scope
+    this.processNodePath();
+}
+
+LGraphConstVec3.prototype.processNodePath = function()
+{
+    var input = [];
+    this.node_path[0] = input;
+    input.push(this);
+}
+
+LGraphConstVec3.prototype.processInputCode = function(scope)
+{
+    this.codes[0] = this.shader_piece.getCode("vec3_"+this.id, this.valueToString(), scope); // need to check scope
     this.codes[0].order = this.order;
 }
 
@@ -551,10 +598,22 @@ LGraphConstVec4.prototype.setValue = function(v1,v2,v3,v4)
     this.setDirtyCanvas(true);
 };
 
+LGraphConstVec4.prototype.processNodePath = function()
+{
+    var input = [];
+    this.node_path[0] = input;
+    input.push(this);
+}
+
+LGraphConstVec4.prototype.processInputCode = function(scope)
+{
+    this.codes[0] = this.shader_piece.getCode("vec4_"+this.id, this.valueToString(), scope); // need to check scope
+    this.codes[0].order = this.order;
+}
+
 LGraphConstVec4.prototype.onExecute = function()
 {
-    this.codes[0] = this.shader_piece.getCode("vec4_"+this.id, this.valueToString(), CodePiece.FRAGMENT); // need to check scope
-    this.codes[0].order = this.order;
+    this.processNodePath();
 }
 
 LGraphConstVec4.prototype.onDrawBackground = function(ctx)

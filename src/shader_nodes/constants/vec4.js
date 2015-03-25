@@ -31,10 +31,22 @@ LGraphConstVec4.prototype.setValue = function(v1,v2,v3,v4)
     this.setDirtyCanvas(true);
 };
 
+LGraphConstVec4.prototype.processNodePath = function()
+{
+    var input = [];
+    this.node_path[0] = input;
+    input.push(this);
+}
+
+LGraphConstVec4.prototype.processInputCode = function(scope)
+{
+    this.codes[0] = this.shader_piece.getCode("vec4_"+this.id, this.valueToString(), scope); // need to check scope
+    this.codes[0].order = this.order;
+}
+
 LGraphConstVec4.prototype.onExecute = function()
 {
-    this.codes[0] = this.shader_piece.getCode("vec4_"+this.id, this.valueToString(), CodePiece.FRAGMENT); // need to check scope
-    this.codes[0].order = this.order;
+    this.processNodePath();
 }
 
 LGraphConstVec4.prototype.onDrawBackground = function(ctx)

@@ -28,7 +28,19 @@ LGraphConstVec2.prototype.setValue = function(v1,v2)
 
 LGraphConstVec2.prototype.onExecute = function()
 {
-    this.codes[0] = this.shader_piece.getCode("vec2_"+this.id, this.valueToString(), CodePiece.FRAGMENT); // need to check scope
+    this.processNodePath();
+}
+
+LGraphConstVec2.prototype.processNodePath = function()
+{
+    var input = [];
+    this.node_path[0] = input;
+    input.push(this);
+}
+
+LGraphConstVec2.prototype.processInputCode = function(scope)
+{
+    this.codes[0] = this.shader_piece.getCode("vec2_"+this.id, this.valueToString(), scope); // need to check scope
     this.codes[0].order = this.order;
 }
 

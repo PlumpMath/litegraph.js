@@ -88,6 +88,8 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
 }
 
 ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emission,specular,gloss,alpha,offset) {
+    albedo.fragment.setBody("normal = normalize("+normal.getOutputVar()+".xyz);\n");
+
     albedo.merge(normal);
     albedo.merge(emission);
     albedo.merge(specular);
@@ -158,9 +160,9 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
             "      vec3 dp2perp = cross( dp2, v_normal );\n" +
             "      vec3 dp1perp = cross( v_normal, dp1 );\n" +
             "      vec3 tangent = dp2perp * duv1.x + dp1perp * duv2.x;\n" +
-            "      vec3 bitangent = dp2perp * duv1.y + dp1perp * duv2.y;\n" +
-            "      float invmax = inversesqrt( max( dot(tangent,tangent), dot(bitangent,bitangent) ) );\n" +
-            "      mat3 TBN = mat3( tangent * invmax, bitangent * invmax, v_normal );\n";
+            "      vec3 binormal = dp2perp * duv1.y + dp1perp * duv2.y;\n" +
+            "      float invmax = inversesqrt( max( dot(tangent,tangent), dot(binormal,binormal) ) );\n" +
+            "      mat3 TBN = mat3( tangent * invmax, binormal * invmax, v_normal );\n";
     }
 
 
@@ -206,9 +208,9 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
         r +="      float gloss = "+gloss.getOutputVar()+";\n";
     }
 
-    ids = normal.fragment.getBodyIds();
-    if(ids.length > 0)
-        r += "      normal = normalize("+normal.getOutputVar()+".xyz);\n";
+//    ids = normal.fragment.getBodyIds();
+//    if(ids.length > 0)
+//        r += "      normal = normalize("+normal.getOutputVar()+".xyz);\n";
     r +="      float ambient_color = 0.3;\n" +
         "      vec3 light_dir = normalize("+light_dir+");\n" +
         "      float lambertian = max(dot(light_dir,normal), 0.0);\n" +

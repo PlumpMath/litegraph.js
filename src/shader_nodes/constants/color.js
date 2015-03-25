@@ -24,12 +24,23 @@ LGraphConstColor.prototype.onDrawBackground = function(ctx)
 
 }
 
+
 LGraphConstColor.prototype.onExecute = function()
 {
-    this.codes[0] = this.shader_piece.getCode("vec3_"+this.id, LiteGraph.hexToColor(this.properties["color"]), CodePiece.FRAGMENT); // need to check scope
-    this.codes[0].order = this.order;
+    this.processNodePath();
 }
 
+LGraphConstColor.prototype.processNodePath = function()
+{
+    var input = [];
+    this.node_path[0] = input;
+    input.push(this);
+}
 
+LGraphConstColor.prototype.processInputCode = function(scope)
+{
+    this.codes[0] = this.shader_piece.getCode("vec3_"+this.id, LiteGraph.hexToColor(this.properties["color"]), scope); // need to check scope
+    this.codes[0].order = this.order;
+}
 
 LiteGraph.registerNodeType("constants/"+LGraphConstColor.title, LGraphConstColor);

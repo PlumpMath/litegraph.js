@@ -23,10 +23,22 @@ LGraphConstant.prototype.setValue = function(v)
 
 LGraphConstant.prototype.onExecute = function()
 {
-    this.codes[0] = this.shader_piece.getCode("float_"+this.id, this.properties["value"].toFixed(3), CodePiece.FRAGMENT); // need to check scope
-    this.codes[0].order = this.order;
+    this.processNodePath();
 
     this.setOutputData(0, parseFloat( this.properties["value"] ) );
+}
+
+LGraphConstant.prototype.processNodePath = function()
+{
+    var input = [];
+    this.node_path[0] = input;
+    input.push(this);
+}
+
+LGraphConstant.prototype.processInputCode = function(scope)
+{
+    this.codes[0] = this.shader_piece.getCode("float_"+this.id, this.properties["value"].toFixed(3), scope); // need to check scope
+    this.codes[0].order = this.order;
 }
 
 LGraphConstant.prototype.onDrawBackground = function(ctx)

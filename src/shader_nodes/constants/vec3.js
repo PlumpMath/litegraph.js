@@ -30,7 +30,19 @@ LGraphConstVec3.prototype.setValue = function(v1,v2,v3)
 
 LGraphConstVec3.prototype.onExecute = function()
 {
-    this.codes[0] = this.shader_piece.getCode("vec3_"+this.id, this.valueToString(), CodePiece.FRAGMENT); // need to check scope
+    this.processNodePath();
+}
+
+LGraphConstVec3.prototype.processNodePath = function()
+{
+    var input = [];
+    this.node_path[0] = input;
+    input.push(this);
+}
+
+LGraphConstVec3.prototype.processInputCode = function(scope)
+{
+    this.codes[0] = this.shader_piece.getCode("vec3_"+this.id, this.valueToString(), scope); // need to check scope
     this.codes[0].order = this.order;
 }
 
