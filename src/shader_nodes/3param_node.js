@@ -35,7 +35,7 @@ LGraph3ParamNode.prototype.processInputCode = function(scope)
             this.getOutputType()); // output var must be fragment
         // if the alpha is an input, otherwise hardcoded
         // we need to set the order into the code so the lines set up correctly
-        output_code.order = this.order;
+        output_code.setOrder(this.order);
 
         if(code_C){
             output_code.merge(code_C);

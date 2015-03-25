@@ -41,7 +41,7 @@ LGraphConstVec4.prototype.processNodePath = function()
 LGraphConstVec4.prototype.processInputCode = function(scope)
 {
     this.codes[0] = this.shader_piece.getCode("vec4_"+this.id, this.valueToString(), scope); // need to check scope
-    this.codes[0].order = this.order;
+    this.codes[0].setOrder(this.order);
 }
 
 LGraphConstVec4.prototype.onExecute = function()

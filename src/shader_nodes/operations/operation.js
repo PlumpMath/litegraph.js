@@ -48,9 +48,13 @@ LGraphOperation.prototype.infereTypes = function( output, target_slot) {
 LGraphOperation.prototype.onGetNullCode = function(slot, scope)
 {
     if(slot == 0){
-        return this.number_piece.getCode("float_"+this.id, this.properties["A"].toFixed(3), scope); // need to check scope;
+        var code = this.number_piece.getCode("float_"+this.id, this.properties["A"].toFixed(3), scope);
+        code.setOrder(this.order -1);
+        return code;
     } else if(slot == 1){
-        return this.number_piece.getCode("float_"+this.id, this.properties["B"].toFixed(3), scope); // need to check scope;
+        var code = this.number_piece.getCode("float_"+this.id, this.properties["B"].toFixed(3), scope);
+        code.setOrder(this.order -1);
+        return code;
     }
 
 }

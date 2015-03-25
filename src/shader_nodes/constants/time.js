@@ -26,7 +26,7 @@ LGraphTime.prototype.processNodePath = function()
 LGraphTime.prototype.processInputCode = function(scope)
 {
     this.codes[0] = this.shader_piece.getCode(scope); // need to check scope
-    this.codes[0].order = this.order;
+    this.codes[0].setOrder(this.order);
 }
 
 LiteGraph.registerNodeType("constants/"+LGraphTime.title , LGraphTime);

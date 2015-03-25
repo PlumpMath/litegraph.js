@@ -31,7 +31,7 @@ LGraph1ParamNode.prototype.processInputCode = function(scope)
     if(code_A){
         // (output, incident, normal)
         var output_code = this.codes[0] = this.shader_piece.getCode(this.getCodeName()+"_"+this.id, code_A.getOutputVar(), scope, this.getOutputType()); // output var must be fragment
-        output_code.order = this.order;
+        output_code.setOrder(this.order);
         output_code.merge(code_A);
     }
 

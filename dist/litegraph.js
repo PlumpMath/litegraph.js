@@ -4959,8 +4959,12 @@ CodePiece.prototype.setBody = function(s, other_order)
 {
     if(s != ""){
         var id = s.hashCode();
-        if(this.body_hash[id] && this.body_hash[id].order > other_order){
-            this.body_hash[id].order = this.order;
+        var is_order_not_defined = this.body_hash[id] && typeof(this.body_hash[id].order) === 'undefined';
+        if(is_order_not_defined)
+            var debug = 1;
+        var new_order = is_order_not_defined ? other_order : this.order;
+        if(this.body_hash[id] && this.body_hash[id].order > other_order || is_order_not_defined){
+            this.body_hash[id].order = new_order;
             var index = this.body_ids.indexOf(id);
             this.body_ids.splice(index, 1);
             this.body_ids.unshift(id);
@@ -5052,8 +5056,18 @@ ShaderCode.prototype.getOutputVar = function()
     return this.output_var;
 };
 
+ShaderCode.prototype.setOrder = function(order)
+{
+    this.order = order;
+    this.vertex.order = this.order;
+    this.fragment.order = this.order;
+};
+
+
 ShaderCode.prototype.merge = function (other_code)
 {
+    if(other_code === LiteGraph.EMPTY_CODE || this === LiteGraph.EMPTY_CODE)
+        return;
     this.vertex.order = this.order;
     this.fragment.order = this.order;
     this.vertex.merge(other_code.vertex);
@@ -5155,8 +5169,8 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
     for (var i = 0, l = ids.length; i < l; i++) {
         r += "      "+body_hash[ids[i]].str;
     }
-    if (includes["v_pos"])
-        r += "      v_pos = (u_model * vec4(pos,1.0)).xyz;\n";
+    //if (includes["v_pos"])
+    r += "      v_pos = (u_model * vec4(pos,1.0)).xyz;\n";
     r += "      gl_Position = u_mvp * vec4(pos,1.0);\n"+
         "}\n";
 
@@ -5164,7 +5178,17 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
 }
 
 ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emission,specular,gloss,alpha,offset) {
-    albedo.fragment.setBody("normal = normalize("+normal.getOutputVar()+".xyz);\n");
+
+
+    var has_gloss = gloss.fragment.getBodyIds().length  > 0;
+    var has_albedo = albedo.fragment.getBodyIds().length  > 0;
+    var has_normal = normal.fragment.getBodyIds().length  > 0;
+    var has_specular = specular.fragment.getBodyIds().length  > 0;
+    var has_gloss = gloss.fragment.getBodyIds().length  > 0;
+    var has_alpha = alpha.fragment.getBodyIds().length  > 0;
+
+    if(has_albedo && has_normal) albedo.fragment.setBody("normal = normalize("+normal.getOutputVar()+".xyz);\n");
+   //else normal.fragment.setBody("normal = normalize("+normal.getOutputVar()+".xyz);\n");
 
     albedo.merge(normal);
     albedo.merge(emission);
@@ -5227,7 +5251,7 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
 
     var ids = normal.fragment.getBodyIds();
     var body_hash = normal.fragment.getBody();
-    if(ids.length > 0){
+    if(has_normal){
         // http://www.thetenthplanet.de/archives/1180
         r+= "      vec3 dp1 = dFdx( v_pos );\n" +
             "      vec3 dp2 = dFdy( v_pos );\n" +
@@ -5262,23 +5286,23 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
         r += "      "+body_hash[ids[i]].str;
     }
 
-    ids = specular.fragment.getBodyIds();
-    body_hash = specular.fragment.getBody();
+//    ids = specular.fragment.getBodyIds();
+//    body_hash = specular.fragment.getBody();
 //    for (var i = 0, l = ids.length; i < l; i++) {
 //        r += "      "+body_hash[ids[i]].str;
 //    }
-    if(ids.length == 0){
+    if(!has_specular){
         r += "      float specular_intensity = 1.0;\n";
     } else{
         r +="      float specular_intensity = "+specular.getOutputVar()+";\n";
     }
 
-    ids = gloss.fragment.getBodyIds();
-    body_hash = gloss.fragment.getBody();
+//    ids = gloss.fragment.getBodyIds();
+//    body_hash = gloss.fragment.getBody();
 //    for (var i = 0, l = ids.length; i < l; i++) {
 //        r += "      "+body_hash[ids[i]].str;
 //    }
-    if(ids.length == 0){
+    if( !has_gloss){
         r += "      float gloss = "+gloss_prop+";\n";
     } else{
         r +="      float gloss = "+gloss.getOutputVar()+";\n";

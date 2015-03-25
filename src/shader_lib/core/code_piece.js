@@ -30,8 +30,12 @@ CodePiece.prototype.setBody = function(s, other_order)
 {
     if(s != ""){
         var id = s.hashCode();
-        if(this.body_hash[id] && this.body_hash[id].order > other_order){
-            this.body_hash[id].order = this.order;
+        var is_order_not_defined = this.body_hash[id] && typeof(this.body_hash[id].order) === 'undefined';
+        if(is_order_not_defined)
+            var debug = 1;
+        var new_order = is_order_not_defined ? other_order : this.order;
+        if(this.body_hash[id] && this.body_hash[id].order > other_order || is_order_not_defined){
+            this.body_hash[id].order = new_order;
             var index = this.body_ids.indexOf(id);
             this.body_ids.splice(index, 1);
             this.body_ids.unshift(id);

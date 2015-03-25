@@ -17,8 +17,18 @@ ShaderCode.prototype.getOutputVar = function()
     return this.output_var;
 };
 
+ShaderCode.prototype.setOrder = function(order)
+{
+    this.order = order;
+    this.vertex.order = this.order;
+    this.fragment.order = this.order;
+};
+
+
 ShaderCode.prototype.merge = function (other_code)
 {
+    if(other_code === LiteGraph.EMPTY_CODE || this === LiteGraph.EMPTY_CODE)
+        return;
     this.vertex.order = this.order;
     this.fragment.order = this.order;
     this.vertex.merge(other_code.vertex);

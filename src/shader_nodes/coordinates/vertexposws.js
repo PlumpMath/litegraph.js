@@ -24,7 +24,7 @@ LGraphVertexPosWS.prototype.processNodePath = function()
 LGraphVertexPosWS.prototype.processInputCode = function(scope)
 {
     this.codes[0] = this.shader_piece.getCode(); // I need to check texture id
-    this.codes[0].order = this.order;
+    this.codes[0].setOrder(this.order);
 }
 
 LiteGraph.registerNodeType("coordinates/"+LGraphVertexPosWS.title, LGraphVertexPosWS);

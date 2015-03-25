@@ -39,7 +39,7 @@ LGraph2ParamNode.prototype.processInputCode = function(scope)
             scope,
             this.getOutputType()); // output var must be fragment
         // if the alpha is an input, otherwise hardcoded
-        output_code.order = this.order;
+        output_code.setOrder(this.order);
         output_code.merge(code_A);
         output_code.merge(code_B);
     }

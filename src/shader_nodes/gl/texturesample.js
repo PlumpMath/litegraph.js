@@ -328,7 +328,7 @@ LGraphTexture.prototype.processInputCode = function(scope)
     if(input_code){
         var texture_name = "u_" + (this.properties.name ? this.properties.name : "default_name") + "_texture"; // TODO check if there is a texture
         var color_output = this.codes[1] = this.shader_piece.getCode("color_"+this.id, input_code.getOutputVar(), texture_name, texture_type, scope); // 1 it's the color output
-        color_output.order = this.order;
+        color_output.setOrder(this.order);
 
         color_output.merge(input_code);
         var r_chan = color_output.clone();
@@ -359,8 +359,11 @@ LGraphTexture.prototype.processInputCode = function(scope)
 
 LGraphTexture.prototype.onGetNullCode = function(slot)
 {
-    if(slot == 0)
-        return this.uvs_piece.getCode();
+    if(slot == 0) {
+        var code = this.uvs_piece.getCode();
+        code.setOrder(this.order -1);
+        return code;
+    }
 
 }
 
