@@ -5091,11 +5091,17 @@ var ShaderConstructor = {};
 
 
 // codes it's [vertex, fragment]
-ShaderConstructor.createShader = function (properties , albedo,normal,emission,specular,gloss,alpha,offset) {
+ShaderConstructor.createShader = function (properties , albedo,normal,emission,specular,gloss,alpha,alphaclip,offset) {
 
+    albedo.merge(normal);
+    albedo.merge(emission);
+    albedo.merge(specular);
+    albedo.merge(gloss);
+    albedo.merge(alpha);
+    albedo.merge(alphaclip);
 
-    var vertex_code = this.createVertexCode(properties ,albedo,normal,emission,specular,gloss,alpha,offset);
-    var fragment_code = this.createFragmentCode(properties ,albedo,normal,emission,specular,gloss,alpha,offset);
+    var vertex_code = this.createVertexCode(properties ,albedo,normal,emission,specular,gloss,alpha,alphaclip,offset);
+    var fragment_code = this.createFragmentCode(properties ,albedo,normal,emission,specular,gloss,alpha,alphaclip,offset);
 
     var shader = {};
     shader.vertex_code = vertex_code;
@@ -5106,7 +5112,7 @@ ShaderConstructor.createShader = function (properties , albedo,normal,emission,s
 
 }
 
-ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emission,specular,gloss,alpha,offset) {
+ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emission,specular,gloss,alpha,alphaclip,offset) {
 
     var displacement_factor = properties.displacement_factor.toFixed(4);
 
@@ -5117,6 +5123,7 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
     for (var line in specular.vertex.includes) { includes[line] = 1; }
     for (var line in gloss.vertex.includes) { includes[line] = 1; }
     for (var line in alpha.vertex.includes) { includes[line] = 1; }
+    for (var line in alphaclip.vertex.includes) { includes[line] = 1; }
     for (var line in offset.vertex.includes) { includes[line] = 1; }
 
     // header
@@ -5160,7 +5167,7 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
 
     }
     if(ids.length > 0){
-        r += "      pos += a_normal * "+offset.getOutputVar()+".x * "+displacement_factor+";\n";
+        r += "      pos += a_normal * "+offset.getOutputVar()+" * "+displacement_factor+";\n";
     }
 
     var ids = albedo.vertex.getBodyIds();
@@ -5176,7 +5183,7 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
     return r;
 }
 
-ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emission,specular,gloss,alpha,offset) {
+ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emission,specular,gloss,alpha,alphaclip, offset) {
 
 
     var has_gloss = gloss.fragment.getBodyIds().length  > 0;
@@ -5187,11 +5194,6 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     var has_alpha = alpha.fragment.getBodyIds().length  > 0;
 
 
-    albedo.merge(normal);
-    albedo.merge(emission);
-    albedo.merge(specular);
-    albedo.merge(gloss);
-    albedo.merge(alpha);
 
 
     var color = LiteGraph.hexToColor(properties.color);
@@ -5298,6 +5300,25 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
 //    for (var i = 0, l = ids.length; i < l; i++) {
 //        r += "      "+body_hash[ids[i]].str;
 //    }
+
+    //    ids = specular.fragment.getBodyIds();
+//    body_hash = specular.fragment.getBody();
+//    for (var i = 0, l = ids.length; i < l; i++) {
+//        r += "      "+body_hash[ids[i]].str;
+//    }
+
+    if(alphaclip.getOutputVar()) {
+        r += "       if ("+alphaclip.getOutputVar()+" < 0.5)\n" +
+            "      {\n" +
+            "           discard;\n" +
+            "      }\n";
+    }
+
+
+
+
+
+
     if(!has_specular){
         r += "      float specular_intensity = 1.0;\n";
     } else{
@@ -5906,7 +5927,7 @@ PPanner.prototype.getCode = function ( params) {
     var dy = params.dy;
     var scope = params.scope;
     var out_type = params.out_type;
-    var order = params.order || Number.MAX_VALUE;
+    var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
 
     var vertex = new CodePiece(order);
     vertex.setBody(this.getVertexCode(out_var, input, time, dx, dy, scope, out_type));

@@ -12,7 +12,8 @@ function LGraphShader()
     this.addInput("specular","float", {float:1}); // specular power in 0..1 range
     this.addInput("gloss","float", {float:1});
     this.addInput("alpha","float", {float:1});
-    this.addInput("displacement","vec3", {vec3:1, vec4:1});
+    this.addInput("alpha clip","float", {float:1});
+    this.addInput("vertex offset","float", {float:1});
 
 
     //inputs: ["base color","metallic", "specular", "roughness", "emissive color", "opacity", "opacitiy mask", "normal", "world position offset", "world displacement", "tesselation multiplier", "subsurface color", "ambient occlusion", "refraction"],
@@ -81,11 +82,12 @@ LGraphShader.prototype.processInputCode = function() {
     var specular_code = this.getFullCode(3, CodePiece.FRAGMENT,0);
     var gloss_code = this.getFullCode(4, CodePiece.FRAGMENT,0);
     var alpha_code = this.getFullCode(5, CodePiece.FRAGMENT,0);
-    var world_offset_code = this.getFullCode(6, CodePiece.VERTEX,0);
+    var alphaclip_code = this.getFullCode(6, CodePiece.FRAGMENT,0);
+    var world_offset_code = this.getFullCode(7, CodePiece.VERTEX,0);
 
 
 
-    var shader = this.shader_piece.createShader(this.properties ,color_code,normal_code,emission_code,specular_code,gloss_code,alpha_code,world_offset_code);
+    var shader = this.shader_piece.createShader(this.properties ,color_code,normal_code,emission_code,specular_code,gloss_code,alpha_code,alphaclip_code,world_offset_code);
     this.graph.shader_output = shader;
     var texture_nodes = this.graph.findNodesByType("texture/"+LGraphTexture.title);// we need to find all the textures used in the graph
     this.graph.shader_textures = [];

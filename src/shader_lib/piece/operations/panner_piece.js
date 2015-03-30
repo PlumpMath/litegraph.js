@@ -43,7 +43,7 @@ PPanner.prototype.getCode = function ( params) {
     var dy = params.dy;
     var scope = params.scope;
     var out_type = params.out_type;
-    var order = params.order || Number.MAX_VALUE;
+    var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
 
     var vertex = new CodePiece(order);
     vertex.setBody(this.getVertexCode(out_var, input, time, dx, dy, scope, out_type));
