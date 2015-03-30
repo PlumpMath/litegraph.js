@@ -1,5 +1,12 @@
 var ShaderConstructor = {};
 
+function sortMapByValue(map)
+{
+    var tupleArray = [];
+    for (var key in map) tupleArray.push([key, map[key]]);
+    tupleArray.sort(function (a, b) { return a[1].order - b[1].order });
+    return tupleArray;
+}
 
 // codes it's [vertex, fragment]
 ShaderConstructor.createShader = function (properties , albedo,normal,emission,specular,gloss,alpha,alphaclip,offset) {
@@ -10,6 +17,8 @@ ShaderConstructor.createShader = function (properties , albedo,normal,emission,s
     albedo.merge(gloss);
     albedo.merge(alpha);
     albedo.merge(alphaclip);
+    albedo.merge(offset);
+
 
     var vertex_code = this.createVertexCode(properties ,albedo,normal,emission,specular,gloss,alpha,alphaclip,offset);
     var fragment_code = this.createFragmentCode(properties ,albedo,normal,emission,specular,gloss,alpha,alphaclip,offset);
@@ -58,10 +67,7 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
 
     for(var k in albedo.vertex.getHeader())
         r += k;
-    for(var k in normal.vertex.getHeader())
-        r += k;
-    for(var k in offset.vertex.getHeader())
-        r += k;
+
 
 
     // body
@@ -71,21 +77,19 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
     r += "      v_normal = (u_model * vec4(a_normal, 0.0)).xyz;\n";
     r += "      vec3 pos = a_vertex;\n";
 
-    var ids = offset.vertex.getBodyIds();
-    var body_hash = offset.vertex.getBody();
-    for (var i = 0, l = ids.length; i < l; i++) {
-        r += "      "+body_hash[ids[i]].str;
-
-    }
-    if(ids.length > 0){
-        r += "      pos += a_normal * "+offset.getOutputVar()+" * "+displacement_factor+";\n";
-    }
 
     var ids = albedo.vertex.getBodyIds();
     var body_hash = albedo.vertex.getBody();
-    for (var i = 0, l = ids.length; i < l; i++) {
-        r += "      "+body_hash[ids[i]].str;
+    var sorted_map = sortMapByValue(body_hash);
+    for(var i in sorted_map){
+        r += "      "+sorted_map[i][1].str;
+        //console.log(sorted_map[i][1].str +" "+    sorted_map[i][1].order);
     }
+
+    if(offset.getOutputVar()){
+        r += "      pos += a_normal * "+offset.getOutputVar()+" * "+displacement_factor+";\n";
+    }
+
     //if (includes["v_pos"])
     r += "      v_pos = (u_model * vec4(pos,1.0)).xyz;\n";
     r += "      gl_Position = u_mvp * vec4(pos,1.0);\n"+
@@ -121,11 +125,7 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     for (var line in alpha.fragment.includes) { includes[line] = 1; }
     for (var line in offset.fragment.includes) { includes[line] = 1; }
 
-    var header = {};
-    for (var line in albedo.fragment.getHeader()) { header[line] = 1; }
-    for (var line in normal.fragment.getHeader()) { header[line] = 1; }
-    for (var line in specular.fragment.getHeader()) { header[line] = 1; }
-    for (var line in gloss.fragment.getHeader()) { header[line] = 1; }
+
 
     // header
     var r = "precision highp float;\n"+
@@ -141,7 +141,7 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     //if (includes["u_eye"])
         r += "uniform vec3 u_eye;\n";
     r += "uniform vec4 u_color;\n";
-    for(var i in header)
+    for(var i in albedo.fragment.getHeader())
         r += i;
 //    for(var k in offset.fragment.getHeader())
 //        r += k;
@@ -184,20 +184,13 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
 //    if(ids.length > 0)
 //        r += "      normal = normalize("+offset.getOutputVar()+".xyz);\n";
 
-    function sortMapByValue(map)
-    {
-        var tupleArray = [];
-        for (var key in map) tupleArray.push([key, map[key]]);
-        tupleArray.sort(function (a, b) { return a[1].order - b[1].order });
-        return tupleArray;
-    }
+
 
     ids = albedo.fragment.getBodyIds();
     body_hash = albedo.fragment.getBody();
     var sorted_map = sortMapByValue(body_hash);
     for(var i in sorted_map){
         r += "      "+sorted_map[i][1].str;
-        console.log(sorted_map[i][1].str +" "+    sorted_map[i][1].order);
     }
 
 //    for (var i = 0, l = ids.length; i < l; i++) {
