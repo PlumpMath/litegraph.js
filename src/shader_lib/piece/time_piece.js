@@ -17,11 +17,14 @@ PTime.getFragmentCode = function () {
 }
 
 
-PTime.getCode = function () {
-    var fragment = new CodePiece();
+PTime.getCode = function (params) {
+    var scope = params.scope;
+    var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
+
+    var fragment = new CodePiece(order);
     fragment.setIncludes(PTime.includes);
 
-    var vertex = new CodePiece();
+    var vertex = new CodePiece(order);
     vertex.setBody(this.getVertexCode());
     vertex.setIncludes(PTime.includes);
 

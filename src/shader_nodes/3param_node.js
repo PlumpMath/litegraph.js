@@ -27,12 +27,16 @@ LGraph3ParamNode.prototype.processInputCode = function(scope)
     var code_C = this.getInputCode(2) || this.onGetNullCode(2, scope);
     if(code_A && code_B && code_C){
         // (out_var, a, b, c, scope, out_type)
-        output_code = this.codes[0] = this.shader_piece.getCode( this.getCodeName()+"_"+this.id,
-            code_A.getOutputVar(),
-            code_B.getOutputVar(),
-            code_C.getOutputVar(),
-            scope,
-            this.getOutputType()); // output var must be fragment
+
+        output_code = this.codes[0] = this.shader_piece.getCode(
+                { out_var:this.getCodeName() + "_" + this.id,
+                    a:code_A.getOutputVar(),
+                    b:code_B.getOutputVar(),
+                    c:code_C.getOutputVar(),
+                    scope:scope,
+                    out_type:this.getOutputType(),
+                    order:this.order
+                }); // output var must be fragment
         // if the alpha is an input, otherwise hardcoded
         // we need to set the order into the code so the lines set up correctly
         output_code.setOrder(this.order);

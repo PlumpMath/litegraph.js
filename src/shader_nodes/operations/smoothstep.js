@@ -45,13 +45,21 @@ LGraphSmooth.desc = "smoothstep of input";
 LGraphSmooth.prototype.onGetNullCode = function(slot, scope)
 {
     if(slot == 0){
-        var code = this.number_piece.getCode("float_"+this.id+""+ slot, this.properties["lower"].toFixed(3), scope); // need to check scope;
-        code.setOrder(this.order -1);
+        var code = this.number_piece.getCode({
+                out_var:"float_"+this.id+""+ slot,
+            a:this.properties["lower"].toFixed(3),
+            scope:scope,
+            order:this.order-1
+        });
         return code;
     }
     else if(slot == 1){
-        var code = this.number_piece.getCode("float_"+this.id+""+ slot, this.properties["upper"].toFixed(3), scope); // need to check scope;
-        code.setOrder(this.order -1);
+        var code = this.number_piece.getCode({
+            out_var:"float_"+this.id+""+ slot,
+            a:this.properties["upper"].toFixed(3),
+            scope:scope,
+            order:this.order-1
+        });
         return code;
     }
 

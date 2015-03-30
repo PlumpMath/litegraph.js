@@ -39,8 +39,17 @@ LGraphPanner.prototype.processInputCode = function(scope)
     var code_time = this.getInputCode(1) || LiteGraph.EMPTY_CODE;
 
     //(out_var, input, dx, dy, scope, out_type)
-    var output_code = this.codes[0] = this.shader_piece.getCode("panner_"+this.id, code_input.getOutputVar(), code_time.getOutputVar() ,this.properties.SpeedX.toFixed(3), this.properties.SpeedY.toFixed(3), scope, "vec2"); // output var must be fragment
-    output_code.setOrder(this.order);
+
+    var output_code = this.codes[0] = this.shader_piece.getCode(
+        { out_var:"panner_"+this.id,
+        input:code_input.getOutputVar(),
+        time:code_time.getOutputVar(),
+        dx:this.properties.SpeedX.toFixed(3),
+        dy:this.properties.SpeedY.toFixed(3),
+        scope:scope,
+        out_type:"vec2",
+        order:this.order
+        });
 
     if(code_time != LiteGraph.EMPTY_CODE)
         output_code.merge(code_time);
@@ -52,8 +61,7 @@ LGraphPanner.prototype.processInputCode = function(scope)
 LGraphPanner.prototype.onGetNullCode = function(slot, scope)
 {
     if(slot == 0){
-        var code = this.uvs_piece.getCode();
-        code.setOrder(this.order -1);
+        var code = this.uvs_piece.getCode({order:this.order-1});
         return code;
     }
 

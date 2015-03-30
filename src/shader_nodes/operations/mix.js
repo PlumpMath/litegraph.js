@@ -44,8 +44,12 @@ LGraphMix.prototype.infereTypes = function( output, target_slot) {
 LGraphMix.prototype.onGetNullCode = function(slot, scope)
 {
     if(slot == 2){
-        var code = this.number_piece.getCode("float_"+this.id, this.properties["alpha"].toFixed(3), scope);
-        code.setOrder(this.order -1);
+        var code = this.number_piece.getCode(
+            { out_var:"float_"+this.id,
+            a:this.properties["alpha"].toFixed(3),
+            scope:scope,
+            order:this.order-1
+        });
         return code; // need to check scope;
     }
 

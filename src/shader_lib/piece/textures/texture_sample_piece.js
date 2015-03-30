@@ -6,8 +6,8 @@ var PTextureSample = {};
 PTextureSample.id = "texture_sample";
 PTextureSample.includes = {v_pos:1, v_coord:1, camera_to_pixel_ws:1, u_eye:1};
 
-PTextureSample.getVertexCode = function (output, input, texture_id, texture_type, scope) {
-    var code = new CodePiece();
+PTextureSample.getVertexCode = function (output, input, texture_id, texture_type, scope, order) {
+    var code = new CodePiece(order);
     var code_str = "";
     if(scope == CodePiece.VERTEX) {
         code.setIncludes(PTextureSample.includes);
@@ -19,9 +19,9 @@ PTextureSample.getVertexCode = function (output, input, texture_id, texture_type
     return code;
 }
 
-PTextureSample.getFragmentCode = function (output, input, texture_id, texture_type, scope) {
+PTextureSample.getFragmentCode = function (output, input, texture_id, texture_type, scope, order) {
     input = input || "v_coord";
-    var code = new CodePiece();
+    var code = new CodePiece(order);
     code.setIncludes(PTextureSample.includes);
     var code_str = "";
     if(scope == CodePiece.FRAGMENT) {
@@ -63,13 +63,20 @@ PTextureSample.getFragmentCode = function (output, input, texture_id, texture_ty
 }
 
 
-PTextureSample.getCode = function (output, input, texture_id, texture_type, scope) {
+PTextureSample.getCode = function (params) {
+    //output, input, texture_id, texture_type, scope
+    var out_var = params.out_var;
+    var input = params.input;
+    var texture_id = params.texture_id;
+    var texture_type = params.texture_type;
+    var scope = params.scope;
+    var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
 
-    var vertex = this.getVertexCode(output, input, texture_id, texture_type, scope);
+    var vertex = this.getVertexCode(out_var, input, texture_id, texture_type, scope , order);
 
-    var fragment = this.getFragmentCode(output, input, texture_id, texture_type, scope);
+    var fragment = this.getFragmentCode(out_var, input, texture_id, texture_type, scope, order);
 
-    return new ShaderCode(vertex, fragment, output);
+    return new ShaderCode(vertex, fragment, out_var);
 }
 
 

@@ -62,7 +62,8 @@ LGraphShader.prototype.onWidget = function(e,widget)
 
 }
 
-LGraphShader.prototype.getFullCode = function(slot, scope) {
+LGraphShader.prototype.getFullCode = function(slot, scope, modifier) {
+    CodePiece.ORDER_MODIFIER = modifier;
     var path = this.getInputNodePath(slot);
     for(var i = 0; i < path.length; ++i){
         path[i].processInputCode(scope);
@@ -73,13 +74,14 @@ LGraphShader.prototype.getFullCode = function(slot, scope) {
 
 LGraphShader.prototype.processInputCode = function() {
 
-    var color_code = this.getFullCode(0, CodePiece.FRAGMENT);
-    var normal_code = this.getFullCode(1, CodePiece.FRAGMENT);
-    var emission_code = this.getFullCode(2, CodePiece.FRAGMENT);
-    var specular_code = this.getFullCode(3, CodePiece.FRAGMENT);
-    var gloss_code = this.getFullCode(4, CodePiece.FRAGMENT);
-    var alpha_code = this.getFullCode(5, CodePiece.FRAGMENT);
-    var world_offset_code = this.getFullCode(6, CodePiece.VERTEX);
+    var color_code = this.getFullCode(0, CodePiece.FRAGMENT, 0);
+    var normal_code = this.getFullCode(1, CodePiece.FRAGMENT, 1000);
+    if(normal_code.getOutputVar()) normal_code.fragment.setBody("normal = normalize("+normal_code.getOutputVar()+".xyz);\n", -5);
+    var emission_code = this.getFullCode(2, CodePiece.FRAGMENT,0);
+    var specular_code = this.getFullCode(3, CodePiece.FRAGMENT,0);
+    var gloss_code = this.getFullCode(4, CodePiece.FRAGMENT,0);
+    var alpha_code = this.getFullCode(5, CodePiece.FRAGMENT,0);
+    var world_offset_code = this.getFullCode(6, CodePiece.VERTEX,0);
 
 
 

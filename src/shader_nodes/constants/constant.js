@@ -37,8 +37,13 @@ LGraphConstant.prototype.processNodePath = function()
 
 LGraphConstant.prototype.processInputCode = function(scope)
 {
-    this.codes[0] = this.shader_piece.getCode("float_"+this.id, this.properties["value"].toFixed(3), scope); // need to check scope
-    this.codes[0].setOrder(this.order);
+    this.codes[0] = this.shader_piece.getCode(
+        { out_var:"float_"+this.id,
+            a:this.properties["value"].toFixed(3),
+            scope:scope,
+            order:this.order
+        }); // need to check scope
+
 }
 
 LGraphConstant.prototype.onDrawBackground = function(ctx)

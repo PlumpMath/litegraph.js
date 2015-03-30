@@ -85,8 +85,13 @@ LGraphCubemap.prototype.processInputCode = function(scope)
     var input_code = this.getInputCode(0) || this.onGetNullCode(0); // get input in link 0
     if(input_code){
         var texture_name = "u_" + (this.properties.name ? this.properties.name : "default_name") + "_texture"; // TODO check if there is a texture
-        var color_code = this.codes[1] = this.shader_piece.getCode("color_"+this.id, input_code.getOutputVar(), texture_name, scope);
-        color_code.setOrder(this.order);
+        var color_code = this.codes[1] = this.shader_piece.getCode(
+            {   out_var:"color_"+this.id,
+            input:input_code.getOutputVar(),
+            texture_id:texture_name,
+            scope:scope,
+            order:this.order
+        });
         color_code.merge(input_code);
     } else {
         this.codes[0] = LiteGraph.EMPTY_CODE;
@@ -98,8 +103,7 @@ LGraphCubemap.prototype.processInputCode = function(scope)
 LGraphCubemap.prototype.onGetNullCode = function(slot)
 {
     if(slot == 0){
-        var code = this.vector_piece.getCode();
-        code.setOrder(this.order -1);
+        var code = this.vector_piece.getCode({order:this.order-1});
         return code;
     }
 

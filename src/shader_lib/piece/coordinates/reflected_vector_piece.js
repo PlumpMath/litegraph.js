@@ -24,12 +24,13 @@ PReflected.prototype.getFragmentCode = function () {
  *  @param {scope} either CodePiece.BOTH CodePiece.FRAGMENT CodePiece.VERTEX
  *  @param {out_type} in case the output var type has to be defined in run time example "vec3"
  */
-PReflected.prototype.getCode = function () {
-    var vertex = new CodePiece();
+PReflected.prototype.getCode = function (params) {
+    var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
+    var vertex = new CodePiece(order);
     vertex.setBody(this.getVertexCode());
     vertex.setIncludes(this.includes);
 
-    var fragment = new CodePiece();
+    var fragment = new CodePiece(order);
     fragment.setBody(this.getFragmentCode());
     fragment.setIncludes(this.includes );
 

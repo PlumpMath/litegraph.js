@@ -34,12 +34,19 @@ P2ParamFunc.prototype.getFragmentCode = function (out_var, a, b, scope, out_type
  *  @param {scope} either CodePiece.BOTH CodePiece.FRAGMENT CodePiece.VERTEX
  *  @param {out_type} in case the output var type has to be defined in run time example "vec3"
  */
-P2ParamFunc.prototype.getCode = function (out_var, a, b, scope, out_type) {
-    var vertex = new CodePiece();
+P2ParamFunc.prototype.getCode = function (params) {
+    var out_var = params.out_var;
+    var a = params.a;
+    var b = params.b;
+    var scope = params.scope;
+    var out_type = params.out_type;
+    var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
+
+    var vertex = new CodePiece(order);
     vertex.setBody(this.getVertexCode(out_var, a, b, scope, out_type));
     vertex.setIncludes(this.includes);
 
-    var fragment = new CodePiece();
+    var fragment = new CodePiece(order);
     fragment.setBody(this.getFragmentCode(out_var, a, b, scope, out_type));
     fragment.setIncludes(this.includes );
 
@@ -56,4 +63,5 @@ LiteGraph.CodeLib["mod"] = new P2ParamFunc (undefined, "mod");
 LiteGraph.CodeLib["min"] = new P2ParamFunc (undefined, "min");
 LiteGraph.CodeLib["max"] = new P2ParamFunc (undefined, "max");
 LiteGraph.CodeLib["step"] = new P2ParamFunc (undefined, "step");
+LiteGraph.CodeLib["pow"] = new P2ParamFunc (undefined, "pow");
 

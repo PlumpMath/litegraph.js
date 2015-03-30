@@ -6,14 +6,16 @@
 CodePiece.VERTEX = 1;
 CodePiece.FRAGMENT = 2;
 CodePiece.BOTH = 3;
-
-function CodePiece()
+CodePiece.ORDER_MODIFIER = 0;
+function CodePiece(order)
 {
     this.header = {}; // map for custom uniforms or variants
     this.body_hash = {}; // body hashmap
     this.body_ids = []; // body ids sorted  by insert order
     this.includes = {}; // map for standard uniforms
     this.scope = "";
+    this.order = typeof order !== 'undefined' ? order : Number.MAX_VALUE;
+    this.order -= CodePiece.ORDER_MODIFIER;
 }
 
 CodePiece.prototype.getBodyIds = function()
@@ -28,24 +30,22 @@ CodePiece.prototype.getBody = function()
 
 CodePiece.prototype.setBody = function(s, other_order)
 {
+
     if(s != ""){
         var id = s.hashCode();
-        var is_order_not_defined = this.body_hash[id] && typeof(this.body_hash[id].order) === 'undefined';
-        if(is_order_not_defined)
-            var debug = 1;
-        var new_order = is_order_not_defined ? other_order : this.order;
-        if(this.body_hash[id] && this.body_hash[id].order > other_order || is_order_not_defined){
-            this.body_hash[id].order = new_order;
-            var index = this.body_ids.indexOf(id);
-            this.body_ids.splice(index, 1);
+        var new_order = typeof other_order !== 'undefined' ? other_order : this.order;
+        if(this.body_hash[id] !== undefined){
+            if(this.body_hash[id].order > new_order){
+                this.body_hash[id].order = new_order;
+                var index = this.body_ids.indexOf(id);
+                this.body_ids.splice(index, 1);
+                this.body_ids.unshift(id);
+            }
+        }  else {
+            this.body_hash[id] = {"str":s, order:new_order}; // we save the order
             this.body_ids.unshift(id);
         }
-
-        if(typeof(this.body_hash[id]) === 'undefined' ){
-            this.body_hash[id] = {"str":s, order:this.order}; // we save the order
-            this.body_ids.unshift(id);
-        }
-
+       // console.log("str:"+ s + " new_order:"+this.body_hash[id].order+" old_order:"+old_order);
     }
 };
 
@@ -85,7 +85,8 @@ CodePiece.prototype.merge = function (input_code)
     var ids = input_code.getBodyIds();
     var body_hash = input_code.getBody();
     for (var i = ids.length-1; i >= 0; i--) {
-        this.setBody(body_hash[ids[i]].str, input_code.order);
+        var order = typeof body_hash[ids[i]].order !== 'undefined' ? body_hash[ids[i]].order : input_code.order;
+        this.setBody(body_hash[ids[i]].str, order);
     }
 
     for (var inc in input_code.getHeader()) { this.header[inc] = input_code.header[inc]; }

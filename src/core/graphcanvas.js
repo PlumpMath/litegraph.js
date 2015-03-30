@@ -289,7 +289,7 @@ LGraphCanvas.prototype.setCanvas = function (canvas) {
 
         //read data
         var type = file.type.split("/")[0];
-        if (type == "text")
+        if (type == "text" || ext == "json")
             reader.readAsText(file);
         else if (type == "image")
             reader.readAsDataURL(file);

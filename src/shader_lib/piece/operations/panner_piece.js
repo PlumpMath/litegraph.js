@@ -34,12 +34,22 @@ PPanner.prototype.getFragmentCode = function (out_var, input, time, dx, dy, scop
 
 
 
-PPanner.prototype.getCode = function (out_var, input, time, dx, dy, scope, out_type) {
-    var vertex = new CodePiece();
+PPanner.prototype.getCode = function ( params) {
+    //out_var, input, time, dx, dy, scope, out_type
+    var out_var = params.out_var;
+    var input = params.input;
+    var time = params.time;
+    var dx = params.dx;
+    var dy = params.dy;
+    var scope = params.scope;
+    var out_type = params.out_type;
+    var order = params.order || Number.MAX_VALUE;
+
+    var vertex = new CodePiece(order);
     vertex.setBody(this.getVertexCode(out_var, input, time, dx, dy, scope, out_type));
     vertex.setIncludes(this.includes);
 
-    var fragment = new CodePiece();
+    var fragment = new CodePiece(order);
     fragment.setBody(this.getFragmentCode(out_var, input, time, dx, dy, scope, out_type));
     fragment.setIncludes(this.includes );
 

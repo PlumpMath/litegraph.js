@@ -97,21 +97,13 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     var has_gloss = gloss.fragment.getBodyIds().length  > 0;
     var has_alpha = alpha.fragment.getBodyIds().length  > 0;
 
-    if(has_albedo && has_normal) albedo.fragment.setBody("normal = normalize("+normal.getOutputVar()+".xyz);\n");
-   //else normal.fragment.setBody("normal = normalize("+normal.getOutputVar()+".xyz);\n");
 
     albedo.merge(normal);
     albedo.merge(emission);
     albedo.merge(specular);
     albedo.merge(gloss);
     albedo.merge(alpha);
-//    this.options = {
-//        gloss:{step:0.01},
-//        displacement_factor:{step:0.01},
-//        light_dir_x:{min:0, max:1, step:0.01},
-//        light_dir_y:{min:0, max:1, step:0.01},
-//        light_dir_z:{min:0, max:1, step:0.01}
-//    };
+
 
     var color = LiteGraph.hexToColor(properties.color);
     var light_dir = "vec3("+properties.light_dir_x+","+properties.light_dir_y+","+properties.light_dir_z+")";
@@ -190,11 +182,27 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
 //    if(ids.length > 0)
 //        r += "      normal = normalize("+offset.getOutputVar()+".xyz);\n";
 
+    function sortMapByValue(map)
+    {
+        var tupleArray = [];
+        for (var key in map) tupleArray.push([key, map[key]]);
+        tupleArray.sort(function (a, b) { return a[1].order - b[1].order });
+        return tupleArray;
+    }
+
     ids = albedo.fragment.getBodyIds();
     body_hash = albedo.fragment.getBody();
-    for (var i = 0, l = ids.length; i < l; i++) {
-        r += "      "+body_hash[ids[i]].str;
+    var sorted_map = sortMapByValue(body_hash);
+    for(var i in sorted_map){
+        r += "      "+sorted_map[i][1].str;
+        console.log(sorted_map[i][1].str +" "+    sorted_map[i][1].order);
     }
+
+//    for (var i = 0, l = ids.length; i < l; i++) {
+//        r += "      "+body_hash[ids[i]].str;
+//        console.log(body_hash[ids[i]].str +" "+    body_hash[ids[i]].order);
+//    }
+
 
 //    ids = specular.fragment.getBodyIds();
 //    body_hash = specular.fragment.getBody();

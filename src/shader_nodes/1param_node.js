@@ -23,15 +23,21 @@ LGraph1ParamNode.prototype.processNodePath = function()
 }
 
 
-LGraph1ParamNode.prototype.processInputCode = function(scope)
+LGraph1ParamNode.prototype.processInputCode = function(scope, priority_modifier)
 {
 
     var code_A = this.getInputCode(0); // normal
 
     if(code_A){
         // (output, incident, normal)
-        var output_code = this.codes[0] = this.shader_piece.getCode(this.getCodeName()+"_"+this.id, code_A.getOutputVar(), scope, this.getOutputType()); // output var must be fragment
-        output_code.setOrder(this.order);
+        var output_code = this.codes[0] = this.shader_piece.getCode(
+            { out_var:this.getCodeName() + "_" + this.id,
+                a:code_A.getOutputVar(),
+                scope:scope,
+                out_type:this.getOutputType(),
+                order:this.order
+            }
+        ); // output var must be fragment
         output_code.merge(code_A);
     }
 

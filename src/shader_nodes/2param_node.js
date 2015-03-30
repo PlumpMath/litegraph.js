@@ -33,11 +33,14 @@ LGraph2ParamNode.prototype.processInputCode = function(scope)
     var code_B = this.getInputCode(1) || this.onGetNullCode(1 , scope);
     if(code_A && code_B){
         // (out_var, a, b, c, scope, out_type)
-        output_code = this.codes[0] = this.shader_piece.getCode( this.getCodeName()+"_"+this.id,
-            code_A.getOutputVar(),
-            code_B.getOutputVar(),
-            scope,
-            this.getOutputType()); // output var must be fragment
+        output_code = this.codes[0] = this.shader_piece.getCode(
+            { out_var:this.getCodeName() + "_" + this.id,
+            a:code_A.getOutputVar(),
+            b:code_B.getOutputVar(),
+            scope:scope,
+            out_type:this.getOutputType(),
+            order:this.order
+            }); // output var must be fragment
         // if the alpha is an input, otherwise hardcoded
         output_code.setOrder(this.order);
         output_code.merge(code_A);

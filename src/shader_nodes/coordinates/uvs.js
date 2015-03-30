@@ -28,8 +28,11 @@ LGraphUVs.prototype.processNodePath = function()
 
 LGraphUVs.prototype.processInputCode = function(scope)
 {
-    this.codes[0] = this.shader_piece.getCode(this.properties.UTiling.toFixed(3), this.properties.VTiling.toFixed(3)); // I need to check texture id
-    this.codes[0].setOrder(this.order);
+    this.codes[0] = this.shader_piece.getCode({order:this.order,
+                                                utiling:this.properties.UTiling.toFixed(3),
+                                                vtiling:this.properties.VTiling.toFixed(3)
+                                                }); // I need to check texture id
+
 }
 
 LGraphUVs.prototype.setFloatValue = function(old_value,new_value) {

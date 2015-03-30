@@ -27,14 +27,19 @@ PConstant.prototype.getFragmentCode = function (output_var, value, scope) {
 }
 
 
-PConstant.prototype.getCode = function (output_var, value, scope) {
-    var vertex = new CodePiece();
-    vertex.setBody(this.getVertexCode(output_var, value, scope));
+PConstant.prototype.getCode = function (params) {
+    var out_var = params.out_var;
+    var a = params.a;
+    var scope = params.scope;
+    var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
+
+    var vertex = new CodePiece(order);
+    vertex.setBody(this.getVertexCode(out_var, a, scope));
     vertex.setIncludes(this.includes);
 
-    var fragment = new CodePiece();
-    fragment.setBody(this.getFragmentCode(output_var, value, scope));
+    var fragment = new CodePiece(order);
+    fragment.setBody(this.getFragmentCode(out_var, a, scope));
     fragment.setIncludes(this.includes );
 
-    return new ShaderCode(vertex, fragment, output_var);
+    return new ShaderCode(vertex, fragment, out_var);
 }
