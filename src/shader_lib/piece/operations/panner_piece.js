@@ -13,8 +13,8 @@ PPanner.prototype.getVertexCode = function (out_var, input, time, dx, dy, scope,
     if(scope == CodePiece.VERTEX || scope == CodePiece.BOTH){
         var code = out_type+" " +out_var+" = "+input+";\n" +
             "      "+out_var+".x += "+dx+" * "+time+";\n" +
-            "      "+out_var+".y += "+dy+" * "+time+";\n" +
-            "      "+out_var+" = fract("+out_var+");\n";
+            "      "+out_var+".y += "+dy+" * "+time+";\n";// +
+            //"      "+out_var+" = fract("+out_var+");\n";
         return code;
     }
     return "";
@@ -25,8 +25,8 @@ PPanner.prototype.getFragmentCode = function (out_var, input, time, dx, dy, scop
     if(scope == CodePiece.FRAGMENT || scope == CodePiece.BOTH){
         var code = out_type+" " +out_var+" = "+input+";\n" +
             "      "+out_var+".x += "+dx+" * "+time+";\n" +
-            "      "+out_var+".y += "+dy+" * "+time+";\n" +
-            "      "+out_var+" = fract("+out_var+");\n";
+            "      "+out_var+".y += "+dy+" * "+time+";\n";// +
+            //"      "+out_var+" = fract("+out_var+");\n";
         return code;
     }
     return "";

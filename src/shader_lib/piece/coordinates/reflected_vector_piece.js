@@ -14,7 +14,7 @@ PReflected.prototype.getVertexCode = function () {
 
 PReflected.prototype.getFragmentCode = function () {
     return  "vec3 pixel_normal_ws = normal;\n" +
-            "      vec3 reflected_vector = reflect(camera_to_pixel_ws,pixel_normal_ws);\n";
+            "      vec3 reflected_vector = reflect(view_dir,pixel_normal_ws);\n";
 }
 
 /**

@@ -6,6 +6,14 @@ function LGraphCubemap()
     this.addInput("vec3","vec3");
     this.properties =  this.properties || {};
     this.properties.name = "";
+
+    this.properties =  this.properties || {};
+    this.properties.name = "";
+    this.properties.texture_url = "";
+    this.options = {    texture_url:{hidden:1}};
+
+
+
     this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
 
     this.shader_piece = PTextureSampleCube; // hardcoded for testing
@@ -47,7 +55,7 @@ LGraphCubemap.prototype.onExecute = function()
     if(!this.properties.name)
         return;
 
-    var tex = LGraphTexture.getTexture( this.properties.name );
+    var tex = LGraphTexture.getTexture( this.properties.name, this.properties.texture_url );
     if(!tex)
         return;
 
@@ -87,12 +95,13 @@ LGraphCubemap.prototype.processInputCode = function(scope)
         var texture_name = "u_" + (this.properties.name ? this.properties.name : "default_name") + "_texture"; // TODO check if there is a texture
         var color_code = this.codes[1] = this.shader_piece.getCode(
             {   out_var:"color_"+this.id,
-            input:input_code.getOutputVar(),
-            texture_id:texture_name,
-            scope:scope,
-            order:this.order
-        });
+                input:input_code.getOutputVar(),
+                texture_id:texture_name,
+                scope:scope,
+                order:this.order
+            });
         color_code.merge(input_code);
+
     } else {
         this.codes[0] = LiteGraph.EMPTY_CODE;
         this.codes[1] = LiteGraph.EMPTY_CODE;

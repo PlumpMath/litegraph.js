@@ -13,12 +13,6 @@ LGraphConstColor.title = "Color";
 LGraphConstColor.desc = "Constant color";
 
 
-LGraphConstColor.prototype.onExecute = function()
-{
-    this.codes[0] = this.shader_piece.getCode("vec3_"+this.id, this.valueToString(), CodePiece.FRAGMENT); // need to check scope
-    this.codes[0].order = this.order;
-}
-
 LGraphConstColor.prototype.onDrawBackground = function(ctx)
 {
 
@@ -39,8 +33,13 @@ LGraphConstColor.prototype.processNodePath = function()
 
 LGraphConstColor.prototype.processInputCode = function(scope)
 {
-    this.codes[0] = this.shader_piece.getCode("vec3_"+this.id, LiteGraph.hexToColor(this.properties["color"]), scope); // need to check scope
-    this.codes[0].setOrder(this.order);
+    this.codes[0] = this.shader_piece.getCode(
+        { out_var:"vec3_"+this.id,
+            a:LiteGraph.hexToColor(this.properties["color"]),
+            scope:scope,
+            order:this.order
+        }); // need to check scope
+
 }
 
 LiteGraph.registerNodeType("constants/"+LGraphConstColor.title, LGraphConstColor);

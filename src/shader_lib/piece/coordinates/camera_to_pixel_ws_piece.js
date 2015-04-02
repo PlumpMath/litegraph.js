@@ -4,7 +4,7 @@ declare(PCameraToPixelWS);
 
 var PCameraToPixelWS = {};
 
-PCameraToPixelWS.id = "cameratopixelws";
+PCameraToPixelWS.id = "view_dir";
 PCameraToPixelWS.includes = {v_pos:1, u_eye: 1, camera_to_pixel_ws:1};
 
 PCameraToPixelWS.getVertexCode = function (order) {
@@ -26,5 +26,5 @@ PCameraToPixelWS.getCode = function (params) {
     var fragment = this.getFragmentCode(order);
     var vertex = this.getVertexCode(order);
 
-    return new ShaderCode(vertex, fragment, "camera_to_pixel_ws");
+    return new ShaderCode(vertex, fragment, "view_dir");
 }

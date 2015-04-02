@@ -11,10 +11,13 @@ function LGraphTexture()
     // properties for for dat gui
     this.properties =  this.properties || {};
     this.properties.name = "";
+    this.properties.texture_url = "";
     this.properties.texture_type = "Color";
-    this.multichoice = {texture_type:[ 'Color', 'Normal map', 'Specular map' ],
-                        normal_map_type:[ 'Tangent space', 'Model space', 'Bump map' ]};
-    this.reloadonchange = {texture_type: 1};
+
+    this.options = {    texture_url:{hidden:1},
+                        texture_type:{multichoice:[ 'Color', 'Normal map', 'Specular map' ], reloadonchange:1 },
+                        normal_map_type:{multichoice:[ 'Tangent space', 'Model space', 'Bump map' ]},
+                    };
 
 
 
@@ -55,7 +58,7 @@ LGraphTexture.MODE_VALUES = {
     "default": LGraphTexture.DEFAULT
 };
 
-LGraphTexture.getTexture = function(name)
+LGraphTexture.getTexture = function(name, url)
 {
     var container =  gl.textures || LGraphTexture.textures_container; // changedo order, otherwise it bugs with the multiple context
 
@@ -63,15 +66,15 @@ LGraphTexture.getTexture = function(name)
         throw("Cannot load texture, container of textures not found");
 
     var tex = container[ name ];
+
     if(!tex && name && name[0] != ":")
     {
         //texture must be loaded
         if(LGraphTexture.loadTextureCallback)
         {
             var loader = LGraphTexture.loadTextureCallback;
-            if(loader)
-                loader( name );
-            return null;
+            tex = loader( name, url );
+            return tex;
         }
         else
         {
@@ -82,7 +85,7 @@ LGraphTexture.getTexture = function(name)
                     url = LiteGraph.proxy + url.substr(7);
             }
 
-            tex = container[ name ] = GL.Texture.fromURL(url, {});
+            tex = container[ name ] = GL.Texture.fromURL(name, {});
         }
     }
 
@@ -134,14 +137,14 @@ LGraphTexture.loadTextureFromFile = function(data, filename, file, callback, gl)
         var texture = null;
         var no_ext_name = LiteGraph.removeExtension(filename);
         if( typeof(data) == "string" )
-            gl.textures[no_ext_name] = texture = GL.Texture.fromURL( data, {minFilter:gl.LINEAR_MIPMAP_LINEAR}, callback, gl );
+            gl.textures[no_ext_name] = texture = GL.Texture.fromURL( data, {}, callback, gl );
         else if( filename.toLowerCase().indexOf(".dds") != -1 )
             texture = GL.Texture.fromDDSInMemory(data, gl);
         else
         {
             var blob = new Blob([file]);
             var url = URL.createObjectURL(blob);
-            texture = GL.Texture.fromURL( url, {}, callback, gl  );
+            texture = GL.Texture.fromURL( url, {}, callback , gl  );
         }
         texture.name = no_ext_name;
         return texture;
@@ -156,7 +159,7 @@ LGraphTexture.prototype.onDropFile = function(data, filename, file, callback, gl
         this._drop_texture = null;
         this.properties.name = "";
     } else {
-        var tex = LGraphTexture.loadTextureFromFile(data, filename, file, callback, gl);
+        var tex = LGraphTexture.loadTextureFromFile(data, filename, file, LGraphTexture.configTexture, gl);
         if(tex){
             this._drop_texture = tex;
             this._last_tex = this._drop_texture;
@@ -186,18 +189,16 @@ LGraphTexture.prototype.onExecute = function()
     if(this._drop_texture ){
 
         if(this._drop_texture.current_ctx != LiteGraph.current_ctx){
-            this._drop_texture = LGraphTexture.getTexture( this.properties.name );
+            this._drop_texture = LGraphTexture.getTexture( this.properties.name, this.properties.texture_url );
         }
             this.setOutputData(0, this._drop_texture);
             return;
     }
 
-
-
     if(!this.properties.name)
         return;
 
-    var tex = LGraphTexture.getTexture( this.properties.name );
+    var tex = LGraphTexture.getTexture( this.properties.name, this.properties.texture_url );
     if(!tex)
         return;
 
@@ -217,7 +218,6 @@ LGraphTexture.prototype.onDrawBackground = function(ctx)
         return;
     }
 
-
     //Different texture? then get it from the GPU
     if(this._last_preview_tex != this._last_tex)
     {
@@ -225,7 +225,7 @@ LGraphTexture.prototype.onDrawBackground = function(ctx)
         {
             this._canvas = this._last_tex;
         }
-        else if( !this._drop_texture || this._drop_texture && !this._drop_texture.hasOwnProperty("ready"))
+        else if( !this._drop_texture && !this._last_tex.hasOwnProperty("ready")|| this._drop_texture && !this._drop_texture.hasOwnProperty("ready"))
         {
             var tex_canvas = LGraphTexture.generateLowResTexturePreview(this._last_tex);
             if(!tex_canvas)
@@ -371,6 +371,34 @@ LGraphTexture.prototype.onGetNullCode = function(slot)
     }
 
 }
+
+LGraphTexture.loadTextureCallback = function(name, url)
+{
+    function callback(tex){
+        LGraphTexture.configTexture(tex);
+        LiteGraph.dispatchEvent("graphCanvasChange", null, null);
+    }
+    tex = gl.textures[ name ] = GL.Texture.fromURL(url, {}, callback);
+    return tex;
+}
+
+LGraphTexture.configTexture = function(tex)
+{
+    tex.bind();
+    if(GL.isPowerOfTwo(tex.width) && GL.isPowerOfTwo(tex.height)){
+        gl.generateMipmap(tex.texture_type);
+        tex.has_mipmaps = true;
+        tex.minFilter = gl.LINEAR_MIPMAP_LINEAR;
+        tex.wrapS = gl.REPEAT;
+        tex.wrapT = gl.REPEAT;
+    }
+
+    gl.texParameteri(tex.texture_type, gl.TEXTURE_MIN_FILTER, tex.minFilter );
+    gl.texParameteri(tex.texture_type, gl.TEXTURE_WRAP_S, tex.wrapS );
+    gl.texParameteri(tex.texture_type, gl.TEXTURE_WRAP_T, tex.wrapT );
+    gl.bindTexture(tex.texture_type, null); //disable
+}
+
 
 LiteGraph.registerNodeType("texture/"+LGraphTexture.title, LGraphTexture );
 window.LGraphTexture = LGraphTexture;

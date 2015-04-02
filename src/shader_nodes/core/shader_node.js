@@ -88,19 +88,23 @@ LGraphShader.prototype.processInputCode = function() {
 
 
     var shader = this.shader_piece.createShader(this.properties ,color_code,normal_code,emission_code,specular_code,gloss_code,alpha_code,alphaclip_code,world_offset_code);
-    this.graph.shader_output = shader;
+
     var texture_nodes = this.graph.findNodesByType("texture/"+LGraphTexture.title);// we need to find all the textures used in the graph
-    this.graph.shader_textures = [];
+    var shader_textures = [];
+    var shader_cubemaps = [];
     // we set all the names in one array
     // useful to render nodes
     for(var i = 0; i < texture_nodes.length; ++i){
-        this.graph.shader_textures.push(texture_nodes[i].properties.name);
+        shader_textures.push(texture_nodes[i].properties.name);
     }
     texture_nodes = this.graph.findNodesByType("texture/"+LGraphCubemap.title);// we need to find all the textures used in the graph
     for(var i = 0; i < texture_nodes.length; ++i){
-        this.graph.shader_textures.push(texture_nodes[i].properties.name);
+        shader_cubemaps.push(texture_nodes[i].properties.name);
     }
 
+    shader.cubemaps = shader_cubemaps;
+    shader.textures = shader_textures;
+    this.graph.shader_output = shader;
 
 }
 
