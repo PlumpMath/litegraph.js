@@ -36,8 +36,11 @@ LGraphMix.prototype.infereTypes = function( output, target_slot) {
     this.in_conected_using_T++;
     var input = this.inputs[target_slot];
     if (input.use_t && this.in_conected_using_T == 1) {
-        for (var k in output.types)
-            this.T_types[k] = output.types[k];
+        for (var k in output.types){
+            this.T_out_types[k] = output.types[k];
+            this.T_in_types[k] = output.types[k];
+        }
+
     }
 }
 

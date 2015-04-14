@@ -28,6 +28,24 @@ CodePiece.prototype.getBody = function()
     return this.body_hash;
 };
 
+
+CodePiece.prototype.setPartialBody = function(s, other_order)
+{
+
+    if(s != ""){
+        var id = s.hashCode();
+        var new_order = typeof other_order !== 'undefined' ? other_order : this.order;
+        if(this.body_hash[id] !== undefined) {
+            if(this.body_hash[id].order > new_order){
+                return [s, other_order];
+            }
+        }  else {
+            return [s, other_order];
+        }
+    }
+    return null;
+};
+
 CodePiece.prototype.setBody = function(s, other_order)
 {
 
@@ -94,6 +112,27 @@ CodePiece.prototype.merge = function (input_code)
     for (var inc in input_code.includes) { this.includes[inc] = input_code.includes[inc]; }
 };
 
+CodePiece.prototype.partialMerge = function (input_code)
+{
+    //this.setBody( input_code.getBody().concat(this.body) );
+
+    var ids = input_code.getBodyIds();
+    var body_hash = input_code.getBody();
+    var map = {};
+    for (var i = ids.length-1; i >= 0; i--) {
+        var order = typeof body_hash[ids[i]].order !== 'undefined' ? body_hash[ids[i]].order : input_code.order;
+        var arr = this.setPartialBody(body_hash[ids[i]].str, order);
+        if(arr !== null){
+            map[arr[0]] = arr[1];
+        }
+    }
+
+    for (var inc in input_code.getHeader()) { this.header[inc] = input_code.header[inc]; }
+    // we merge the includes
+    for (var inc in input_code.includes) { this.includes[inc] = input_code.includes[inc]; }
+
+    return map;
+};
 
 CodePiece.prototype.clone = function()
 {

@@ -9,7 +9,7 @@ function LGraphConstVec4()
                         v4:1.0};
     this.editable = { property:"value", type:"vec4" };
 
-    this.shader_piece = new PConstant("vec4"); // hardcoded for testing
+    this.shader_piece = new PConstant("vec4");
 }
 
 LGraphConstVec4.title = "ConstVec4";
@@ -40,8 +40,13 @@ LGraphConstVec4.prototype.processNodePath = function()
 
 LGraphConstVec4.prototype.processInputCode = function(scope)
 {
-    this.codes[0] = this.shader_piece.getCode("vec4_"+this.id, this.valueToString(), scope); // need to check scope
-    this.codes[0].setOrder(this.order);
+    this.codes[0] = this.shader_piece.getCode(
+        { out_var:"vec4_"+this.id,
+        a:this.valueToString(),
+        scope:scope,
+        order:this.order
+    });
+
 }
 
 LGraphConstVec4.prototype.onExecute = function()

@@ -642,6 +642,15 @@ LiteGraph.hexToColor = function( color_hex)
     return "vec3("+(color[0]/255).toFixed(3)+","+(color[1]/255).toFixed(3)+","+(color[2]/255).toFixed(3)+")";
 }
 
+LiteGraph.getOtputTypeFromMap = function( map)
+{
+    for(var key in map){
+        if(key != "float")
+            return key;
+    }
+    return "float";
+
+}
 
 /*
  LiteGraph.createNodetypeWrapper = function( class_object )
@@ -893,7 +902,7 @@ LGraph.prototype.computeExecutionBFS = function()
     var visited_links = {}; //to avoid repeating links
     var visited_nodes = {}; //to avoid repeating links
     var remaining_links = {}; //to a
-    var node_output = this.findNodesByType("core/Shader")[0]; // our main output
+    var node_output = this.findNodesByType("core/output")[0]; // our main output
     var nodes_ordered = [node_output];
     for (var i = 0;  i < nodes_ordered.length; ++i) {
         var n = nodes_ordered[i];
@@ -1719,7 +1728,8 @@ LGraphNode.prototype._ctor = function( title )
     this.codes = []; //output codes in each output link channel
     this.node_path = []; //this var stores the different functions that have to be executed in one graph path
 
-    this.T_types = {}; // template types
+    this.T_in_types = {}; // template types
+    this.T_out_types = {}; // template types
     this.in_using_T = 0; // number of inputs using T types
     this.in_conected_using_T = 0; // number of connected inputs  using T types
 }
@@ -1802,7 +1812,8 @@ LGraphNode.prototype.serialize = function()
         outputs: this.outputs,
         shader_piece: this.shader_piece,
         codes: this.codes,
-        T_types: this.T_types
+        T_out_types: this.T_out_types,
+        T_in_types: this.T_in_types
     };
 
     if(this.properties)
@@ -2377,11 +2388,13 @@ LGraphNode.prototype.disconnectOutput = function(slot, target_node)
         output.links = null;
     }
 
-    this.resetTypes();
+    //this.resetTypes();
     this.setDirtyCanvas(false,true);
     this.graph.onConnectionChange();
     return true;
 }
+
+
 
 /**
  * disconnect one input
@@ -2411,10 +2424,12 @@ LGraphNode.prototype.disconnectInput = function(slot)
 
     var input = this.inputs[slot];
     if(!input) return false;
-    if(input.use_t) this.in_conected_using_T--;
+    if(input.use_t){
+        this.disconnectTemplateSlot(input);
+    }
     var link_id = this.inputs[slot].link;
     this.inputs[slot].link = null;
-    this.resetTypes();
+
 
 
     //remove other side
@@ -2653,67 +2668,42 @@ LGraphNode.prototype.infereTypes = function( output, target_slot)
 {
     this.in_conected_using_T++;
     var input = this.inputs[target_slot];
+    var out_types = this.getTypesFromOutputSlot(output)
     if(input.use_t && this.in_conected_using_T == 1){
-        for(var k in output.types)
-            this.T_types[k] = output.types[k];
+        for(var k in out_types){
+            this.T_in_types[k] = out_types[k];
+            this.T_out_types[k] = out_types[k];
+        }
     }
 
 
-//    for(var i in this.inputs){
-//        var inp = this.inputs[i];
-//        if(this.inputs[i].use_t){
-//            inp.types = output.types;
-//            inp.label = Object.keys(output.types)[0]; // as it can have more than one property atm we extract the first one
-//        }
-//    }
-//
-//    for(var j in this.outputs){
-//        var out = this.outputs[j];
-//        if(this.outputs[j].use_t){
-//            out.types = output.types;
-//            out.label = Object.keys(output.types)[0]; // as it can have more than one property atm we extract the first one
-//        }
-//    }
 
 }
 
-LGraphNode.prototype.resetTypes = function( )
+LGraphNode.prototype.resetTypes = function( input )
 {
-
-    if( !this.in_conected_using_T )
-        for(var k in this.T_types)
-            delete this.T_types[k];
-
-//    var inputs_connected = false;
-//    for(var i in this.inputs){
-//        inputs_connected = inputs_connected || this.inputs[i].link != null ;
-//        if(inputs_connected)
-//            return;
-//    }
-//
-//
-//
-//    for(var i in this.inputs){
-//        var inp = this.inputs[i];
-//        if(this.inputs[i].use_t){
-//            inp.types = {};
-//            inp.label = null; // as it can have more than one property atm we extract the first one
+//    var out_types = this.getTypesFromOutputSlot(input);
+//    if(this.in_conected_using_T == Object.keys(this.T_in_types).length){
+//        for(var k in out_types){
+//            delete this.T_in_types[k];
+//            delete this.T_out_types[k];
 //        }
 //    }
-//
-//    for(var i in this.outputs){
-//        var out = this.outputs[i];
-//        if(this.outputs[i].use_t){
-//            out.types = {};
-//            out.label = null; // as it can have more than one property atm we extract the first one
-//        }
-//    }
+    if( !this.in_conected_using_T ){
+        for(var k in this.T_in_types)
+            delete this.T_in_types[k];
+        for(var k in this.T_out_types)
+            delete this.T_out_types[k];
+    }
+
+
 }
 
-/**
- * increments the counter of the inputs using template vars
- * and then updates the inputs type with the output given
- * @method infereTypes
+/** Compares the
+ * @param connecting_node the node that we are connection
+ * @param connection_slot the slot from the connectiing node
+ * @param slot_id the id of the slot where we are connecting our input node
+ * @method compareNodeTypes
  **/
 LGraphNode.prototype.compareNodeTypes = function(connecting_node, connection_slot, slot_id)
 {
@@ -2722,13 +2712,15 @@ LGraphNode.prototype.compareNodeTypes = function(connecting_node, connection_slo
     var in_types = null;
     var ret = false;
     if(connection_slot.use_t){
-        out_types = Object.keys(connecting_node.T_types) == 0 ? null : connecting_node.T_types;
-    } else {
+        out_types = Object.keys(connecting_node.T_out_types) == 0 ? null : connecting_node.T_out_types;
+    }
+
+    if(out_types === null) {
         out_types = Object.keys(connection_slot.types).length ? connection_slot.types : connection_slot.types_list;
     }
-    out_types = Object.keys(connection_slot.types).length ? connection_slot.types : connection_slot.types_list;
+
     if(input_slot.use_t){
-        in_types = Object.keys(this.T_types) == 0 ? null : this.T_types;
+        in_types = Object.keys(this.T_in_types) == 0 ? null : this.T_in_types;
         ret = true;
     }  else if (Object.keys(input_slot.types).length)
         in_types = input_slot.types;
@@ -2745,6 +2737,28 @@ LGraphNode.prototype.compareNodeTypes = function(connecting_node, connection_slo
     return false;
 }
 
+
+LGraphNode.prototype.getTypesFromOutputSlot = function(output_slot){
+    var out_types = null;
+    if(output_slot.use_t){
+        out_types = Object.keys(this.T_out_types) == 0 ? null : this.T_out_types;
+    }
+    if (out_types === null) {
+        out_types = Object.keys(output_slot.types).length ? output_slot.types : output_slot.types_list;
+    }
+    return out_types;
+}
+
+LGraphNode.prototype.disconnectTemplateSlot = function(input){
+
+    if(this.in_conected_using_T > 0)
+        this.in_conected_using_T--;
+    this.resetTypes(input);
+}
+
+LGraphNode.prototype.connectTemplateSlot = function(){
+    this.in_conected_using_T++;
+}
 
 
 
@@ -4957,6 +4971,24 @@ CodePiece.prototype.getBody = function()
     return this.body_hash;
 };
 
+
+CodePiece.prototype.setPartialBody = function(s, other_order)
+{
+
+    if(s != ""){
+        var id = s.hashCode();
+        var new_order = typeof other_order !== 'undefined' ? other_order : this.order;
+        if(this.body_hash[id] !== undefined) {
+            if(this.body_hash[id].order > new_order){
+                return [s, other_order];
+            }
+        }  else {
+            return [s, other_order];
+        }
+    }
+    return null;
+};
+
 CodePiece.prototype.setBody = function(s, other_order)
 {
 
@@ -5023,6 +5055,27 @@ CodePiece.prototype.merge = function (input_code)
     for (var inc in input_code.includes) { this.includes[inc] = input_code.includes[inc]; }
 };
 
+CodePiece.prototype.partialMerge = function (input_code)
+{
+    //this.setBody( input_code.getBody().concat(this.body) );
+
+    var ids = input_code.getBodyIds();
+    var body_hash = input_code.getBody();
+    var map = {};
+    for (var i = ids.length-1; i >= 0; i--) {
+        var order = typeof body_hash[ids[i]].order !== 'undefined' ? body_hash[ids[i]].order : input_code.order;
+        var arr = this.setPartialBody(body_hash[ids[i]].str, order);
+        if(arr !== null){
+            map[arr[0]] = arr[1];
+        }
+    }
+
+    for (var inc in input_code.getHeader()) { this.header[inc] = input_code.header[inc]; }
+    // we merge the includes
+    for (var inc in input_code.includes) { this.includes[inc] = input_code.includes[inc]; }
+
+    return map;
+};
 
 CodePiece.prototype.clone = function()
 {
@@ -5041,6 +5094,7 @@ LiteGraph.CodeLib = {};
 /**
  * Created by vik on 26/01/2015.
  */
+
 
 
 
@@ -5074,6 +5128,21 @@ ShaderCode.prototype.merge = function (other_code)
 
 };
 
+ShaderCode.prototype.partialMerge = function (other_code)
+{
+    if(other_code === LiteGraph.EMPTY_CODE || this === LiteGraph.EMPTY_CODE)
+        return ["", ""];
+    var vertex_remainder_map = this.vertex.partialMerge(other_code.vertex);
+    var fragment_remainder_map = this.fragment.partialMerge(other_code.fragment);
+
+    var vertex_str = this.getCodeStringFromMap(vertex_remainder_map);
+    var frag_str = this.getCodeStringFromMap(fragment_remainder_map);
+    return [vertex_str, frag_str];
+
+};
+
+
+
 ShaderCode.prototype.clone = function ()
 {
     var vertex = this.vertex.clone();
@@ -5083,6 +5152,23 @@ ShaderCode.prototype.clone = function ()
     return cloned;
 };
 
+
+ShaderCode.prototype.sortMapByValue = function (map)
+{
+    var tupleArray = [];
+    for (var key in map) tupleArray.push([key, map[key]]);
+    tupleArray.sort(function (a, b) { return a[1] - b[1] });
+    return tupleArray;
+}
+
+ShaderCode.prototype.getCodeStringFromMap = function (map)
+{
+    var r = "";
+    var sorted_map = this.sortMapByValue(map);
+    for(var i in sorted_map)
+        r += "         "+sorted_map[i][0];
+    return r;
+}
 
 
 LiteGraph.EMPTY_CODE = new ShaderCode();
@@ -5163,7 +5249,6 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
     r += "      v_normal = (u_model * vec4(a_normal, 0.0)).xyz;\n";
     r += "      vec3 pos = a_vertex;\n";
 
-
     var ids = albedo.vertex.getBodyIds();
     var body_hash = albedo.vertex.getBody();
     var sorted_map = sortMapByValue(body_hash);
@@ -5175,6 +5260,8 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
     if(offset.getOutputVar()){
         r += "      pos += a_normal * "+offset.getOutputVar()+" * "+displacement_factor+";\n";
     }
+
+
 
     //if (includes["v_pos"])
     r += "      v_pos = (u_model * vec4(pos,1.0)).xyz;\n";
@@ -5251,10 +5338,12 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     r += "void main() {\n";
     r += "      vec3 normal = normalize(v_normal);\n";
 
+    if (includes["depth"])
+        r += "      float depth = gl_FragCoord.z / gl_FragCoord.w;\n";
     //if (includes["view_dir"])
-        r += "      vec3 view_dir = normalize(v_pos - u_eye);\n" +
-            "      vec3 light_dir = normalize("+light_dir+");\n" +
-            "      vec3 half_dir = normalize(view_dir + light_dir);\n";
+    r += "      vec3 view_dir = normalize(v_pos - u_eye);\n" +
+        "      vec3 light_dir = normalize("+light_dir+");\n" +
+        "      vec3 half_dir = normalize(view_dir + light_dir);\n";
 
 
     var ids = normal.fragment.getBodyIds();
@@ -5400,6 +5489,7 @@ P1ParamFunc.prototype.getCode = function (params) {
 // https://www.khronos.org/files/webgl/webgl-reference-card-1_0.pdf
 // undefined means T
 LiteGraph.CodeLib["length"] = new P1ParamFunc ("float", "length");
+LiteGraph.CodeLib["exp2"] = new P1ParamFunc (undefined, "exp2");
 LiteGraph.CodeLib["sin"] = new P1ParamFunc (undefined, "sin");
 LiteGraph.CodeLib["cos"] = new P1ParamFunc (undefined, "cos");
 LiteGraph.CodeLib["tan"] = new P1ParamFunc (undefined, "tan");
@@ -5544,7 +5634,7 @@ LiteGraph.CodeLib["distance"] = new P3ParamFunc ("float", "distance");
 LiteGraph.CodeLib["refract"] = new P3ParamFunc (undefined, "refract");
 LiteGraph.CodeLib["mix"] = new P3ParamFunc (undefined, "mix");
 LiteGraph.CodeLib["smoothstep"] = new P3ParamFunc (undefined, "smoothstep");
-
+LiteGraph.CodeLib["clamp"] = new P3ParamFunc (undefined, "clamp");
 
 
 
@@ -5596,6 +5686,11 @@ PConstant.prototype.getCode = function (params) {
     return new ShaderCode(vertex, fragment, out_var);
 }
 
+PConstant.prototype.setType = function (t) {
+    this.type = t;
+}
+
+
 
 
 require(CodePiece);
@@ -5626,6 +5721,36 @@ PCameraToPixelWS.getCode = function (params) {
     var vertex = this.getVertexCode(order);
 
     return new ShaderCode(vertex, fragment, "view_dir");
+}
+
+
+
+require(CodePiece);
+declare(PDepth);
+
+var PDepth = {};
+
+PDepth.id = "depth";
+PDepth.includes = {depth:1, v_pos:1};
+PDepth.already_included = false; // TODO add multiple times same line
+
+PDepth.getVertexCode = function (order) {
+    var vertex = new CodePiece(order);
+    vertex.setIncludes(PDepth.includes);
+    return vertex;
+}
+
+PDepth.getFragmentCode = function (order) {
+    var fragment = new CodePiece(order);
+    fragment.setIncludes(PDepth.includes);
+    return fragment;
+}
+
+PDepth.getCode = function (params) {
+    var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
+    var fragment = this.getFragmentCode(order);
+    var vertex = this.getVertexCode(order);
+    return new ShaderCode(vertex, fragment, "depth");
 }
 
 
@@ -5750,7 +5875,7 @@ PVertexPosWS.already_included = false; // TODO add multiple times same line
 
 PVertexPosWS.getVertexCode = function (order) {
     var vertex = new CodePiece(order);
-    vertex.setIncludes(PCameraToPixelWS.includes);
+    vertex.setIncludes(PVertexPosWS.includes);
     return vertex;
 }
 
@@ -5766,6 +5891,89 @@ PVertexPosWS.getCode = function (params) {
     var vertex = this.getVertexCode(order);
     return new ShaderCode(vertex, fragment, "v_pos");
 }
+
+
+require(CodePiece);
+declare(PIf);
+
+
+function PIf () {
+    this.id = "if";
+    this.includes = {};
+}
+
+PIf.prototype.getVertexCode = function (out_type, out_var, a,b,gt,lt,eq,gt_out,lt_out,eq_out,scope) {
+    if(scope == CodePiece.VERTEX || scope == CodePiece.BOTH){
+        var code = out_type+" " +out_var+";\n" +
+            "      if("+ a+">"+ b+")\n" +
+            "      {\n" +
+            ""+gt+"\n" +
+            "          "+out_var+" = " + gt_out +";\n"+
+            "      } else if ("+ a+"<"+ b+"){\n" +
+            ""+lt+"\n" +
+            "          "+out_var+" = " + lt_out +";\n"+
+            "      } else {\n" +
+            ""+eq+"\n" +
+            "          "+out_var+" = " + eq_out +";\n"
+        " }\n";
+        return code;
+    }
+    return "";
+}
+
+PIf.prototype.getFragmentCode = function (out_type, out_var, a,b,gt,lt,eq,gt_out,lt_out,eq_out,scope) {
+    if(scope == CodePiece.FRAGMENT || scope == CodePiece.BOTH){
+        gt = gt ? gt +"" : "";
+        lt = lt ? lt +"" : "";
+        eq = eq ? eq +"" : "";
+        gt_out = gt_out ? "         "+out_var+" = " + gt_out +";\n" : "";
+        lt_out = lt_out ? "         "+out_var+" = " + lt_out +";\n" : "";
+        eq_out = eq_out ? "         "+out_var+" = " + eq_out +";\n" : "";
+        var code = out_type+" " +out_var+";\n" +
+            "      if("+ a+" > "+ b+")\n" +
+            "      {\n" +
+            ""+gt+"" +
+            gt_out  +
+            "      } else if ("+ a+" < "+ b+"){\n" +
+            ""+lt+"" +
+            lt_out  +
+            "      } else {\n" +
+            ""+eq+"" +
+            eq_out  +
+            "      }\n";
+        return code;
+    }
+    return "";
+}
+
+
+PIf.prototype.getCode = function (params) {
+    var out_var = params.out_var;
+    var out_type = params.out_type;
+    var a = params.a;
+    var b = params.b;
+    var gt = params.gt;
+    var lt = params.lt;
+    var eq = params.eq;
+    var gt_out = params.gt_out;
+    var lt_out = params.lt_out;
+    var eq_out = params.eq_out;
+    var scope = params.scope;
+    var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
+
+    var vertex = new CodePiece(order);
+    vertex.setBody(this.getVertexCode(out_type, out_var, a,b,gt,lt,eq,gt_out,lt_out,eq_out, scope));
+    vertex.setIncludes(this.includes);
+
+    var fragment = new CodePiece(order);
+    fragment.setBody(this.getFragmentCode(out_type, out_var, a,b,gt,lt,eq,gt_out,lt_out,eq_out,scope));
+    fragment.setIncludes(this.includes );
+
+    return new ShaderCode(vertex, fragment, out_var);
+}
+
+
+
 
 
 require(CodePiece);

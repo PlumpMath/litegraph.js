@@ -137,7 +137,7 @@ LGraphTexture.loadTextureFromFile = function(data, filename, file, callback, gl)
         var texture = null;
         var no_ext_name = LiteGraph.removeExtension(filename);
         if( typeof(data) == "string" )
-            gl.textures[no_ext_name] = texture = GL.Texture.fromURL( data, {}, callback, gl );
+            gl.textures[no_ext_name] = texture = GL.Texture.fromURL( data, {wrap: gl.REPEAT}, callback, gl );
         else if( filename.toLowerCase().indexOf(".dds") != -1 )
             texture = GL.Texture.fromDDSInMemory(data, gl);
         else

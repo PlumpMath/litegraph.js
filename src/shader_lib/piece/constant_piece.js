@@ -43,3 +43,8 @@ PConstant.prototype.getCode = function (params) {
 
     return new ShaderCode(vertex, fragment, out_var);
 }
+
+PConstant.prototype.setType = function (t) {
+    this.type = t;
+}
+

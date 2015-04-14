@@ -55,6 +55,7 @@ P1ParamFunc.prototype.getCode = function (params) {
 // https://www.khronos.org/files/webgl/webgl-reference-card-1_0.pdf
 // undefined means T
 LiteGraph.CodeLib["length"] = new P1ParamFunc ("float", "length");
+LiteGraph.CodeLib["exp2"] = new P1ParamFunc (undefined, "exp2");
 LiteGraph.CodeLib["sin"] = new P1ParamFunc (undefined, "sin");
 LiteGraph.CodeLib["cos"] = new P1ParamFunc (undefined, "cos");
 LiteGraph.CodeLib["tan"] = new P1ParamFunc (undefined, "tan");

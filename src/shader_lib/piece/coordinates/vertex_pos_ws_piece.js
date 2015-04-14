@@ -10,7 +10,7 @@ PVertexPosWS.already_included = false; // TODO add multiple times same line
 
 PVertexPosWS.getVertexCode = function (order) {
     var vertex = new CodePiece(order);
-    vertex.setIncludes(PCameraToPixelWS.includes);
+    vertex.setIncludes(PVertexPosWS.includes);
     return vertex;
 }
 

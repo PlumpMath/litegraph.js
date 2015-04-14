@@ -40,8 +40,12 @@ LGraphConstVec2.prototype.processNodePath = function()
 
 LGraphConstVec2.prototype.processInputCode = function(scope)
 {
-    this.codes[0] = this.shader_piece.getCode("vec2_"+this.id, this.valueToString(), scope); // need to check scope
-    this.codes[0].setOrder( this.order);
+    this.codes[0] = this.shader_piece.getCode(
+        { out_var:"vec2_"+this.id,
+        a:this.valueToString(),
+        scope:scope,
+        order:this.order
+    });
 }
 
 LGraphConstVec2.prototype.onDrawBackground = function(ctx)

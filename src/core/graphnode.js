@@ -72,7 +72,8 @@ LGraphNode.prototype._ctor = function( title )
     this.codes = []; //output codes in each output link channel
     this.node_path = []; //this var stores the different functions that have to be executed in one graph path
 
-    this.T_types = {}; // template types
+    this.T_in_types = {}; // template types
+    this.T_out_types = {}; // template types
     this.in_using_T = 0; // number of inputs using T types
     this.in_conected_using_T = 0; // number of connected inputs  using T types
 }
@@ -155,7 +156,8 @@ LGraphNode.prototype.serialize = function()
         outputs: this.outputs,
         shader_piece: this.shader_piece,
         codes: this.codes,
-        T_types: this.T_types
+        T_out_types: this.T_out_types,
+        T_in_types: this.T_in_types
     };
 
     if(this.properties)
@@ -730,11 +732,13 @@ LGraphNode.prototype.disconnectOutput = function(slot, target_node)
         output.links = null;
     }
 
-    this.resetTypes();
+    //this.resetTypes();
     this.setDirtyCanvas(false,true);
     this.graph.onConnectionChange();
     return true;
 }
+
+
 
 /**
  * disconnect one input
@@ -764,10 +768,12 @@ LGraphNode.prototype.disconnectInput = function(slot)
 
     var input = this.inputs[slot];
     if(!input) return false;
-    if(input.use_t) this.in_conected_using_T--;
+    if(input.use_t){
+        this.disconnectTemplateSlot(input);
+    }
     var link_id = this.inputs[slot].link;
     this.inputs[slot].link = null;
-    this.resetTypes();
+
 
 
     //remove other side
@@ -1006,67 +1012,42 @@ LGraphNode.prototype.infereTypes = function( output, target_slot)
 {
     this.in_conected_using_T++;
     var input = this.inputs[target_slot];
+    var out_types = this.getTypesFromOutputSlot(output)
     if(input.use_t && this.in_conected_using_T == 1){
-        for(var k in output.types)
-            this.T_types[k] = output.types[k];
+        for(var k in out_types){
+            this.T_in_types[k] = out_types[k];
+            this.T_out_types[k] = out_types[k];
+        }
     }
 
 
-//    for(var i in this.inputs){
-//        var inp = this.inputs[i];
-//        if(this.inputs[i].use_t){
-//            inp.types = output.types;
-//            inp.label = Object.keys(output.types)[0]; // as it can have more than one property atm we extract the first one
-//        }
-//    }
-//
-//    for(var j in this.outputs){
-//        var out = this.outputs[j];
-//        if(this.outputs[j].use_t){
-//            out.types = output.types;
-//            out.label = Object.keys(output.types)[0]; // as it can have more than one property atm we extract the first one
-//        }
-//    }
 
 }
 
-LGraphNode.prototype.resetTypes = function( )
+LGraphNode.prototype.resetTypes = function( input )
 {
-
-    if( !this.in_conected_using_T )
-        for(var k in this.T_types)
-            delete this.T_types[k];
-
-//    var inputs_connected = false;
-//    for(var i in this.inputs){
-//        inputs_connected = inputs_connected || this.inputs[i].link != null ;
-//        if(inputs_connected)
-//            return;
-//    }
-//
-//
-//
-//    for(var i in this.inputs){
-//        var inp = this.inputs[i];
-//        if(this.inputs[i].use_t){
-//            inp.types = {};
-//            inp.label = null; // as it can have more than one property atm we extract the first one
+//    var out_types = this.getTypesFromOutputSlot(input);
+//    if(this.in_conected_using_T == Object.keys(this.T_in_types).length){
+//        for(var k in out_types){
+//            delete this.T_in_types[k];
+//            delete this.T_out_types[k];
 //        }
 //    }
-//
-//    for(var i in this.outputs){
-//        var out = this.outputs[i];
-//        if(this.outputs[i].use_t){
-//            out.types = {};
-//            out.label = null; // as it can have more than one property atm we extract the first one
-//        }
-//    }
+    if( !this.in_conected_using_T ){
+        for(var k in this.T_in_types)
+            delete this.T_in_types[k];
+        for(var k in this.T_out_types)
+            delete this.T_out_types[k];
+    }
+
+
 }
 
-/**
- * increments the counter of the inputs using template vars
- * and then updates the inputs type with the output given
- * @method infereTypes
+/** Compares the
+ * @param connecting_node the node that we are connection
+ * @param connection_slot the slot from the connectiing node
+ * @param slot_id the id of the slot where we are connecting our input node
+ * @method compareNodeTypes
  **/
 LGraphNode.prototype.compareNodeTypes = function(connecting_node, connection_slot, slot_id)
 {
@@ -1075,13 +1056,15 @@ LGraphNode.prototype.compareNodeTypes = function(connecting_node, connection_slo
     var in_types = null;
     var ret = false;
     if(connection_slot.use_t){
-        out_types = Object.keys(connecting_node.T_types) == 0 ? null : connecting_node.T_types;
-    } else {
+        out_types = Object.keys(connecting_node.T_out_types) == 0 ? null : connecting_node.T_out_types;
+    }
+
+    if(out_types === null) {
         out_types = Object.keys(connection_slot.types).length ? connection_slot.types : connection_slot.types_list;
     }
-    out_types = Object.keys(connection_slot.types).length ? connection_slot.types : connection_slot.types_list;
+
     if(input_slot.use_t){
-        in_types = Object.keys(this.T_types) == 0 ? null : this.T_types;
+        in_types = Object.keys(this.T_in_types) == 0 ? null : this.T_in_types;
         ret = true;
     }  else if (Object.keys(input_slot.types).length)
         in_types = input_slot.types;
@@ -1098,6 +1081,28 @@ LGraphNode.prototype.compareNodeTypes = function(connecting_node, connection_slo
     return false;
 }
 
+
+LGraphNode.prototype.getTypesFromOutputSlot = function(output_slot){
+    var out_types = null;
+    if(output_slot.use_t){
+        out_types = Object.keys(this.T_out_types) == 0 ? null : this.T_out_types;
+    }
+    if (out_types === null) {
+        out_types = Object.keys(output_slot.types).length ? output_slot.types : output_slot.types_list;
+    }
+    return out_types;
+}
+
+LGraphNode.prototype.disconnectTemplateSlot = function(input){
+
+    if(this.in_conected_using_T > 0)
+        this.in_conected_using_T--;
+    this.resetTypes(input);
+}
+
+LGraphNode.prototype.connectTemplateSlot = function(){
+    this.in_conected_using_T++;
+}
 
 
 

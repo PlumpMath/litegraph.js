@@ -74,7 +74,6 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
     r += "      v_normal = (u_model * vec4(a_normal, 0.0)).xyz;\n";
     r += "      vec3 pos = a_vertex;\n";
 
-
     var ids = albedo.vertex.getBodyIds();
     var body_hash = albedo.vertex.getBody();
     var sorted_map = sortMapByValue(body_hash);
@@ -86,6 +85,8 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
     if(offset.getOutputVar()){
         r += "      pos += a_normal * "+offset.getOutputVar()+" * "+displacement_factor+";\n";
     }
+
+
 
     //if (includes["v_pos"])
     r += "      v_pos = (u_model * vec4(pos,1.0)).xyz;\n";
@@ -162,10 +163,12 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     r += "void main() {\n";
     r += "      vec3 normal = normalize(v_normal);\n";
 
+    if (includes["depth"])
+        r += "      float depth = gl_FragCoord.z / gl_FragCoord.w;\n";
     //if (includes["view_dir"])
-        r += "      vec3 view_dir = normalize(v_pos - u_eye);\n" +
-            "      vec3 light_dir = normalize("+light_dir+");\n" +
-            "      vec3 half_dir = normalize(view_dir + light_dir);\n";
+    r += "      vec3 view_dir = normalize(v_pos - u_eye);\n" +
+        "      vec3 light_dir = normalize("+light_dir+");\n" +
+        "      vec3 half_dir = normalize(view_dir + light_dir);\n";
 
 
     var ids = normal.fragment.getBodyIds();

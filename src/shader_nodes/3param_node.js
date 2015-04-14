@@ -67,27 +67,27 @@ LGraph3ParamNode.prototype.processNodePath = function()
 
 LGraph3ParamNode.prototype.getOutputTypes = function()
 {
-    return this.output_types ? this.output_types :  this.T_types;
+    return this.output_types ? this.output_types :  this.T_out_types;
 }
 
 LGraph3ParamNode.prototype.getInputTypesA = function()
 {
-    return this.intput_typesA ? this.intput_typesA :  this.T_types;
+    return this.intput_typesA ? this.intput_typesA :  this.T_in_types;
 }
 
 LGraph3ParamNode.prototype.getInputTypesB = function()
 {
-    return this.intput_typesB ? this.intput_typesB :  this.T_types;
+    return this.intput_typesB ? this.intput_typesB :  this.T_in_types;
 }
 
 LGraph3ParamNode.prototype.getInputTypesC = function()
 {
-    return this.intput_typesC ? this.intput_typesC :  this.T_types;
+    return this.intput_typesC ? this.intput_typesC :  this.T_in_types;
 }
 
 LGraph3ParamNode.prototype.getOutputType = function()
 {
-    var obj = this.output_types ? this.output_types :  this.T_types;
+    var obj = this.output_types ? this.output_types :  this.T_out_types;
     return Object.keys(obj)[0];
 }
 

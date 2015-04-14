@@ -42,7 +42,6 @@ LGraph2ParamNode.prototype.processInputCode = function(scope)
             order:this.order
             }); // output var must be fragment
         // if the alpha is an input, otherwise hardcoded
-        output_code.setOrder(this.order);
         output_code.merge(code_A);
         output_code.merge(code_B);
     }
@@ -51,24 +50,26 @@ LGraph2ParamNode.prototype.processInputCode = function(scope)
 
 LGraph2ParamNode.prototype.getOutputTypes = function()
 {
-    return this.output_types ? this.output_types :  this.T_types;
+    return this.output_types ? this.output_types :  this.T_out_types;
 }
 
 LGraph2ParamNode.prototype.getInputTypesA = function()
 {
-    return this.intput_typesA ? this.intput_typesA :  this.T_types;
+    return this.intput_typesA ? this.intput_typesA :  this.T_in_types;
 }
 
 LGraph2ParamNode.prototype.getInputTypesB = function()
 {
-    return this.intput_typesB ? this.intput_typesB :  this.T_types;
+    return this.intput_typesB ? this.intput_typesB :  this.T_in_types;
 }
 
 
 LGraph2ParamNode.prototype.getOutputType = function()
 {
-    var obj = this.output_types ? this.output_types :  this.T_types;
-    return Object.keys(obj)[0];
+    var obj = this.output_types ? this.output_types :  this.T_out_types;
+    var string_type = LiteGraph.getOtputTypeFromMap(obj);
+    return string_type;
+
 }
 
 LGraph2ParamNode.prototype.getScope = function()

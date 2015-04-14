@@ -74,7 +74,7 @@ LGraphSmooth.prototype.onDrawBackground = function(ctx)
     if(!this.isInputConnected(0))
         this.inputs[0].label += "="+this.properties["lower"].toFixed(3);
     this.inputs[1].label = "upper";
-    if(!this.isInputConnected(0))
+    if(!this.isInputConnected(1))
         this.inputs[1].label += "="+this.properties["upper"].toFixed(3);
 }
 

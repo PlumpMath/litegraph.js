@@ -60,7 +60,7 @@ LiteGraph.CodeLib["distance"] = new P3ParamFunc ("float", "distance");
 LiteGraph.CodeLib["refract"] = new P3ParamFunc (undefined, "refract");
 LiteGraph.CodeLib["mix"] = new P3ParamFunc (undefined, "mix");
 LiteGraph.CodeLib["smoothstep"] = new P3ParamFunc (undefined, "smoothstep");
-
+LiteGraph.CodeLib["clamp"] = new P3ParamFunc (undefined, "clamp");
 
 
 

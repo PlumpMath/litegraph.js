@@ -45,19 +45,19 @@ LGraph1ParamNode.prototype.processInputCode = function(scope, priority_modifier)
 
 LGraph1ParamNode.prototype.getOutputType = function()
 {
-    var obj = this.output_types ? this.output_types :  this.T_types;
+    var obj = this.output_types ? this.output_types :  this.T_out_types;
     return Object.keys(obj)[0];
 }
 
 
 LGraph1ParamNode.prototype.getOutputTypes = function()
 {
-    return this.output_types ? this.output_types :  this.T_types;
+    return this.output_types ? this.output_types :  this.T_out_types;
 }
 
 LGraph1ParamNode.prototype.getInputTypes = function()
 {
-    return this.intput_types ? this.intput_types :  this.T_types;
+    return this.intput_types ? this.intput_types :  this.T_in_types;
 }
 
 LGraph1ParamNode.prototype.getScope = function()

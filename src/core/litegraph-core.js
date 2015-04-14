@@ -637,6 +637,15 @@ LiteGraph.hexToColor = function( color_hex)
     return "vec3("+(color[0]/255).toFixed(3)+","+(color[1]/255).toFixed(3)+","+(color[2]/255).toFixed(3)+")";
 }
 
+LiteGraph.getOtputTypeFromMap = function( map)
+{
+    for(var key in map){
+        if(key != "float")
+            return key;
+    }
+    return "float";
+
+}
 
 /*
  LiteGraph.createNodetypeWrapper = function( class_object )
