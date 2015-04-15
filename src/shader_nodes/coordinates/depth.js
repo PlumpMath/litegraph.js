@@ -16,8 +16,8 @@ LGraphDepth.prototype.onExecute = function()
 
 LGraphDepth.prototype.processNodePath = function()
 {
-    var input = [];
-    input.push(this);
+    var input = {};
+    this.insertIntoPath(input);
     this.node_path[0] = input;
 }
 

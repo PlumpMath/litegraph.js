@@ -16,8 +16,8 @@ LGraphVertexPosWS.prototype.onExecute = function()
 
 LGraphVertexPosWS.prototype.processNodePath = function()
 {
-    var input = [];
-    input.push(this);
+    var input = {};
+    this.insertIntoPath(input);
     this.node_path[0] = input;
 }
 

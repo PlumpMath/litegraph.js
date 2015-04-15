@@ -28,11 +28,11 @@ PReflected.prototype.getCode = function (params) {
     var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
     var vertex = new CodePiece(order);
     vertex.setBody(this.getVertexCode());
-    vertex.setIncludes(this.includes);
+    vertex.setIncludesFromMap(this.includes);
 
     var fragment = new CodePiece(order);
     fragment.setBody(this.getFragmentCode());
-    fragment.setIncludes(this.includes );
+    fragment.setIncludesFromMap(this.includes );
 
     return new ShaderCode(vertex, fragment, "reflected_vector");
 }

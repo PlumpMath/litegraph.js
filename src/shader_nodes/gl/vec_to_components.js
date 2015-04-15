@@ -22,11 +22,14 @@ LGraphVecToComps.prototype.onExecute = function()
 LGraphVecToComps.prototype.processNodePath = function()
 {
     var input = this.getInputNodePath(0);
-    input.push(this);
-    this.node_path[0] = input.slice(0);
-    this.node_path[1] = input.slice(0);
-    this.node_path[2] = input.slice(0);
-    this.node_path[3] = input.slice(0);
+
+    this.insertIntoPath(input);
+
+    this.node_path[0] = input;
+    this.node_path[1] = input;
+    this.node_path[2] = input;
+    this.node_path[3] = input;
+
 
 
 }

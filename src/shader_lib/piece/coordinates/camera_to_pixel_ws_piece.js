@@ -9,14 +9,14 @@ PCameraToPixelWS.includes = {v_pos:1, u_eye: 1, camera_to_pixel_ws:1};
 
 PCameraToPixelWS.getVertexCode = function (order) {
     var vertex = new CodePiece(order);
-    vertex.setIncludes(PCameraToPixelWS.includes);
+    vertex.setIncludesFromMap(PCameraToPixelWS.includes);
     return vertex;
 }
 
 PCameraToPixelWS.getFragmentCode = function (order) {
     var fragment = new CodePiece(order);
     fragment.setBody("");
-    fragment.setIncludes(PCameraToPixelWS.includes);
+    fragment.setIncludesFromMap(PCameraToPixelWS.includes);
     return fragment;
 }
 

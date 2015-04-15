@@ -995,7 +995,23 @@ LGraphNode.prototype.getInputNodePath = function(slot)
     var link = this.graph.links[link_id];
     if(link)
         return this.graph.getNodeById( link.origin_id ).node_path[link.origin_slot];
-    return [];
+    return {};
+}
+
+LGraphNode.prototype.insertIntoPath = function(path)
+{
+    if(!path.hasOwnProperty((this.id)))
+        path[this.id] = this;
+}
+
+LGraphNode.prototype.mergePaths = function(path_target, path_to_merge)
+{
+    var objKeys = Object.keys(path_to_merge);
+    var id;
+    for (var i = 0, l = objKeys.length; i < l; i++) {
+        id = objKeys[i];
+        path_target[id] = path_to_merge[id];
+    }
 }
 
 LGraphNode.prototype.onGetNullCode = function(slot)

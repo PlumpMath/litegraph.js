@@ -33,28 +33,28 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
 
     var displacement_factor = properties.displacement_factor.toFixed(4);
 
-    var includes = {};
-    for (var line in albedo.vertex.includes) { includes[line] = 1; }
-    for (var line in normal.vertex.includes) { includes[line] = 1; }
-    for (var line in emission.vertex.includes) { includes[line] = 1; }
-    for (var line in specular.vertex.includes) { includes[line] = 1; }
-    for (var line in gloss.vertex.includes) { includes[line] = 1; }
-    for (var line in alpha.vertex.includes) { includes[line] = 1; }
-    for (var line in alphaclip.vertex.includes) { includes[line] = 1; }
-    for (var line in offset.vertex.includes) { includes[line] = 1; }
+//    var includes = {};
+//    for (var line in albedo.vertex.includes) { includes[line] = 1; }
+//    for (var line in normal.vertex.includes) { includes[line] = 1; }
+//    for (var line in emission.vertex.includes) { includes[line] = 1; }
+//    for (var line in specular.vertex.includes) { includes[line] = 1; }
+//    for (var line in gloss.vertex.includes) { includes[line] = 1; }
+//    for (var line in alpha.vertex.includes) { includes[line] = 1; }
+//    for (var line in alphaclip.vertex.includes) { includes[line] = 1; }
+//    for (var line in offset.vertex.includes) { includes[line] = 1; }
 
     // header
     var r = "precision highp float;\n"+
         "attribute vec3 a_vertex;\n"+
         "attribute vec3 a_normal;\n"+
         "attribute vec2 a_coord;\n";
-    if (includes["v_coord"])
+    if (albedo.vertex.isLineIncluded("v_coord"))
         r += "varying vec2 v_coord;\n";
     //if (includes["v_normal"] || normal != LiteGraph.EMPTY_CODE)
         r += "varying vec3 v_normal;\n";
 
     r += "varying vec3 v_pos;\n";
-    if (includes["u_time"])
+    if (albedo.vertex.isLineIncluded("u_time"))
         r += "uniform float u_time;\n";
     //if (includes["u_eye"])
         r += "uniform vec3 u_eye;\n";
@@ -62,19 +62,19 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
          "uniform mat4 u_model;\n" +
         "uniform mat4 u_viewprojection;\n";
 
-    for(var k in albedo.vertex.getHeader())
-        r += k;
-
+    var h = albedo.vertex.getHeader();
+    for(var id in h)
+        r += h[id];
 
 
     // body
     r += "void main() {\n";
-    if (includes["v_coord"])
+    if (albedo.vertex.isLineIncluded("v_coord"))
         r += "      v_coord = a_coord;\n";
     r += "      v_normal = (u_model * vec4(a_normal, 0.0)).xyz;\n";
     r += "      vec3 pos = a_vertex;\n";
 
-    var ids = albedo.vertex.getBodyIds();
+
     var body_hash = albedo.vertex.getBody();
     var sorted_map = sortMapByValue(body_hash);
     for(var i in sorted_map){
@@ -99,14 +99,14 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
 ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emission,specular,gloss,alpha,alphaclip, offset) {
 
 
-    var has_gloss = gloss.fragment.getBodyIds().length  > 0;
-    var has_albedo = albedo.fragment.getBodyIds().length  > 0;
-    var has_normal = normal.fragment.getBodyIds().length  > 0;
-    var has_specular = specular.fragment.getBodyIds().length  > 0;
-    var has_emission = emission.fragment.getBodyIds().length  > 0;
-    var has_gloss = gloss.fragment.getBodyIds().length  > 0;
-    var has_alpha = alpha.fragment.getBodyIds().length  > 0;
-    var has_alphaclip = alphaclip.fragment.getBodyIds().length  > 0;
+    var has_gloss = Object.keys(gloss.fragment.getBody()).length  > 0;
+    var has_albedo = Object.keys(albedo.fragment.getBody()).length  > 0;
+    var has_normal = Object.keys(normal.fragment.getBody()).length  > 0;
+    var has_specular = Object.keys(specular.fragment.getBody()).length  > 0;
+    var has_emission = Object.keys(emission.fragment.getBody()).length  > 0;
+    var has_gloss = Object.keys(gloss.fragment.getBody()).length  > 0;
+    var has_alpha = Object.keys(alpha.fragment.getBody()).length  > 0;
+    var has_alphaclip = Object.keys(alphaclip.fragment.getBody()).length  > 0;
 
 
 
@@ -115,14 +115,14 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     var gloss_prop = properties.gloss.toFixed(4);
 
 
-    var includes = {};
-    for (var line in albedo.fragment.includes) { includes[line] = 1; }
-    for (var line in normal.fragment.includes) { includes[line] = 1; }
-    for (var line in emission.fragment.includes) { includes[line] = 1; }
-    for (var line in specular.fragment.includes) { includes[line] = 1; }
-    for (var line in gloss.fragment.includes) { includes[line] = 1; }
-    for (var line in alpha.fragment.includes) { includes[line] = 1; }
-    for (var line in offset.fragment.includes) { includes[line] = 1; }
+//    var includes = albedo.fragment.includes;
+//    for (var line in albedo.fragment.includes) { includes[line] = 1; }
+//    for (var line in normal.fragment.includes) { includes[line] = 1; }
+//    for (var line in emission.fragment.includes) { includes[line] = 1; }
+//    for (var line in specular.fragment.includes) { includes[line] = 1; }
+//    for (var line in gloss.fragment.includes) { includes[line] = 1; }
+//    for (var line in alpha.fragment.includes) { includes[line] = 1; }
+//    for (var line in offset.fragment.includes) { includes[line] = 1; }
     albedo.fragment.addHeaderLine("uniform samplerCube u_cube_default_texture;\n");
 
 
@@ -130,19 +130,20 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     // header
     var r = "precision highp float;\n"+
      "#extension GL_OES_standard_derivatives : enable\n";
-    if (includes["v_coord"])
+    if (albedo.fragment.isLineIncluded("v_coord"))
         r += "varying vec2 v_coord;\n";
     //if (includes["v_normal"] || normal != LiteGraph.EMPTY_CODE )
         r += "varying vec3 v_normal;\n";
     //if (includes["v_pos"])
         r += "varying vec3 v_pos;\n";
-    if (includes["u_time"])
+    if (albedo.fragment.isLineIncluded("u_time"))
         r += "uniform float u_time;\n";
     //if (includes["u_eye"])
         r += "uniform vec3 u_eye;\n";
     r += "uniform vec4 u_color;\n";
-    for(var i in albedo.fragment.getHeader())
-        r += i;
+    var h = albedo.fragment.getHeader();
+    for(var id in h)
+        r += h[id];
 
     // http://www.thetenthplanet.de/archives/1180
     if(has_normal) {
@@ -163,7 +164,7 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     r += "void main() {\n";
     r += "      vec3 normal = normalize(v_normal);\n";
 
-    if (includes["depth"])
+    if (albedo.fragment.isLineIncluded("depth"))
         r += "      float depth = gl_FragCoord.z / gl_FragCoord.w;\n";
     //if (includes["view_dir"])
     r += "      vec3 view_dir = normalize(v_pos - u_eye);\n" +
@@ -171,16 +172,14 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
         "      vec3 half_dir = normalize(view_dir + light_dir);\n";
 
 
-    var ids = normal.fragment.getBodyIds();
-    var body_hash = normal.fragment.getBody();
+
     if(has_normal){
         // http://www.thetenthplanet.de/archives/1180
         r+= "      mat3 TBN = computeTBN();\n";
     }
 
 
-    ids = albedo.fragment.getBodyIds();
-    body_hash = albedo.fragment.getBody();
+    var body_hash = albedo.fragment.getBody();
     var sorted_map = sortMapByValue(body_hash);
     for(var i in sorted_map){
         r += "      "+sorted_map[i][1].str;

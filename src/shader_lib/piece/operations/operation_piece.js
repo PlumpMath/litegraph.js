@@ -20,11 +20,11 @@ POperation.getFragmentCode = function (output, op, input1, input2) {
 POperation.getCode = function (output, op, input1, input2) {
     var vertex = new CodePiece();
     vertex.setBody(this.getVertexCode(output, op, input1, input2));
-    vertex.setIncludes(POperation.includes);
+    vertex.setIncludesFromMap(POperation.includes);
 
     var fragment = new CodePiece();
     fragment.setBody(this.getFragmentCode(output, op, input1, input2));
-    fragment.setIncludes(POperation.includes);
+    fragment.setIncludesFromMap(POperation.includes);
 
 
     return new ShaderCode(vertex, fragment, output);

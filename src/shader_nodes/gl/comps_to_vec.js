@@ -28,11 +28,13 @@ LGraphCompsToVec.prototype.processNodePath = function()
     var input3 = this.getInputNodePath(2);
     var input4 = this.getInputNodePath(3);
 
-    var input = input1.concat(input2);
-    input = input.concat(input3);
-    input = input.concat(input4);
-    input.push(this);
-    this.node_path[0] = input;
+    this.mergePaths(input1,input2);
+    this.mergePaths(input1,input3);
+    this.mergePaths(input1,input4);
+    this.insertIntoPath(input1);
+
+
+    this.node_path[0] = input1;
 
 
 }

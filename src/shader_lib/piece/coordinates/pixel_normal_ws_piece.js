@@ -21,11 +21,11 @@ PPixelNormalWS.getCode = function (params) {
     var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
     var vertex = new CodePiece(order);
     vertex.setBody(this.getVertexCode());
-    vertex.setIncludes(PPixelNormalWS.includes);
+    vertex.setIncludesFromMap(PPixelNormalWS.includes);
 
     var fragment = new CodePiece(order);
     fragment.setBody(this.getFragmentCode());
-    fragment.setIncludes(PPixelNormalWS.includes);
+    fragment.setIncludesFromMap(PPixelNormalWS.includes);
 
     return new ShaderCode(vertex, fragment, "pixel_normal_ws");
 }

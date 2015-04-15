@@ -2651,7 +2651,23 @@ LGraphNode.prototype.getInputNodePath = function(slot)
     var link = this.graph.links[link_id];
     if(link)
         return this.graph.getNodeById( link.origin_id ).node_path[link.origin_slot];
-    return [];
+    return {};
+}
+
+LGraphNode.prototype.insertIntoPath = function(path)
+{
+    if(!path.hasOwnProperty((this.id)))
+        path[this.id] = this;
+}
+
+LGraphNode.prototype.mergePaths = function(path_target, path_to_merge)
+{
+    var objKeys = Object.keys(path_to_merge);
+    var id;
+    for (var i = 0, l = objKeys.length; i < l; i++) {
+        id = objKeys[i];
+        path_target[id] = path_to_merge[id];
+    }
 }
 
 LGraphNode.prototype.onGetNullCode = function(slot)
@@ -4954,17 +4970,17 @@ function CodePiece(order)
 {
     this.header = {}; // map for custom uniforms or variants
     this.body_hash = {}; // body hashmap
-    this.body_ids = []; // body ids sorted  by insert order
+    //this.body_ids = []; // body ids sorted  by insert order
     this.includes = {}; // map for standard uniforms
     this.scope = "";
     this.order = typeof order !== 'undefined' ? order : Number.MAX_VALUE;
     this.order -= CodePiece.ORDER_MODIFIER;
 }
 
-CodePiece.prototype.getBodyIds = function()
-{
-    return this.body_ids;
-};
+//CodePiece.prototype.getBodyIds = function()
+//{
+//    return this.body_ids;
+//};
 
 CodePiece.prototype.getBody = function()
 {
@@ -4972,11 +4988,11 @@ CodePiece.prototype.getBody = function()
 };
 
 
-CodePiece.prototype.setPartialBody = function(s, other_order)
+CodePiece.prototype.setPartialBody = function(s, other_order, id)
 {
-
+    s = s || "";
     if(s != ""){
-        var id = s.hashCode();
+        id = id || s.hashCode();
         var new_order = typeof other_order !== 'undefined' ? other_order : this.order;
         if(this.body_hash[id] !== undefined) {
             if(this.body_hash[id].order > new_order){
@@ -4989,22 +5005,22 @@ CodePiece.prototype.setPartialBody = function(s, other_order)
     return null;
 };
 
-CodePiece.prototype.setBody = function(s, other_order)
-{
 
-    if(s != ""){
-        var id = s.hashCode();
-        var new_order = typeof other_order !== 'undefined' ? other_order : this.order;
-        if(this.body_hash[id] !== undefined){
-            if(this.body_hash[id].order > new_order){
-                this.body_hash[id].order = new_order;
-                var index = this.body_ids.indexOf(id);
-                this.body_ids.splice(index, 1);
-                this.body_ids.unshift(id);
+CodePiece.prototype.setBody = function(s, other_order , id)
+{
+    var body_item;
+    s = s || "";
+    if(s !== ""){
+        id = id || s.hashCode();
+        body_item = this.body_hash[id];
+        other_order = typeof other_order !== 'undefined' ? other_order : this.order;
+        if(body_item !== undefined){
+            if(body_item.order > other_order){
+                body_item.order = other_order;
             }
         }  else {
-            this.body_hash[id] = {"str":s, order:new_order}; // we save the order
-            this.body_ids.unshift(id);
+            this.body_hash[id] = {"str":s, order:other_order}; // we save the order
+            //this.body_ids.unshift(id);
         }
        // console.log("str:"+ s + " new_order:"+this.body_hash[id].order+" old_order:"+old_order);
     }
@@ -5015,22 +5031,63 @@ CodePiece.prototype.getHeader = function()
     return this.header;
 };
 
-CodePiece.prototype.setHeader = function(map)
+CodePiece.prototype.setHeaderFromHashMap = function(map)
 {
-    // we set the includes object
-    for(var k in map) this.header[k] = 1;
+    var objKeys = Object.keys(map);
+    var id;
+    for (var i = 0, l = objKeys.length; i < l; i++) {
+        id = objKeys[i];
+        this.header[id] = map[id];
+    }
+};
+
+CodePiece.prototype.setHeaderFromMap = function(map)
+{
+    var objKeys = Object.keys(map);
+    var s;
+    for (var i = 0, l = objKeys.length; i < l; i++) {
+        s = objKeys[i];
+        this.header[s.hashCode()] = s;
+    }
+
 };
 
 CodePiece.prototype.addHeaderLine = function(s)
 {
-    this.header[s] = 1;
+    var k = s.hashCode();
+    this.header[k] = s;
+};
+
+
+// format needs to be {a:smth , b: smth};
+CodePiece.prototype.setIncludesFromHashMap = function(map)
+{
+    var objKeys = Object.keys(map);
+    var id;
+    for (var i = 0, l = objKeys.length; i < l; i++) {
+        id = objKeys[i];
+        this.includes[id] = map[id];
+    }
+
+
 };
 
 // format needs to be {a:smth , b: smth};
-CodePiece.prototype.setIncludes = function(inc)
+CodePiece.prototype.setIncludesFromMap = function(map)
 {
-    // we set the includes object
-    for(var k in inc) this.includes[k] = 1;
+    var objKeys = Object.keys(map);
+    var s;
+    for (var i = 0, l = objKeys.length; i < l; i++) {
+        s = objKeys[i];
+        this.includes[s.hashCode()] = s;
+    }
+
+};
+
+CodePiece.prototype.isLineIncluded = function(s)
+{
+    var id = s.hashCode();
+    return this.includes.hasOwnProperty(id);
 };
 
 // fragment or vertex
@@ -5041,51 +5098,59 @@ CodePiece.prototype.setScope = function(scope)
 
 CodePiece.prototype.merge = function (input_code)
 {
-    //this.setBody( input_code.getBody().concat(this.body) );
 
-    var ids = input_code.getBodyIds();
     var body_hash = input_code.getBody();
-    for (var i = ids.length-1; i >= 0; i--) {
-        var order = typeof body_hash[ids[i]].order !== 'undefined' ? body_hash[ids[i]].order : input_code.order;
-        this.setBody(body_hash[ids[i]].str, order);
+    var objKeys = Object.keys(body_hash);
+    var id;
+    var order;
+    for (var i = 0, l = objKeys.length; i < l; i++) {
+        id = objKeys[i];
+        order = body_hash[id].order;
+        order = typeof order !== 'undefined' ? order : input_code.order;
+        this.setBody( body_hash[id].str, order, id);
     }
 
-    for (var inc in input_code.getHeader()) { this.header[inc] = input_code.header[inc]; }
-    // we merge the includes
-    for (var inc in input_code.includes) { this.includes[inc] = input_code.includes[inc]; }
+    this.setHeaderFromHashMap(input_code.getHeader());
+    this.setIncludesFromHashMap(input_code.includes);
+
 };
 
 CodePiece.prototype.partialMerge = function (input_code)
 {
     //this.setBody( input_code.getBody().concat(this.body) );
 
-    var ids = input_code.getBodyIds();
+
     var body_hash = input_code.getBody();
     var map = {};
-    for (var i = ids.length-1; i >= 0; i--) {
-        var order = typeof body_hash[ids[i]].order !== 'undefined' ? body_hash[ids[i]].order : input_code.order;
-        var arr = this.setPartialBody(body_hash[ids[i]].str, order);
+    var objKeys = Object.keys(body_hash);
+    var id;
+    var order;
+    for (var i = 0, l = objKeys.length; i < l; i++) {
+        id = objKeys[i];
+        order = body_hash[id].order;
+        order = typeof order !== 'undefined' ? order : input_code.order;
+        var arr = this.setPartialBody(body_hash[id].str, order, id);
         if(arr !== null){
             map[arr[0]] = arr[1];
         }
     }
 
-    for (var inc in input_code.getHeader()) { this.header[inc] = input_code.header[inc]; }
-    // we merge the includes
-    for (var inc in input_code.includes) { this.includes[inc] = input_code.includes[inc]; }
+    this.setHeaderFromHashMap(input_code.getHeader());
+    this.setIncludesFromHashMap(input_code.includes);
 
     return map;
 };
 
 CodePiece.prototype.clone = function()
 {
-    var cloned = new CodePiece();
-    cloned.header = JSON.parse(JSON.stringify(this.header)); // map for custom uniforms or variants
-    cloned.body_hash = JSON.parse(JSON.stringify(this.body_hash)); // body hashmap
-    cloned.body_ids =  this.body_ids.slice(0);; // body ids sorted  by insert order
-    cloned.includes = JSON.parse(JSON.stringify(this.includes)); // map for standard uniforms
-    cloned.scope = this.scope;
-    return cloned;
+//    var cloned = new CodePiece();
+//    cloned.header = JSON.parse(JSON.stringify(this.header)); // map for custom uniforms or variants
+//    cloned.body_hash = JSON.parse(JSON.stringify(this.body_hash)); // body hashmap
+//    //cloned.body_ids =  this.body_ids.slice(0);; // body ids sorted  by insert order
+//    cloned.includes = JSON.parse(JSON.stringify(this.includes)); // map for standard uniforms
+//    cloned.scope = this.scope;
+//    return cloned;
+    return this;
 };
 
 
@@ -5208,28 +5273,28 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
 
     var displacement_factor = properties.displacement_factor.toFixed(4);
 
-    var includes = {};
-    for (var line in albedo.vertex.includes) { includes[line] = 1; }
-    for (var line in normal.vertex.includes) { includes[line] = 1; }
-    for (var line in emission.vertex.includes) { includes[line] = 1; }
-    for (var line in specular.vertex.includes) { includes[line] = 1; }
-    for (var line in gloss.vertex.includes) { includes[line] = 1; }
-    for (var line in alpha.vertex.includes) { includes[line] = 1; }
-    for (var line in alphaclip.vertex.includes) { includes[line] = 1; }
-    for (var line in offset.vertex.includes) { includes[line] = 1; }
+//    var includes = {};
+//    for (var line in albedo.vertex.includes) { includes[line] = 1; }
+//    for (var line in normal.vertex.includes) { includes[line] = 1; }
+//    for (var line in emission.vertex.includes) { includes[line] = 1; }
+//    for (var line in specular.vertex.includes) { includes[line] = 1; }
+//    for (var line in gloss.vertex.includes) { includes[line] = 1; }
+//    for (var line in alpha.vertex.includes) { includes[line] = 1; }
+//    for (var line in alphaclip.vertex.includes) { includes[line] = 1; }
+//    for (var line in offset.vertex.includes) { includes[line] = 1; }
 
     // header
     var r = "precision highp float;\n"+
         "attribute vec3 a_vertex;\n"+
         "attribute vec3 a_normal;\n"+
         "attribute vec2 a_coord;\n";
-    if (includes["v_coord"])
+    if (albedo.vertex.isLineIncluded("v_coord"))
         r += "varying vec2 v_coord;\n";
     //if (includes["v_normal"] || normal != LiteGraph.EMPTY_CODE)
         r += "varying vec3 v_normal;\n";
 
     r += "varying vec3 v_pos;\n";
-    if (includes["u_time"])
+    if (albedo.vertex.isLineIncluded("u_time"))
         r += "uniform float u_time;\n";
     //if (includes["u_eye"])
         r += "uniform vec3 u_eye;\n";
@@ -5237,19 +5302,19 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
          "uniform mat4 u_model;\n" +
         "uniform mat4 u_viewprojection;\n";
 
-    for(var k in albedo.vertex.getHeader())
-        r += k;
-
+    var h = albedo.vertex.getHeader();
+    for(var id in h)
+        r += h[id];
 
 
     // body
     r += "void main() {\n";
-    if (includes["v_coord"])
+    if (albedo.vertex.isLineIncluded("v_coord"))
         r += "      v_coord = a_coord;\n";
     r += "      v_normal = (u_model * vec4(a_normal, 0.0)).xyz;\n";
     r += "      vec3 pos = a_vertex;\n";
 
-    var ids = albedo.vertex.getBodyIds();
+
     var body_hash = albedo.vertex.getBody();
     var sorted_map = sortMapByValue(body_hash);
     for(var i in sorted_map){
@@ -5274,14 +5339,14 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
 ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emission,specular,gloss,alpha,alphaclip, offset) {
 
 
-    var has_gloss = gloss.fragment.getBodyIds().length  > 0;
-    var has_albedo = albedo.fragment.getBodyIds().length  > 0;
-    var has_normal = normal.fragment.getBodyIds().length  > 0;
-    var has_specular = specular.fragment.getBodyIds().length  > 0;
-    var has_emission = emission.fragment.getBodyIds().length  > 0;
-    var has_gloss = gloss.fragment.getBodyIds().length  > 0;
-    var has_alpha = alpha.fragment.getBodyIds().length  > 0;
-    var has_alphaclip = alphaclip.fragment.getBodyIds().length  > 0;
+    var has_gloss = Object.keys(gloss.fragment.getBody()).length  > 0;
+    var has_albedo = Object.keys(albedo.fragment.getBody()).length  > 0;
+    var has_normal = Object.keys(normal.fragment.getBody()).length  > 0;
+    var has_specular = Object.keys(specular.fragment.getBody()).length  > 0;
+    var has_emission = Object.keys(emission.fragment.getBody()).length  > 0;
+    var has_gloss = Object.keys(gloss.fragment.getBody()).length  > 0;
+    var has_alpha = Object.keys(alpha.fragment.getBody()).length  > 0;
+    var has_alphaclip = Object.keys(alphaclip.fragment.getBody()).length  > 0;
 
 
 
@@ -5290,14 +5355,14 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     var gloss_prop = properties.gloss.toFixed(4);
 
 
-    var includes = {};
-    for (var line in albedo.fragment.includes) { includes[line] = 1; }
-    for (var line in normal.fragment.includes) { includes[line] = 1; }
-    for (var line in emission.fragment.includes) { includes[line] = 1; }
-    for (var line in specular.fragment.includes) { includes[line] = 1; }
-    for (var line in gloss.fragment.includes) { includes[line] = 1; }
-    for (var line in alpha.fragment.includes) { includes[line] = 1; }
-    for (var line in offset.fragment.includes) { includes[line] = 1; }
+//    var includes = albedo.fragment.includes;
+//    for (var line in albedo.fragment.includes) { includes[line] = 1; }
+//    for (var line in normal.fragment.includes) { includes[line] = 1; }
+//    for (var line in emission.fragment.includes) { includes[line] = 1; }
+//    for (var line in specular.fragment.includes) { includes[line] = 1; }
+//    for (var line in gloss.fragment.includes) { includes[line] = 1; }
+//    for (var line in alpha.fragment.includes) { includes[line] = 1; }
+//    for (var line in offset.fragment.includes) { includes[line] = 1; }
     albedo.fragment.addHeaderLine("uniform samplerCube u_cube_default_texture;\n");
 
 
@@ -5305,19 +5370,20 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     // header
     var r = "precision highp float;\n"+
      "#extension GL_OES_standard_derivatives : enable\n";
-    if (includes["v_coord"])
+    if (albedo.fragment.isLineIncluded("v_coord"))
         r += "varying vec2 v_coord;\n";
     //if (includes["v_normal"] || normal != LiteGraph.EMPTY_CODE )
         r += "varying vec3 v_normal;\n";
     //if (includes["v_pos"])
         r += "varying vec3 v_pos;\n";
-    if (includes["u_time"])
+    if (albedo.fragment.isLineIncluded("u_time"))
         r += "uniform float u_time;\n";
     //if (includes["u_eye"])
         r += "uniform vec3 u_eye;\n";
     r += "uniform vec4 u_color;\n";
-    for(var i in albedo.fragment.getHeader())
-        r += i;
+    var h = albedo.fragment.getHeader();
+    for(var id in h)
+        r += h[id];
 
     // http://www.thetenthplanet.de/archives/1180
     if(has_normal) {
@@ -5338,7 +5404,7 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     r += "void main() {\n";
     r += "      vec3 normal = normalize(v_normal);\n";
 
-    if (includes["depth"])
+    if (albedo.fragment.isLineIncluded("depth"))
         r += "      float depth = gl_FragCoord.z / gl_FragCoord.w;\n";
     //if (includes["view_dir"])
     r += "      vec3 view_dir = normalize(v_pos - u_eye);\n" +
@@ -5346,16 +5412,14 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
         "      vec3 half_dir = normalize(view_dir + light_dir);\n";
 
 
-    var ids = normal.fragment.getBodyIds();
-    var body_hash = normal.fragment.getBody();
+
     if(has_normal){
         // http://www.thetenthplanet.de/archives/1180
         r+= "      mat3 TBN = computeTBN();\n";
     }
 
 
-    ids = albedo.fragment.getBodyIds();
-    body_hash = albedo.fragment.getBody();
+    var body_hash = albedo.fragment.getBody();
     var sorted_map = sortMapByValue(body_hash);
     for(var i in sorted_map){
         r += "      "+sorted_map[i][1].str;
@@ -5477,11 +5541,11 @@ P1ParamFunc.prototype.getCode = function (params) {
 
     var vertex = new CodePiece(order);
     vertex.setBody(this.getVertexCode(out_var, a, scope, out_type));
-    vertex.setIncludes(this.includes);
+    vertex.setIncludesFromMap(this.includes);
 
     var fragment = new CodePiece(order);
     fragment.setBody(this.getFragmentCode(out_var, a, scope, out_type));
-    fragment.setIncludes(this.includes );
+    fragment.setIncludesFromMap(this.includes );
 
     return new ShaderCode(vertex, fragment, out_var);
 }
@@ -5549,11 +5613,11 @@ P2ParamFunc.prototype.getCode = function (params) {
 
     var vertex = new CodePiece(order);
     vertex.setBody(this.getVertexCode(out_var, a, b, scope, out_type));
-    vertex.setIncludes(this.includes);
+    vertex.setIncludesFromMap(this.includes);
 
     var fragment = new CodePiece(order);
     fragment.setBody(this.getFragmentCode(out_var, a, b, scope, out_type));
-    fragment.setIncludes(this.includes );
+    fragment.setIncludesFromMap(this.includes );
 
     return new ShaderCode(vertex, fragment, out_var);
 }
@@ -5619,11 +5683,11 @@ P3ParamFunc.prototype.getCode = function (params) {
 
     var vertex = new CodePiece(order);
     vertex.setBody(this.getVertexCode(out_var, a, b, c, scope, out_type));
-    vertex.setIncludes(this.includes);
+    vertex.setIncludesFromMap(this.includes);
 
     var fragment = new CodePiece(order);
     fragment.setBody(this.getFragmentCode(out_var, a, b, c, scope, out_type));
-    fragment.setIncludes(this.includes );
+    fragment.setIncludesFromMap(this.includes );
 
     return new ShaderCode(vertex, fragment, out_var);
 }
@@ -5677,11 +5741,11 @@ PConstant.prototype.getCode = function (params) {
 
     var vertex = new CodePiece(order);
     vertex.setBody(this.getVertexCode(out_var, a, scope));
-    vertex.setIncludes(this.includes);
+    vertex.setIncludesFromMap(this.includes);
 
     var fragment = new CodePiece(order);
     fragment.setBody(this.getFragmentCode(out_var, a, scope));
-    fragment.setIncludes(this.includes );
+    fragment.setIncludesFromMap(this.includes );
 
     return new ShaderCode(vertex, fragment, out_var);
 }
@@ -5703,14 +5767,14 @@ PCameraToPixelWS.includes = {v_pos:1, u_eye: 1, camera_to_pixel_ws:1};
 
 PCameraToPixelWS.getVertexCode = function (order) {
     var vertex = new CodePiece(order);
-    vertex.setIncludes(PCameraToPixelWS.includes);
+    vertex.setIncludesFromMap(PCameraToPixelWS.includes);
     return vertex;
 }
 
 PCameraToPixelWS.getFragmentCode = function (order) {
     var fragment = new CodePiece(order);
     fragment.setBody("");
-    fragment.setIncludes(PCameraToPixelWS.includes);
+    fragment.setIncludesFromMap(PCameraToPixelWS.includes);
     return fragment;
 }
 
@@ -5736,13 +5800,13 @@ PDepth.already_included = false; // TODO add multiple times same line
 
 PDepth.getVertexCode = function (order) {
     var vertex = new CodePiece(order);
-    vertex.setIncludes(PDepth.includes);
+    vertex.setIncludesFromMap(PDepth.includes);
     return vertex;
 }
 
 PDepth.getFragmentCode = function (order) {
     var fragment = new CodePiece(order);
-    fragment.setIncludes(PDepth.includes);
+    fragment.setIncludesFromMap(PDepth.includes);
     return fragment;
 }
 
@@ -5777,11 +5841,11 @@ PPixelNormalWS.getCode = function (params) {
     var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
     var vertex = new CodePiece(order);
     vertex.setBody(this.getVertexCode());
-    vertex.setIncludes(PPixelNormalWS.includes);
+    vertex.setIncludesFromMap(PPixelNormalWS.includes);
 
     var fragment = new CodePiece(order);
     fragment.setBody(this.getFragmentCode());
-    fragment.setIncludes(PPixelNormalWS.includes);
+    fragment.setIncludesFromMap(PPixelNormalWS.includes);
 
     return new ShaderCode(vertex, fragment, "pixel_normal_ws");
 }
@@ -5817,11 +5881,11 @@ PReflected.prototype.getCode = function (params) {
     var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
     var vertex = new CodePiece(order);
     vertex.setBody(this.getVertexCode());
-    vertex.setIncludes(this.includes);
+    vertex.setIncludesFromMap(this.includes);
 
     var fragment = new CodePiece(order);
     fragment.setBody(this.getFragmentCode());
-    fragment.setIncludes(this.includes );
+    fragment.setIncludesFromMap(this.includes );
 
     return new ShaderCode(vertex, fragment, "reflected_vector");
 }
@@ -5868,12 +5932,12 @@ PUVs.getCode = function (params) {
     var fragment = new CodePiece(order);
     if(uvs_modified)
         fragment.setBody(this.getFragmentCode(out_var, utiling, vtiling, scope));
-    fragment.setIncludes(PUVs.includes);
+    fragment.setIncludesFromMap(PUVs.includes);
 
     var vertex = new CodePiece(order);
     if(uvs_modified)
         vertex.setBody(this.getVertexCode(out_var, utiling, vtiling, scope));
-    vertex.setIncludes(PUVs.includes);
+    vertex.setIncludesFromMap(PUVs.includes);
 
 
     return new ShaderCode(vertex, fragment, uvs_modified ? out_var : "v_coord");
@@ -5892,13 +5956,13 @@ PVertexPosWS.already_included = false; // TODO add multiple times same line
 
 PVertexPosWS.getVertexCode = function (order) {
     var vertex = new CodePiece(order);
-    vertex.setIncludes(PVertexPosWS.includes);
+    vertex.setIncludesFromMap(PVertexPosWS.includes);
     return vertex;
 }
 
 PVertexPosWS.getFragmentCode = function (order) {
     var fragment = new CodePiece(order);
-    fragment.setIncludes(PVertexPosWS.includes);
+    fragment.setIncludesFromMap(PVertexPosWS.includes);
     return fragment;
 }
 
@@ -5980,11 +6044,11 @@ PIf.prototype.getCode = function (params) {
 
     var vertex = new CodePiece(order);
     vertex.setBody(this.getVertexCode(out_type, out_var, a,b,gt,lt,eq,gt_out,lt_out,eq_out, scope));
-    vertex.setIncludes(this.includes);
+    vertex.setIncludesFromMap(this.includes);
 
     var fragment = new CodePiece(order);
     fragment.setBody(this.getFragmentCode(out_type, out_var, a,b,gt,lt,eq,gt_out,lt_out,eq_out,scope));
-    fragment.setIncludes(this.includes );
+    fragment.setIncludesFromMap(this.includes );
 
     return new ShaderCode(vertex, fragment, out_var);
 }
@@ -6038,11 +6102,11 @@ POperation.prototype.getCode = function (params) {
 
     var vertex = new CodePiece(order);
     vertex.setBody(this.getVertexCode(out_var, a, b, scope, out_type));
-    vertex.setIncludes(this.includes);
+    vertex.setIncludesFromMap(this.includes);
 
     var fragment = new CodePiece(order);
     fragment.setBody(this.getFragmentCode(out_var, a, b, scope, out_type));
-    fragment.setIncludes(this.includes );
+    fragment.setIncludesFromMap(this.includes );
 
     return new ShaderCode(vertex, fragment, out_var);
 }
@@ -6094,11 +6158,11 @@ PFresnel.prototype.getCode = function (params) {
 
     var vertex = new CodePiece(order);
     vertex.setBody(this.getVertexCode(out_var, a, scope));
-    vertex.setIncludes(this.includes);
+    vertex.setIncludesFromMap(this.includes);
 
     var fragment = new CodePiece(order);
     fragment.setBody(this.getFragmentCode(out_var, a, scope));
-    fragment.setIncludes(this.includes );
+    fragment.setIncludesFromMap(this.includes );
 
     return new ShaderCode(vertex, fragment, out_var);
 }
@@ -6126,11 +6190,11 @@ POperation.getFragmentCode = function (output, op, input1, input2) {
 POperation.getCode = function (output, op, input1, input2) {
     var vertex = new CodePiece();
     vertex.setBody(this.getVertexCode(output, op, input1, input2));
-    vertex.setIncludes(POperation.includes);
+    vertex.setIncludesFromMap(POperation.includes);
 
     var fragment = new CodePiece();
     fragment.setBody(this.getFragmentCode(output, op, input1, input2));
-    fragment.setIncludes(POperation.includes);
+    fragment.setIncludesFromMap(POperation.includes);
 
 
     return new ShaderCode(vertex, fragment, output);
@@ -6186,11 +6250,11 @@ PPanner.prototype.getCode = function ( params) {
 
     var vertex = new CodePiece(order);
     vertex.setBody(this.getVertexCode(out_var, input, time, dx, dy, scope, out_type));
-    vertex.setIncludes(this.includes);
+    vertex.setIncludesFromMap(this.includes);
 
     var fragment = new CodePiece(order);
     fragment.setBody(this.getFragmentCode(out_var, input, time, dx, dy, scope, out_type));
-    fragment.setIncludes(this.includes );
+    fragment.setIncludesFromMap(this.includes );
 
     return new ShaderCode(vertex, fragment, out_var);
 }
@@ -6225,12 +6289,12 @@ PTextureSampleCube.getCode = function (params) {
     var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
     var vertex = new CodePiece(order);
     vertex.setBody(this.getVertexCode(out_var, input, texture_id, scope));
-    vertex.setIncludes(PTextureSampleCube.includes);
+    vertex.setIncludesFromMap(PTextureSampleCube.includes);
 
     var fragment = new CodePiece(order);
     fragment.setBody(this.getFragmentCode(out_var, input, texture_id, scope));
     fragment.addHeaderLine("uniform samplerCube "+texture_id+";\n");
-    fragment.setIncludes(PTextureSampleCube.includes);
+    fragment.setIncludesFromMap(PTextureSampleCube.includes);
 
     return new ShaderCode(vertex, fragment, out_var);
 }
@@ -6251,10 +6315,10 @@ PTextureSample.getVertexCode = function (output, input, texture_id, texture_type
     var code = new CodePiece(order);
     var code_str = "";
     if(scope == CodePiece.VERTEX) {
-        code.setIncludes(PTextureSample.includes);
+        code.setIncludesFromMap(PTextureSample.includes);
         code_str = "vec4 " + output + " = texture2D(" + texture_id + ", " + input + ");\n";
         code.addHeaderLine("uniform sampler2D "+texture_id+";\n");
-        code.setIncludes(PTextureSample.includes);
+        code.setIncludesFromMap(PTextureSample.includes);
     }
     code.setBody(code_str);
     return code;
@@ -6263,7 +6327,7 @@ PTextureSample.getVertexCode = function (output, input, texture_id, texture_type
 PTextureSample.getFragmentCode = function (output, input, texture_id, texture_type, scope, order) {
     input = input || "v_coord";
     var code = new CodePiece(order);
-    code.setIncludes(PTextureSample.includes);
+    code.setIncludesFromMap(PTextureSample.includes);
     var code_str = "";
     if(scope == CodePiece.FRAGMENT) {
         code.addHeaderLine("uniform sampler2D " + texture_id + ";\n");
@@ -6275,11 +6339,11 @@ PTextureSample.getFragmentCode = function (output, input, texture_id, texture_ty
         else if( texture_type == LiteGraph.TANGENT_MAP){
             code_str += "      " + output + " = (2.0 * " + output + " )-1.0;\n";
             code_str += "      "+output+" = vec4(TBN * "+output+".xyz, 1.0);\n";
-            code.setIncludes(PTextureSample.includes);
+            code.setIncludesFromMap(PTextureSample.includes);
         }    else if( texture_type == LiteGraph.TANGENT_MAP){
             code_str += "      " + output + " = (2.0 * " + output + " )-1.0;\n";
             code_str += "      "+output+" = vec4(TBN * "+output+".xyz, 1.0);\n";
-            code.setIncludes(PTextureSample.includes);
+            code.setIncludesFromMap(PTextureSample.includes);
         }
     }
 //    else if( texture_type == LiteGraph.BUMP_MAP){
@@ -6294,7 +6358,7 @@ PTextureSample.getFragmentCode = function (output, input, texture_id, texture_ty
 //                    "      vec3 vb = normalize(vec3(size.yx,s12-s10));\n" +
 //                    "      "+output+" = vec4( cross(va,vb), s11 );\n";
 //
-//        code.setIncludes(PTextureSample.includes);
+//        code.setIncludesFromMap(PTextureSample.includes);
 //    }
 
 
@@ -6348,11 +6412,11 @@ PTime.getCode = function (params) {
     var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
 
     var fragment = new CodePiece(order);
-    fragment.setIncludes(PTime.includes);
+    fragment.setIncludesFromMap(PTime.includes);
 
     var vertex = new CodePiece(order);
     vertex.setBody(this.getVertexCode());
-    vertex.setIncludes(PTime.includes);
+    vertex.setIncludesFromMap(PTime.includes);
 
     return new ShaderCode(vertex, fragment, "u_time");
 }

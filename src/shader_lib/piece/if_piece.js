@@ -68,11 +68,11 @@ PIf.prototype.getCode = function (params) {
 
     var vertex = new CodePiece(order);
     vertex.setBody(this.getVertexCode(out_type, out_var, a,b,gt,lt,eq,gt_out,lt_out,eq_out, scope));
-    vertex.setIncludes(this.includes);
+    vertex.setIncludesFromMap(this.includes);
 
     var fragment = new CodePiece(order);
     fragment.setBody(this.getFragmentCode(out_type, out_var, a,b,gt,lt,eq,gt_out,lt_out,eq_out,scope));
-    fragment.setIncludes(this.includes );
+    fragment.setIncludesFromMap(this.includes );
 
     return new ShaderCode(vertex, fragment, out_var);
 }

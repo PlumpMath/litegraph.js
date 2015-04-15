@@ -26,9 +26,9 @@ LGraphPanner.prototype.processNodePath = function()
 {
     var input1 = this.getInputNodePath(0);
     var input2 = this.getInputNodePath(1);
-    var input = input1.concat(input2);
-    input.push(this);
-    this.node_path[0] = input;
+    this.mergePaths(input1,input2);
+    this.insertIntoPath(input1);
+    this.node_path[0] = input1;
 }
 
 

@@ -18,7 +18,7 @@ LGraph1ParamNode.prototype.onExecute = function()
 LGraph1ParamNode.prototype.processNodePath = function()
 {
     var input = this.getInputNodePath(0);
-    input.push(this);
+    this.insertIntoPath(input);
     this.node_path[0] = input;
 }
 

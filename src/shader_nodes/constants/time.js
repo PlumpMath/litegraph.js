@@ -18,9 +18,9 @@ LGraphTime.prototype.onExecute = function()
 
 LGraphTime.prototype.processNodePath = function()
 {
-    var input = [];
+    var input = {};
+    this.insertIntoPath(input);
     this.node_path[0] = input;
-    input.push(this);
 }
 
 LGraphTime.prototype.processInputCode = function(scope)

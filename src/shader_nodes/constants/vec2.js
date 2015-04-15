@@ -33,9 +33,9 @@ LGraphConstVec2.prototype.onExecute = function()
 
 LGraphConstVec2.prototype.processNodePath = function()
 {
-    var input = [];
+    var input = {};
+    this.insertIntoPath(input);
     this.node_path[0] = input;
-    input.push(this);
 }
 
 LGraphConstVec2.prototype.processInputCode = function(scope)

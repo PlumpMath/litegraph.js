@@ -35,12 +35,12 @@ PUVs.getCode = function (params) {
     var fragment = new CodePiece(order);
     if(uvs_modified)
         fragment.setBody(this.getFragmentCode(out_var, utiling, vtiling, scope));
-    fragment.setIncludes(PUVs.includes);
+    fragment.setIncludesFromMap(PUVs.includes);
 
     var vertex = new CodePiece(order);
     if(uvs_modified)
         vertex.setBody(this.getVertexCode(out_var, utiling, vtiling, scope));
-    vertex.setIncludes(PUVs.includes);
+    vertex.setIncludesFromMap(PUVs.includes);
 
 
     return new ShaderCode(vertex, fragment, uvs_modified ? out_var : "v_coord");

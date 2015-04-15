@@ -290,13 +290,18 @@ LGraphTexture.generateLowResTexturePreview = function(tex)
 LGraphTexture.prototype.processNodePath = function()
 {
     var input = this.getInputNodePath(0);
-    var cloned_input = input.slice(0);
-    cloned_input.push(this);
-    this.node_path[1] = cloned_input;
-    this.node_path[2] = cloned_input.slice(0);
-    this.node_path[3] = cloned_input.slice(0);
-    this.node_path[4] = cloned_input.slice(0);
-    this.node_path[5] = cloned_input.slice(0);
+
+    this.insertIntoPath(input);
+
+    this.node_path[1] = input;
+    this.node_path[2] = input;
+    this.node_path[3] = input;
+    this.node_path[4] = input;
+    this.node_path[5] = input;
+//    this.node_path[2] = cloned_input.slice(0);
+//    this.node_path[3] = cloned_input.slice(0);
+//    this.node_path[4] = cloned_input.slice(0);
+//    this.node_path[5] = cloned_input.slice(0);
 
 }
 

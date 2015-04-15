@@ -10,13 +10,13 @@ PDepth.already_included = false; // TODO add multiple times same line
 
 PDepth.getVertexCode = function (order) {
     var vertex = new CodePiece(order);
-    vertex.setIncludes(PDepth.includes);
+    vertex.setIncludesFromMap(PDepth.includes);
     return vertex;
 }
 
 PDepth.getFragmentCode = function (order) {
     var fragment = new CodePiece(order);
-    fragment.setIncludes(PDepth.includes);
+    fragment.setIncludesFromMap(PDepth.includes);
     return fragment;
 }
 

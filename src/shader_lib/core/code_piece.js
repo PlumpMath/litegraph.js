@@ -11,17 +11,17 @@ function CodePiece(order)
 {
     this.header = {}; // map for custom uniforms or variants
     this.body_hash = {}; // body hashmap
-    this.body_ids = []; // body ids sorted  by insert order
+    //this.body_ids = []; // body ids sorted  by insert order
     this.includes = {}; // map for standard uniforms
     this.scope = "";
     this.order = typeof order !== 'undefined' ? order : Number.MAX_VALUE;
     this.order -= CodePiece.ORDER_MODIFIER;
 }
 
-CodePiece.prototype.getBodyIds = function()
-{
-    return this.body_ids;
-};
+//CodePiece.prototype.getBodyIds = function()
+//{
+//    return this.body_ids;
+//};
 
 CodePiece.prototype.getBody = function()
 {
@@ -29,11 +29,11 @@ CodePiece.prototype.getBody = function()
 };
 
 
-CodePiece.prototype.setPartialBody = function(s, other_order)
+CodePiece.prototype.setPartialBody = function(s, other_order, id)
 {
-
+    s = s || "";
     if(s != ""){
-        var id = s.hashCode();
+        id = id || s.hashCode();
         var new_order = typeof other_order !== 'undefined' ? other_order : this.order;
         if(this.body_hash[id] !== undefined) {
             if(this.body_hash[id].order > new_order){
@@ -46,22 +46,22 @@ CodePiece.prototype.setPartialBody = function(s, other_order)
     return null;
 };
 
-CodePiece.prototype.setBody = function(s, other_order)
-{
 
-    if(s != ""){
-        var id = s.hashCode();
-        var new_order = typeof other_order !== 'undefined' ? other_order : this.order;
-        if(this.body_hash[id] !== undefined){
-            if(this.body_hash[id].order > new_order){
-                this.body_hash[id].order = new_order;
-                var index = this.body_ids.indexOf(id);
-                this.body_ids.splice(index, 1);
-                this.body_ids.unshift(id);
+CodePiece.prototype.setBody = function(s, other_order , id)
+{
+    var body_item;
+    s = s || "";
+    if(s !== ""){
+        id = id || s.hashCode();
+        body_item = this.body_hash[id];
+        other_order = typeof other_order !== 'undefined' ? other_order : this.order;
+        if(body_item !== undefined){
+            if(body_item.order > other_order){
+                body_item.order = other_order;
             }
         }  else {
-            this.body_hash[id] = {"str":s, order:new_order}; // we save the order
-            this.body_ids.unshift(id);
+            this.body_hash[id] = {"str":s, order:other_order}; // we save the order
+            //this.body_ids.unshift(id);
         }
        // console.log("str:"+ s + " new_order:"+this.body_hash[id].order+" old_order:"+old_order);
     }
@@ -72,22 +72,63 @@ CodePiece.prototype.getHeader = function()
     return this.header;
 };
 
-CodePiece.prototype.setHeader = function(map)
+CodePiece.prototype.setHeaderFromHashMap = function(map)
 {
-    // we set the includes object
-    for(var k in map) this.header[k] = 1;
+    var objKeys = Object.keys(map);
+    var id;
+    for (var i = 0, l = objKeys.length; i < l; i++) {
+        id = objKeys[i];
+        this.header[id] = map[id];
+    }
+};
+
+CodePiece.prototype.setHeaderFromMap = function(map)
+{
+    var objKeys = Object.keys(map);
+    var s;
+    for (var i = 0, l = objKeys.length; i < l; i++) {
+        s = objKeys[i];
+        this.header[s.hashCode()] = s;
+    }
+
 };
 
 CodePiece.prototype.addHeaderLine = function(s)
 {
-    this.header[s] = 1;
+    var k = s.hashCode();
+    this.header[k] = s;
+};
+
+
+// format needs to be {a:smth , b: smth};
+CodePiece.prototype.setIncludesFromHashMap = function(map)
+{
+    var objKeys = Object.keys(map);
+    var id;
+    for (var i = 0, l = objKeys.length; i < l; i++) {
+        id = objKeys[i];
+        this.includes[id] = map[id];
+    }
+
+
 };
 
 // format needs to be {a:smth , b: smth};
-CodePiece.prototype.setIncludes = function(inc)
+CodePiece.prototype.setIncludesFromMap = function(map)
 {
-    // we set the includes object
-    for(var k in inc) this.includes[k] = 1;
+    var objKeys = Object.keys(map);
+    var s;
+    for (var i = 0, l = objKeys.length; i < l; i++) {
+        s = objKeys[i];
+        this.includes[s.hashCode()] = s;
+    }
+
+};
+
+CodePiece.prototype.isLineIncluded = function(s)
+{
+    var id = s.hashCode();
+    return this.includes.hasOwnProperty(id);
 };
 
 // fragment or vertex
@@ -98,51 +139,59 @@ CodePiece.prototype.setScope = function(scope)
 
 CodePiece.prototype.merge = function (input_code)
 {
-    //this.setBody( input_code.getBody().concat(this.body) );
 
-    var ids = input_code.getBodyIds();
     var body_hash = input_code.getBody();
-    for (var i = ids.length-1; i >= 0; i--) {
-        var order = typeof body_hash[ids[i]].order !== 'undefined' ? body_hash[ids[i]].order : input_code.order;
-        this.setBody(body_hash[ids[i]].str, order);
+    var objKeys = Object.keys(body_hash);
+    var id;
+    var order;
+    for (var i = 0, l = objKeys.length; i < l; i++) {
+        id = objKeys[i];
+        order = body_hash[id].order;
+        order = typeof order !== 'undefined' ? order : input_code.order;
+        this.setBody( body_hash[id].str, order, id);
     }
 
-    for (var inc in input_code.getHeader()) { this.header[inc] = input_code.header[inc]; }
-    // we merge the includes
-    for (var inc in input_code.includes) { this.includes[inc] = input_code.includes[inc]; }
+    this.setHeaderFromHashMap(input_code.getHeader());
+    this.setIncludesFromHashMap(input_code.includes);
+
 };
 
 CodePiece.prototype.partialMerge = function (input_code)
 {
     //this.setBody( input_code.getBody().concat(this.body) );
 
-    var ids = input_code.getBodyIds();
+
     var body_hash = input_code.getBody();
     var map = {};
-    for (var i = ids.length-1; i >= 0; i--) {
-        var order = typeof body_hash[ids[i]].order !== 'undefined' ? body_hash[ids[i]].order : input_code.order;
-        var arr = this.setPartialBody(body_hash[ids[i]].str, order);
+    var objKeys = Object.keys(body_hash);
+    var id;
+    var order;
+    for (var i = 0, l = objKeys.length; i < l; i++) {
+        id = objKeys[i];
+        order = body_hash[id].order;
+        order = typeof order !== 'undefined' ? order : input_code.order;
+        var arr = this.setPartialBody(body_hash[id].str, order, id);
         if(arr !== null){
             map[arr[0]] = arr[1];
         }
     }
 
-    for (var inc in input_code.getHeader()) { this.header[inc] = input_code.header[inc]; }
-    // we merge the includes
-    for (var inc in input_code.includes) { this.includes[inc] = input_code.includes[inc]; }
+    this.setHeaderFromHashMap(input_code.getHeader());
+    this.setIncludesFromHashMap(input_code.includes);
 
     return map;
 };
 
 CodePiece.prototype.clone = function()
 {
-    var cloned = new CodePiece();
-    cloned.header = JSON.parse(JSON.stringify(this.header)); // map for custom uniforms or variants
-    cloned.body_hash = JSON.parse(JSON.stringify(this.body_hash)); // body hashmap
-    cloned.body_ids =  this.body_ids.slice(0);; // body ids sorted  by insert order
-    cloned.includes = JSON.parse(JSON.stringify(this.includes)); // map for standard uniforms
-    cloned.scope = this.scope;
-    return cloned;
+//    var cloned = new CodePiece();
+//    cloned.header = JSON.parse(JSON.stringify(this.header)); // map for custom uniforms or variants
+//    cloned.body_hash = JSON.parse(JSON.stringify(this.body_hash)); // body hashmap
+//    //cloned.body_ids =  this.body_ids.slice(0);; // body ids sorted  by insert order
+//    cloned.includes = JSON.parse(JSON.stringify(this.includes)); // map for standard uniforms
+//    cloned.scope = this.scope;
+//    return cloned;
+    return this;
 };
 
 

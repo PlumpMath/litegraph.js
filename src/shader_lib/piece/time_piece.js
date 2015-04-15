@@ -22,11 +22,11 @@ PTime.getCode = function (params) {
     var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
 
     var fragment = new CodePiece(order);
-    fragment.setIncludes(PTime.includes);
+    fragment.setIncludesFromMap(PTime.includes);
 
     var vertex = new CodePiece(order);
     vertex.setBody(this.getVertexCode());
-    vertex.setIncludes(PTime.includes);
+    vertex.setIncludesFromMap(PTime.includes);
 
     return new ShaderCode(vertex, fragment, "u_time");
 }

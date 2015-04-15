@@ -26,12 +26,12 @@ PTextureSampleCube.getCode = function (params) {
     var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
     var vertex = new CodePiece(order);
     vertex.setBody(this.getVertexCode(out_var, input, texture_id, scope));
-    vertex.setIncludes(PTextureSampleCube.includes);
+    vertex.setIncludesFromMap(PTextureSampleCube.includes);
 
     var fragment = new CodePiece(order);
     fragment.setBody(this.getFragmentCode(out_var, input, texture_id, scope));
     fragment.addHeaderLine("uniform samplerCube "+texture_id+";\n");
-    fragment.setIncludes(PTextureSampleCube.includes);
+    fragment.setIncludesFromMap(PTextureSampleCube.includes);
 
     return new ShaderCode(vertex, fragment, out_var);
 }

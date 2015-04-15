@@ -10,13 +10,13 @@ PVertexPosWS.already_included = false; // TODO add multiple times same line
 
 PVertexPosWS.getVertexCode = function (order) {
     var vertex = new CodePiece(order);
-    vertex.setIncludes(PVertexPosWS.includes);
+    vertex.setIncludesFromMap(PVertexPosWS.includes);
     return vertex;
 }
 
 PVertexPosWS.getFragmentCode = function (order) {
     var fragment = new CodePiece(order);
-    fragment.setIncludes(PVertexPosWS.includes);
+    fragment.setIncludesFromMap(PVertexPosWS.includes);
     return fragment;
 }
 

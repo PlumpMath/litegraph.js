@@ -63,11 +63,20 @@ LGraphShader.prototype.onWidget = function(e,widget)
 
 }
 
+LGraphShader.prototype.sortPathByOrder = function (map)
+{
+    var tupleArray = [];
+    for (var key in map) tupleArray.push([key, map[key]]);
+    tupleArray.sort(function (a, b) { return a[1].order - b[1].order });
+    return tupleArray;
+}
+
 LGraphShader.prototype.getFullCode = function(slot, scope, modifier) {
     CodePiece.ORDER_MODIFIER = modifier;
     var path = this.getInputNodePath(slot);
-    for(var i = 0; i < path.length; ++i){
-        path[i].processInputCode(scope);
+    var sorted_map = this.sortPathByOrder(path);
+    for(var i = 0; i < sorted_map.length; ++i){
+        sorted_map[i][1].processInputCode(scope);
     }
     var code = this.getInputCode(slot) || LiteGraph.EMPTY_CODE; // 0 it's the color
     return code;

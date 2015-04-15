@@ -21,9 +21,9 @@ LGraphUVs.prototype.onExecute = function()
 
 LGraphUVs.prototype.processNodePath = function()
 {
-    var input = [];
+    var input = {};
+    this.insertIntoPath(input);
     this.node_path[0] = input;
-    input.push(this);
 }
 
 LGraphUVs.prototype.processInputCode = function(scope)

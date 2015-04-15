@@ -56,12 +56,12 @@ LGraph3ParamNode.prototype.processNodePath = function()
     var input1 = this.getInputNodePath(0);
     var input2 = this.getInputNodePath(1);
     var input3 = this.getInputNodePath(2);
-    var input = input1.concat(input2);
-    var input = input.concat(input3);
-    input.push(this);
-    this.node_path[0] = input;
-    this.node_path[1] = input.slice(0);
-    this.node_path[2] = input.slice(0);
+    this.mergePaths(input1,input2);
+    this.mergePaths(input1,input3);
+    this.insertIntoPath(input1);
+
+    this.node_path[0] = input1;
+
 }
 
 

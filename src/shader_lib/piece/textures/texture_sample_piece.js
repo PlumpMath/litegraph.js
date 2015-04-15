@@ -10,10 +10,10 @@ PTextureSample.getVertexCode = function (output, input, texture_id, texture_type
     var code = new CodePiece(order);
     var code_str = "";
     if(scope == CodePiece.VERTEX) {
-        code.setIncludes(PTextureSample.includes);
+        code.setIncludesFromMap(PTextureSample.includes);
         code_str = "vec4 " + output + " = texture2D(" + texture_id + ", " + input + ");\n";
         code.addHeaderLine("uniform sampler2D "+texture_id+";\n");
-        code.setIncludes(PTextureSample.includes);
+        code.setIncludesFromMap(PTextureSample.includes);
     }
     code.setBody(code_str);
     return code;
@@ -22,7 +22,7 @@ PTextureSample.getVertexCode = function (output, input, texture_id, texture_type
 PTextureSample.getFragmentCode = function (output, input, texture_id, texture_type, scope, order) {
     input = input || "v_coord";
     var code = new CodePiece(order);
-    code.setIncludes(PTextureSample.includes);
+    code.setIncludesFromMap(PTextureSample.includes);
     var code_str = "";
     if(scope == CodePiece.FRAGMENT) {
         code.addHeaderLine("uniform sampler2D " + texture_id + ";\n");
@@ -34,11 +34,11 @@ PTextureSample.getFragmentCode = function (output, input, texture_id, texture_ty
         else if( texture_type == LiteGraph.TANGENT_MAP){
             code_str += "      " + output + " = (2.0 * " + output + " )-1.0;\n";
             code_str += "      "+output+" = vec4(TBN * "+output+".xyz, 1.0);\n";
-            code.setIncludes(PTextureSample.includes);
+            code.setIncludesFromMap(PTextureSample.includes);
         }    else if( texture_type == LiteGraph.TANGENT_MAP){
             code_str += "      " + output + " = (2.0 * " + output + " )-1.0;\n";
             code_str += "      "+output+" = vec4(TBN * "+output+".xyz, 1.0);\n";
-            code.setIncludes(PTextureSample.includes);
+            code.setIncludesFromMap(PTextureSample.includes);
         }
     }
 //    else if( texture_type == LiteGraph.BUMP_MAP){
@@ -53,7 +53,7 @@ PTextureSample.getFragmentCode = function (output, input, texture_id, texture_ty
 //                    "      vec3 vb = normalize(vec3(size.yx,s12-s10));\n" +
 //                    "      "+output+" = vec4( cross(va,vb), s11 );\n";
 //
-//        code.setIncludes(PTextureSample.includes);
+//        code.setIncludesFromMap(PTextureSample.includes);
 //    }
 
 
