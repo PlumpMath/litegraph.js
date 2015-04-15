@@ -744,8 +744,8 @@ function LGraphUVs()
 
     this.properties = { UTiling:1.0,
                         VTiling:1.0 };
-    this.options = {    UTiling:{min:0, max:1, step:0.01},
-                        VTiling:{min:0, max:1, step:0.01}
+    this.options = {    UTiling:{ step:0.01},
+                        VTiling:{step:0.01}
     };
     this.shader_piece = PUVs; // hardcoded for testing
 }
@@ -769,9 +769,10 @@ LGraphUVs.prototype.processInputCode = function(scope)
 {
     this.codes[0] = this.shader_piece.getCode({order:this.order,
                                                 utiling:this.properties.UTiling.toFixed(3),
-                                                vtiling:this.properties.VTiling.toFixed(3)
+                                                vtiling:this.properties.VTiling.toFixed(3),
+                                                out_var:"uvs_"+this.id,
+                                                scope:scope
                                                 }); // I need to check texture id
-
 }
 
 LGraphUVs.prototype.setFloatValue = function(old_value,new_value) {
