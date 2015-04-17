@@ -634,7 +634,7 @@ LiteGraph.hexToColor = function( color_hex)
         ] : null;
     };
     var color = hexToRgb(color_hex);
-    return "vec3("+(color[0]/255).toFixed(3)+","+(color[1]/255).toFixed(3)+","+(color[2]/255).toFixed(3)+")";
+    return "vec4("+(color[0]/255).toFixed(3)+","+(color[1]/255).toFixed(3)+","+(color[2]/255).toFixed(3)+", 1.0)";
 }
 
 LiteGraph.getOtputTypeFromMap = function( map)

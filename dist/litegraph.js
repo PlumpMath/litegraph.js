@@ -639,7 +639,7 @@ LiteGraph.hexToColor = function( color_hex)
         ] : null;
     };
     var color = hexToRgb(color_hex);
-    return "vec3("+(color[0]/255).toFixed(3)+","+(color[1]/255).toFixed(3)+","+(color[2]/255).toFixed(3)+")";
+    return "vec4("+(color[0]/255).toFixed(3)+","+(color[1]/255).toFixed(3)+","+(color[2]/255).toFixed(3)+", 1.0)";
 }
 
 LiteGraph.getOtputTypeFromMap = function( map)
@@ -743,6 +743,8 @@ LGraph.prototype.clear = function()
     this.configuring = false;
 
     this.shader_output = null;
+
+    this.scene_properties = null;
 
     LiteGraph.graph_max_steps = 0;
 
@@ -1561,6 +1563,7 @@ LGraph.prototype.serialize = function()
     var data = {
 //		graph: this.graph,
         shader_textures: this.shader_textures,
+        scene_properties: this.scene_properties,
         //shader_output: this.shader_output, this creates a cycle
 
         iteration: this.iteration,
@@ -5271,7 +5274,6 @@ ShaderConstructor.createShader = function (properties , albedo,normal,emission,s
 
 ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emission,specular,gloss,alpha,alphaclip,offset) {
 
-    var displacement_factor = properties.displacement_factor.toFixed(4);
 
 //    var includes = {};
 //    for (var line in albedo.vertex.includes) { includes[line] = 1; }
@@ -5313,6 +5315,10 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
         r += "      v_coord = a_coord;\n";
     r += "      v_normal = (u_model * vec4(a_normal, 0.0)).xyz;\n";
     r += "      vec3 pos = a_vertex;\n";
+    if (albedo.fragment.isLineIncluded("depth")){
+        r += "      vec4 pos4 = (u_model * vec4(pos,1.0));\n";
+        r += "      float depth = pos4.z / pos4.w;\n";
+    }
 
 
     var body_hash = albedo.vertex.getBody();
@@ -5323,7 +5329,7 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
     }
 
     if(offset.getOutputVar()){
-        r += "      pos += a_normal * "+offset.getOutputVar()+" * "+displacement_factor+";\n";
+        r += "      pos += a_normal * "+offset.getOutputVar()+";\n";
     }
 
 
@@ -5349,10 +5355,7 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     var has_alphaclip = Object.keys(alphaclip.fragment.getBody()).length  > 0;
 
 
-
-    var color = LiteGraph.hexToColor(properties.color);
     var light_dir = "vec3("+properties.light_dir_x+","+properties.light_dir_y+","+properties.light_dir_z+")";
-    var gloss_prop = properties.gloss.toFixed(4);
 
 
 //    var includes = albedo.fragment.includes;
@@ -5440,10 +5443,11 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     }
 
     if( !has_gloss) {
-        r += "      float gloss = "+gloss_prop+";\n";
+        r += "      float gloss = 1.0;\n";
     } else{
         r +="      float gloss = "+gloss.getOutputVar()+";\n";
     }
+
 
     // diffuse light
     r +="      vec3 diffuse_color = "+albedo.getOutputVar()+".xyz;\n" +
@@ -5487,7 +5491,9 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
 //        "      vec3 specular_reflection =   mix( diffuse_reflection, vec3(1.0), w) ;\n"; // vec3(1.0 is the light color)
     //specular_color * specular * specular_intensity
 
-    r +="      gl_FragColor = vec4( emission + "+ /*reflection_color.xyz +*/ " specular_color + (ambient_light + diffuse_light) * diffuse_color, 1.0);\n" +
+    var alpha_value = has_alpha ? alpha.getOutputVar() : "1.0";
+
+    r +="      gl_FragColor = vec4( emission + "+ /*reflection_color.xyz +*/ " specular_color + (ambient_light + diffuse_light) * diffuse_color, "+ alpha_value +" );\n" +
         "}";
 
     return r;
@@ -5985,18 +5991,24 @@ function PIf () {
 
 PIf.prototype.getVertexCode = function (out_type, out_var, a,b,gt,lt,eq,gt_out,lt_out,eq_out,scope) {
     if(scope == CodePiece.VERTEX || scope == CodePiece.BOTH){
+        gt = gt ? gt +"" : "";
+        lt = lt ? lt +"" : "";
+        eq = eq ? eq +"" : "";
+        gt_out = gt_out ? "         "+out_var+" = " + gt_out +";\n" : "";
+        lt_out = lt_out ? "         "+out_var+" = " + lt_out +";\n" : "";
+        eq_out = eq_out ? "         "+out_var+" = " + eq_out +";\n" : "";
         var code = out_type+" " +out_var+";\n" +
-            "      if("+ a+">"+ b+")\n" +
+            "      if("+ a+" > "+ b+")\n" +
             "      {\n" +
-            ""+gt+"\n" +
-            "          "+out_var+" = " + gt_out +";\n"+
-            "      } else if ("+ a+"<"+ b+"){\n" +
-            ""+lt+"\n" +
-            "          "+out_var+" = " + lt_out +";\n"+
+            ""+gt+"" +
+            gt_out  +
+            "      } else if ("+ a+" < "+ b+"){\n" +
+            ""+lt+"" +
+            lt_out  +
             "      } else {\n" +
-            ""+eq+"\n" +
-            "          "+out_var+" = " + eq_out +";\n"
-        " }\n";
+            ""+eq+"" +
+            eq_out  +
+            "      }\n";
         return code;
     }
     return "";
@@ -6133,17 +6145,19 @@ function PFresnel () {
     this.includes = {u_model: 1, a_normal: 1, v_normal: 1};
 }
 
-PFresnel.prototype.getVertexCode = function (output_var, value, scope) {
+PFresnel.prototype.getVertexCode = function (output_var,  normal, exp, scope) {
     if(scope == CodePiece.VERTEX || scope == CodePiece.BOTH){
-        var code = "";
+        var code = "float fresnel_"+output_var+" = dot("+normal+", -view_dir);\n" +
+        "      float "+output_var+" = pow( 1.0 - clamp(0.0,fresnel_"+output_var+",1.0), "+exp+");\n";
         return code;
     }
     return "";
 }
 
-PFresnel.prototype.getFragmentCode = function (output_var, value, scope) {
+PFresnel.prototype.getFragmentCode = function (output_var,  normal, exp, scope) {
     if(scope == CodePiece.FRAGMENT || scope == CodePiece.BOTH){
-        var code = this.type+" " +output_var+" = "+value+";\n";
+        var code = "float fresnel_"+output_var+" = dot("+normal+", -view_dir);\n" +
+            "      float "+output_var+" = pow( 1.0 - clamp(0.0,fresnel_"+output_var+",1.0), "+exp+");\n";
         return code;
     }
     return "";
@@ -6152,16 +6166,17 @@ PFresnel.prototype.getFragmentCode = function (output_var, value, scope) {
 
 PFresnel.prototype.getCode = function (params) {
     var out_var = params.out_var;
-    var a = params.a;
+    var normal = params.normal || "normal";
+    var exp = params.exp || "1.0";
     var scope = params.scope;
     var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
 
     var vertex = new CodePiece(order);
-    vertex.setBody(this.getVertexCode(out_var, a, scope));
+    vertex.setBody(this.getVertexCode(out_var,  normal, exp, scope));
     vertex.setIncludesFromMap(this.includes);
 
     var fragment = new CodePiece(order);
-    fragment.setBody(this.getFragmentCode(out_var, a, scope));
+    fragment.setBody(this.getFragmentCode(out_var,  normal, exp, scope));
     fragment.setIncludesFromMap(this.includes );
 
     return new ShaderCode(vertex, fragment, out_var);

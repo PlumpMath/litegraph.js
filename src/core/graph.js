@@ -77,6 +77,8 @@ LGraph.prototype.clear = function()
 
     this.shader_output = null;
 
+    this.scene_properties = null;
+
     LiteGraph.graph_max_steps = 0;
 
 
@@ -894,6 +896,7 @@ LGraph.prototype.serialize = function()
     var data = {
 //		graph: this.graph,
         shader_textures: this.shader_textures,
+        scene_properties: this.scene_properties,
         //shader_output: this.shader_output, this creates a cycle
 
         iteration: this.iteration,

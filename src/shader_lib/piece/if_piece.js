@@ -9,18 +9,24 @@ function PIf () {
 
 PIf.prototype.getVertexCode = function (out_type, out_var, a,b,gt,lt,eq,gt_out,lt_out,eq_out,scope) {
     if(scope == CodePiece.VERTEX || scope == CodePiece.BOTH){
+        gt = gt ? gt +"" : "";
+        lt = lt ? lt +"" : "";
+        eq = eq ? eq +"" : "";
+        gt_out = gt_out ? "         "+out_var+" = " + gt_out +";\n" : "";
+        lt_out = lt_out ? "         "+out_var+" = " + lt_out +";\n" : "";
+        eq_out = eq_out ? "         "+out_var+" = " + eq_out +";\n" : "";
         var code = out_type+" " +out_var+";\n" +
-            "      if("+ a+">"+ b+")\n" +
+            "      if("+ a+" > "+ b+")\n" +
             "      {\n" +
-            ""+gt+"\n" +
-            "          "+out_var+" = " + gt_out +";\n"+
-            "      } else if ("+ a+"<"+ b+"){\n" +
-            ""+lt+"\n" +
-            "          "+out_var+" = " + lt_out +";\n"+
+            ""+gt+"" +
+            gt_out  +
+            "      } else if ("+ a+" < "+ b+"){\n" +
+            ""+lt+"" +
+            lt_out  +
             "      } else {\n" +
-            ""+eq+"\n" +
-            "          "+out_var+" = " + eq_out +";\n"
-        " }\n";
+            ""+eq+"" +
+            eq_out  +
+            "      }\n";
         return code;
     }
     return "";

@@ -325,9 +325,9 @@ function LGraphConstColor()
 {
     this.addOutput("color","vec4", {vec4:1});
     this.properties = { color:"#ffffff"};
-    this.editable = { property:"value", type:"vec3" };
+    this.editable = { property:"value", type:"vec4" };
 
-    this.shader_piece = new PConstant("vec3"); // hardcoded for testing
+    this.shader_piece = new PConstant("vec4"); // hardcoded for testing
 }
 
 LGraphConstColor.title = "Color";
@@ -356,7 +356,7 @@ LGraphConstColor.prototype.processNodePath = function()
 LGraphConstColor.prototype.processInputCode = function(scope)
 {
     this.codes[0] = this.shader_piece.getCode(
-        { out_var:"vec3_"+this.id,
+        { out_var:"vec4_"+this.id,
             a:LiteGraph.hexToColor(this.properties["color"]),
             scope:scope,
             order:this.order
@@ -847,21 +847,21 @@ function LGraphShader()
 
 
     //inputs: ["base color","metallic", "specular", "roughness", "emissive color", "opacity", "opacitiy mask", "normal", "world position offset", "world displacement", "tesselation multiplier", "subsurface color", "ambient occlusion", "refraction"],
-    this.properties = { color:"#ffffff",
-                        gloss:4.0,
-                        displacement_factor:1.0,
-                        light_dir_x: 1.0,
-                        light_dir_y: 1.0,
-                        light_dir_z: 1.0
-    };
+//    this.properties = { color:"#ffffff",
+//                        gloss:4.0,
+//                        displacement_factor:1.0,
+//                        light_dir_x: 1.0,
+//                        light_dir_y: 1.0,
+//                        light_dir_z: 1.0
+//    };
 
-    this.options = {
-        gloss:{step:0.01},
-        displacement_factor:{step:0.01},
-        light_dir_x:{min:-1, max:1, step:0.01},
-        light_dir_y:{min:-1, max:1, step:0.01},
-        light_dir_z:{min:-1, max:1, step:0.01}
-    };
+//    this.options = {
+//        gloss:{step:0.01},
+//        displacement_factor:{step:0.01},
+//        light_dir_x:{min:-1, max:1, step:0.01},
+//        light_dir_y:{min:-1, max:1, step:0.01},
+//        light_dir_z:{min:-1, max:1, step:0.01}
+//    };
 
     this.size = [125,250];
     this.shader_piece = ShaderConstructor;
@@ -926,7 +926,7 @@ LGraphShader.prototype.processInputCode = function() {
 
 
 
-    var shader = this.shader_piece.createShader(this.properties ,color_code,normal_code,emission_code,specular_code,gloss_code,alpha_code,alphaclip_code,world_offset_code);
+    var shader = this.shader_piece.createShader(this.graph.scene_properties ,color_code,normal_code,emission_code,specular_code,gloss_code,alpha_code,alphaclip_code,world_offset_code);
 
     var texture_nodes = this.graph.findNodesByType("texture/"+LGraphTexture.title);// we need to find all the textures used in the graph
     var shader_textures = [];
@@ -2032,6 +2032,70 @@ LGraphDot.desc = "Dot product the inputs";
 
 LiteGraph.extendClass(LGraphDot,LGraphOperation);
 LiteGraph.registerNodeType("operations/"+LGraphDot.title, LGraphDot);
+
+
+
+//UVS
+function LGraphFresnel()
+{
+    this.addOutput("result","float", {float:1});
+    this.addInput("normal","vec3", {vec3:1,vec4:1});
+    this.addInput("exp","float", {float:1});
+
+    this.shader_piece = new PFresnel(); // hardcoded for testing
+
+}
+
+LGraphFresnel.title = "Fresnel";
+LGraphFresnel.desc = "Fresnel the input";
+
+
+LGraphFresnel.prototype.onExecute = function()
+{
+    this.processNodePath();
+}
+
+LGraphFresnel.prototype.processNodePath = function()
+{
+    var input1 = this.getInputNodePath(0);
+    var input2 = this.getInputNodePath(1);
+    this.mergePaths(input1,input2);
+    this.insertIntoPath(input1);
+    this.node_path[0] = input1;
+}
+
+
+LGraphFresnel.prototype.processInputCode = function(scope)
+{
+
+    var code_normal = this.getInputCode(0) || LiteGraph.EMPTY_CODE;
+    var code_exp = this.getInputCode(1) || LiteGraph.EMPTY_CODE;
+
+    //(out_var, input, dx, dy, scope, out_type)
+
+    var output_code = this.codes[0] = this.shader_piece.getCode(
+        {
+            out_var:"fresnel_"+this.id,
+            normal:code_normal.getOutputVar(),
+            exp:code_exp.getOutputVar(),
+            scope:scope,
+            order:this.order
+        });
+
+    if(code_normal != LiteGraph.EMPTY_CODE)
+        output_code.merge(code_normal);
+    output_code.merge(code_exp);
+
+
+}
+
+//LGraphFresnel.prototype.onGetNullCode = function(slot, scope)
+//{
+//
+//
+//}
+
+LiteGraph.registerNodeType("operations/"+LGraphFresnel.title, LGraphFresnel);
 
 
 

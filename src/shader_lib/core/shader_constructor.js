@@ -31,7 +31,6 @@ ShaderConstructor.createShader = function (properties , albedo,normal,emission,s
 
 ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emission,specular,gloss,alpha,alphaclip,offset) {
 
-    var displacement_factor = properties.displacement_factor.toFixed(4);
 
 //    var includes = {};
 //    for (var line in albedo.vertex.includes) { includes[line] = 1; }
@@ -73,6 +72,10 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
         r += "      v_coord = a_coord;\n";
     r += "      v_normal = (u_model * vec4(a_normal, 0.0)).xyz;\n";
     r += "      vec3 pos = a_vertex;\n";
+    if (albedo.fragment.isLineIncluded("depth")){
+        r += "      vec4 pos4 = (u_model * vec4(pos,1.0));\n";
+        r += "      float depth = pos4.z / pos4.w;\n";
+    }
 
 
     var body_hash = albedo.vertex.getBody();
@@ -83,7 +86,7 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
     }
 
     if(offset.getOutputVar()){
-        r += "      pos += a_normal * "+offset.getOutputVar()+" * "+displacement_factor+";\n";
+        r += "      pos += a_normal * "+offset.getOutputVar()+";\n";
     }
 
 
@@ -109,10 +112,7 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     var has_alphaclip = Object.keys(alphaclip.fragment.getBody()).length  > 0;
 
 
-
-    var color = LiteGraph.hexToColor(properties.color);
     var light_dir = "vec3("+properties.light_dir_x+","+properties.light_dir_y+","+properties.light_dir_z+")";
-    var gloss_prop = properties.gloss.toFixed(4);
 
 
 //    var includes = albedo.fragment.includes;
@@ -200,10 +200,11 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     }
 
     if( !has_gloss) {
-        r += "      float gloss = "+gloss_prop+";\n";
+        r += "      float gloss = 1.0;\n";
     } else{
         r +="      float gloss = "+gloss.getOutputVar()+";\n";
     }
+
 
     // diffuse light
     r +="      vec3 diffuse_color = "+albedo.getOutputVar()+".xyz;\n" +
@@ -247,7 +248,9 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
 //        "      vec3 specular_reflection =   mix( diffuse_reflection, vec3(1.0), w) ;\n"; // vec3(1.0 is the light color)
     //specular_color * specular * specular_intensity
 
-    r +="      gl_FragColor = vec4( emission + "+ /*reflection_color.xyz +*/ " specular_color + (ambient_light + diffuse_light) * diffuse_color, 1.0);\n" +
+    var alpha_value = has_alpha ? alpha.getOutputVar() : "1.0";
+
+    r +="      gl_FragColor = vec4( emission + "+ /*reflection_color.xyz +*/ " specular_color + (ambient_light + diffuse_light) * diffuse_color, "+ alpha_value +" );\n" +
         "}";
 
     return r;
