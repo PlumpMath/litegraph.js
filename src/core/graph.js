@@ -77,11 +77,9 @@ LGraph.prototype.clear = function()
 
     this.shader_output = null;
 
-    this.scene_properties = null;
+    //this.scene_properties = null;
 
     LiteGraph.graph_max_steps = 0;
-
-
 
     this.change();
 
@@ -896,7 +894,7 @@ LGraph.prototype.serialize = function()
     var data = {
 //		graph: this.graph,
         shader_textures: this.shader_textures,
-        scene_properties: this.scene_properties,
+
         //shader_output: this.shader_output, this creates a cycle
 
         iteration: this.iteration,
@@ -919,11 +917,13 @@ LGraph.prototype.serialize = function()
  * @param {String} url configure a graph from a JSON string
  * @param {Function} on_complete callback
  */
-LGraph.prototype.loadFromURL = function (url, on_complete, params){
+LGraph.prototype.loadFromURL = function (url, on_pre_configure, on_complete, params){
 
     var that = this;
     HttpRequest( url, null, function(data) {
         var obj = JSON.parse(data);
+        if(on_pre_configure)
+            on_pre_configure(obj);
         that.configure(obj);
         if(on_complete)
             on_complete(obj);

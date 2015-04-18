@@ -61,6 +61,9 @@ LGraphNode.prototype._ctor = function( title )
 
     //local data
     this.properties =  {};
+    this.options = {};
+    this.addBasicProperties();
+
     this.data = null; //persistent local data
     this.flags = {
         //skip_title_render: true,
@@ -76,6 +79,18 @@ LGraphNode.prototype._ctor = function( title )
     this.T_out_types = {}; // template types
     this.in_using_T = 0; // number of inputs using T types
     this.in_conected_using_T = 0; // number of connected inputs  using T types
+}
+
+
+LGraphNode.prototype.addBasicProperties = function(  )
+{
+    var that = this;
+    this.properties.is_global = false
+    this.properties.global_name = this.title;
+    this.options.global_name = {hidden:true};
+    this.options.is_global = {reloadonchange:1, callback: function(){ that.options.global_name.hidden = !that.options.global_name.hidden}};
+
+
 }
 
 /**
@@ -162,6 +177,9 @@ LGraphNode.prototype.serialize = function()
 
     if(this.properties)
         o.properties = LiteGraph.cloneObject(this.properties);
+
+    if(this.options)
+        o.options = LiteGraph.cloneObject(this.options);
 
     if(!o.type)
         o.type = this.constructor.type;

@@ -111,6 +111,7 @@ var LiteGraph = {
         node.type = type;
         if(!node.title) node.title = title;
         if(!node.properties) node.properties = {};
+        if(!node.options) node.options = {};
         if(!node.flags) node.flags = {};
         if(!node.size) node.size = node.computeSize();
         if(!node.pos) node.pos = LiteGraph.DEFAULT_POSITION.concat();
@@ -129,6 +130,9 @@ var LiteGraph = {
 
         if(node.inputs)
             this.graph_max_steps += node.inputs.length;
+
+        node.addBasicProperties();
+
         return node;
     },
 
@@ -744,11 +748,9 @@ LGraph.prototype.clear = function()
 
     this.shader_output = null;
 
-    this.scene_properties = null;
+    //this.scene_properties = null;
 
     LiteGraph.graph_max_steps = 0;
-
-
 
     this.change();
 
@@ -1563,7 +1565,7 @@ LGraph.prototype.serialize = function()
     var data = {
 //		graph: this.graph,
         shader_textures: this.shader_textures,
-        scene_properties: this.scene_properties,
+
         //shader_output: this.shader_output, this creates a cycle
 
         iteration: this.iteration,
@@ -1586,11 +1588,13 @@ LGraph.prototype.serialize = function()
  * @param {String} url configure a graph from a JSON string
  * @param {Function} on_complete callback
  */
-LGraph.prototype.loadFromURL = function (url, on_complete, params){
+LGraph.prototype.loadFromURL = function (url, on_pre_configure, on_complete, params){
 
     var that = this;
     HttpRequest( url, null, function(data) {
         var obj = JSON.parse(data);
+        if(on_pre_configure)
+            on_pre_configure(obj);
         that.configure(obj);
         if(on_complete)
             on_complete(obj);
@@ -1720,6 +1724,9 @@ LGraphNode.prototype._ctor = function( title )
 
     //local data
     this.properties =  {};
+    this.options = {};
+    this.addBasicProperties();
+
     this.data = null; //persistent local data
     this.flags = {
         //skip_title_render: true,
@@ -1735,6 +1742,18 @@ LGraphNode.prototype._ctor = function( title )
     this.T_out_types = {}; // template types
     this.in_using_T = 0; // number of inputs using T types
     this.in_conected_using_T = 0; // number of connected inputs  using T types
+}
+
+
+LGraphNode.prototype.addBasicProperties = function(  )
+{
+    var that = this;
+    this.properties.is_global = false
+    this.properties.global_name = this.title + this.id;
+    this.options.global_name = {hidden:true};
+    this.options.is_global = {reloadonchange:1, callback: function(){ that.options.global_name.hidden = !that.options.global_name.hidden}};
+
+
 }
 
 /**
@@ -1821,6 +1840,9 @@ LGraphNode.prototype.serialize = function()
 
     if(this.properties)
         o.properties = LiteGraph.cloneObject(this.properties);
+
+    if(this.options)
+        o.options = LiteGraph.cloneObject(this.options);
 
     if(!o.type)
         o.type = this.constructor.type;
@@ -5356,7 +5378,7 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
 
 
     var light_dir = "vec3("+properties.light_dir_x+","+properties.light_dir_y+","+properties.light_dir_z+")";
-
+    var alpha_threshold = properties.alpha_threshold;
 
 //    var includes = albedo.fragment.includes;
 //    for (var line in albedo.fragment.includes) { includes[line] = 1; }
@@ -5429,7 +5451,7 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     }
 
     if(has_alphaclip) {
-        r += "       if ("+alphaclip.getOutputVar()+" < 0.5)\n" +
+        r += "       if ("+alphaclip.getOutputVar()+" < "+alpha_threshold.toFixed(3);+")\n" +
             "      {\n" +
             "           discard;\n" +
             "      }\n";

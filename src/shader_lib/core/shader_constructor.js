@@ -113,7 +113,7 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
 
 
     var light_dir = "vec3("+properties.light_dir_x+","+properties.light_dir_y+","+properties.light_dir_z+")";
-
+    var alpha_threshold = properties.alpha_threshold;
 
 //    var includes = albedo.fragment.includes;
 //    for (var line in albedo.fragment.includes) { includes[line] = 1; }
@@ -186,7 +186,7 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     }
 
     if(has_alphaclip) {
-        r += "       if ("+alphaclip.getOutputVar()+" < 0.5)\n" +
+        r += "       if ("+alphaclip.getOutputVar()+" < "+alpha_threshold.toFixed(3);+")\n" +
             "      {\n" +
             "           discard;\n" +
             "      }\n";

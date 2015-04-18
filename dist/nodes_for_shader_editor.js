@@ -1084,12 +1084,21 @@ function LGraphTexture()
     this.properties.name = "";
     this.properties.texture_url = "";
     this.properties.texture_type = "Color";
+    this.properties.normal_map_type = "Tangent space";
 
-    this.options = {    texture_url:{hidden:1},
-                        texture_type:{multichoice:[ 'Color', 'Normal map', 'Specular map' ], reloadonchange:1 },
-                        normal_map_type:{multichoice:[ 'Tangent space', 'Model space', 'Bump map' ]},
-                    };
 
+    this.options =  this.options || {};
+    this.options.texture_url = {hidden:1};
+    var that = this;
+    this.options.texture_type = {multichoice:[ 'Color', 'Normal map'], reloadonchange:1,
+                                 callback: function(){
+                                     if(that.properties.texture_type == "Normal map") {
+                                         that.options.normal_map_type.hidden = 0;
+                                     } else  {
+                                         that.options.normal_map_type.hidden = 1;
+                                     }
+                                 }};
+    this.options.normal_map_type = {multichoice:[ 'Tangent space', 'Model space', 'Bump map' ], hidden:1};
 
 
     //this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
@@ -1360,6 +1369,7 @@ LGraphTexture.generateLowResTexturePreview = function(tex)
 
 LGraphTexture.prototype.processNodePath = function()
 {
+
     var input = this.getInputNodePath(0);
 
     this.insertIntoPath(input);
@@ -1378,11 +1388,12 @@ LGraphTexture.prototype.processNodePath = function()
 
 LGraphTexture.prototype.processInputCode = function(scope)
 {
-    if(this.properties.texture_type == "Normal map") {
-        if (!this.properties.hasOwnProperty("normal_map_type"))
-            this.properties.normal_map_type = "Tangent space";
-    } else
-        delete this.properties.normal_map_type;
+
+//    if(this.properties.texture_type == "Normal map") {
+//        if (!this.properties.hasOwnProperty("normal_map_type"))
+//            this.properties.normal_map_type = "Tangent space";
+//    } else
+//        delete this.properties.normal_map_type;
 
 
 
@@ -1396,7 +1407,6 @@ LGraphTexture.prototype.processInputCode = function(scope)
         else if(this.properties.normal_map_type == "Bump map")
             texture_type = LiteGraph.BUMP_MAP;
     }
-
     else
         texture_type = LiteGraph.COLOR_MAP;
 

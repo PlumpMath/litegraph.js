@@ -106,6 +106,7 @@ var LiteGraph = {
         node.type = type;
         if(!node.title) node.title = title;
         if(!node.properties) node.properties = {};
+        if(!node.options) node.options = {};
         if(!node.flags) node.flags = {};
         if(!node.size) node.size = node.computeSize();
         if(!node.pos) node.pos = LiteGraph.DEFAULT_POSITION.concat();
@@ -124,6 +125,9 @@ var LiteGraph = {
 
         if(node.inputs)
             this.graph_max_steps += node.inputs.length;
+
+        node.addBasicProperties();
+
         return node;
     },
 
