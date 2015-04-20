@@ -89,8 +89,6 @@ LGraphNode.prototype.addBasicProperties = function(  )
     this.properties.global_name = this.title;
     this.options.global_name = {hidden:true};
     this.options.is_global = {reloadonchange:1, callback: function(){ that.options.global_name.hidden = !that.options.global_name.hidden}};
-
-
 }
 
 /**

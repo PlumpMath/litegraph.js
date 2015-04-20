@@ -843,6 +843,7 @@ function LGraphShader()
     this.addInput("gloss","float", {float:1});
     this.addInput("alpha","float", {float:1});
     this.addInput("alpha clip","float", {float:1});
+    this.addInput("refraction","float", {float:1});
     this.addInput("vertex offset","float", {float:1});
 
 
@@ -922,11 +923,12 @@ LGraphShader.prototype.processInputCode = function() {
     var gloss_code = this.getFullCode(4, CodePiece.FRAGMENT,0);
     var alpha_code = this.getFullCode(5, CodePiece.FRAGMENT,0);
     var alphaclip_code = this.getFullCode(6, CodePiece.FRAGMENT,0);
-    var world_offset_code = this.getFullCode(7, CodePiece.VERTEX,0);
+    var refraction_code = this.getFullCode(7, CodePiece.FRAGMENT,0);
+    var world_offset_code = this.getFullCode(8, CodePiece.VERTEX,0);
 
 
 
-    var shader = this.shader_piece.createShader(this.graph.scene_properties ,color_code,normal_code,emission_code,specular_code,gloss_code,alpha_code,alphaclip_code,world_offset_code);
+    var shader = this.shader_piece.createShader(this.graph.scene_properties ,color_code,normal_code,emission_code,specular_code,gloss_code,alpha_code,alphaclip_code,refraction_code, world_offset_code);
 
     var texture_nodes = this.graph.findNodesByType("texture/"+LGraphTexture.title);// we need to find all the textures used in the graph
     var shader_textures = [];

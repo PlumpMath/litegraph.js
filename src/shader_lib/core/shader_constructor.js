@@ -9,7 +9,7 @@ function sortMapByValue(map)
 }
 
 // codes it's [vertex, fragment]
-ShaderConstructor.createShader = function (properties , albedo,normal,emission,specular,gloss,alpha,alphaclip,offset) {
+ShaderConstructor.createShader = function (properties , albedo,normal,emission,specular,gloss,alpha,alphaclip, refraction, offset) {
 
     albedo.merge(normal);
     albedo.merge(emission);
@@ -17,11 +17,12 @@ ShaderConstructor.createShader = function (properties , albedo,normal,emission,s
     albedo.merge(gloss);
     albedo.merge(alpha);
     albedo.merge(alphaclip);
+    albedo.merge(refraction);
     albedo.merge(offset);
 
 
-    var vertex_code = this.createVertexCode(properties ,albedo,normal,emission,specular,gloss,alpha,alphaclip,offset);
-    var fragment_code = this.createFragmentCode(properties ,albedo,normal,emission,specular,gloss,alpha,alphaclip,offset);
+    var vertex_code = this.createVertexCode(properties ,albedo,normal,emission,specular,gloss,alpha,alphaclip, refraction, offset);
+    var fragment_code = this.createFragmentCode(properties ,albedo,normal,emission,specular,gloss,alpha,alphaclip, refraction, offset);
 
     var shader = {};
     shader.vertex_code = vertex_code;
@@ -29,7 +30,7 @@ ShaderConstructor.createShader = function (properties , albedo,normal,emission,s
     return shader;
 }
 
-ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emission,specular,gloss,alpha,alphaclip,offset) {
+ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emission,specular,gloss,alpha,alphaclip, refraction, offset) {
 
 
 //    var includes = {};
@@ -99,7 +100,7 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
     return r;
 }
 
-ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emission,specular,gloss,alpha,alphaclip, offset) {
+ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emission,specular,gloss,alpha,alphaclip, refraction, offset) {
 
 
     var has_gloss = Object.keys(gloss.fragment.getBody()).length  > 0;
@@ -110,7 +111,7 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     var has_gloss = Object.keys(gloss.fragment.getBody()).length  > 0;
     var has_alpha = Object.keys(alpha.fragment.getBody()).length  > 0;
     var has_alphaclip = Object.keys(alphaclip.fragment.getBody()).length  > 0;
-
+    var has_refraction = Object.keys(refraction.fragment.getBody()).length  > 0;
 
     var light_dir = "vec3("+properties.light_dir_x+","+properties.light_dir_y+","+properties.light_dir_z+")";
     var alpha_threshold = properties.alpha_threshold;
@@ -229,7 +230,12 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
 //        "      float w = pow( 1.0 - clamp(0.0,fresnel_dot,1.0), 5.0);\n" +
 //        "      vec4 reflection_color = env_color * w;\n";
 
-
+    if(has_refraction){
+        r += "      vec3 refraction_vec = refract(view_dir,normal, 1.0 / "+refraction.getOutputVar()+");\n" +
+             "      vec3 refraction_color = textureCube(u_cube_default_texture, refraction_vec).xyz;\n";
+    } else {
+        r += "      vec3 refraction_color = vec3(0.0);\n";
+    }
     // emission color
     if( !has_emission){
         r += "      vec3 emission = vec3(0.0);\n";
@@ -250,7 +256,7 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
 
     var alpha_value = has_alpha ? alpha.getOutputVar() : "1.0";
 
-    r +="      gl_FragColor = vec4( emission + "+ /*reflection_color.xyz +*/ " specular_color + (ambient_light + diffuse_light) * diffuse_color, "+ alpha_value +" );\n" +
+    r +="      gl_FragColor = vec4( emission + refraction_color +"+ /*reflection_color.xyz +*/ " specular_color + (ambient_light + diffuse_light) * diffuse_color, "+ alpha_value +" );\n" +
         "}";
 
     return r;

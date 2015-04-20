@@ -523,13 +523,15 @@ LGraph.prototype.remove = function(node)
                 node.disconnectOutput(i);
         }
 
-    node.id = -1;
-
+    if(this.onNodeRemove)
+        this.onNodeRemove(node);
 
     //callback
     if(node.onRemoved)
         node.onRemoved();
 
+
+    node.id = -1;
     node.graph = null;
 
     //remove from canvas render
