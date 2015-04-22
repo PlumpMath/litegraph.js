@@ -28,19 +28,21 @@ LGraphMix.prototype.constructor = LGraphMix;
 LGraphMix.title = "Mix";
 LGraphMix.desc = "mix of input";
 
-LGraphMix.prototype.infereTypes = function( output, target_slot) {
-    var output_type = Object.keys(output.types)[0];
-    if(target_slot == 2 && output_type == "float")
+LGraphMix.prototype.infereTypes = function( output_slot, target_slot, node) {
+    var out_types = node.getTypesFromOutputSlot(output_slot);
+    if( target_slot == 2 && Object.keys(out_types)[0] == "float")
         return;
+    this.connectTemplateSlot();
 
-    this.in_conected_using_T++;
+
     var input = this.inputs[target_slot];
-    if (input.use_t && this.in_conected_using_T == 1) {
-        for (var k in output.types){
-            this.T_out_types[k] = output.types[k];
-            this.T_in_types[k] = output.types[k];
-        }
+    if (input.use_t && Object.keys(this.T_in_types).length === 0) {
 
+        this.T_in_types["float"] = 1; // we hardcode the float as operation always accept float in one of the inputs
+        for (var k in out_types)
+            this.T_in_types[k] = out_types[k];
+        for (var k in out_types)
+            this.T_out_types[k] = out_types[k];
     }
 }
 

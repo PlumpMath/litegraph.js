@@ -114,6 +114,7 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     var has_refraction = Object.keys(refraction.fragment.getBody()).length  > 0;
 
     var light_dir = "vec3("+properties.light_dir_x+","+properties.light_dir_y+","+properties.light_dir_z+")";
+    var light_color = LiteGraph.hexToColor(properties.color);
     var alpha_threshold = properties.alpha_threshold;
 
 //    var includes = albedo.fragment.includes;
@@ -187,7 +188,7 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     }
 
     if(has_alphaclip) {
-        r += "       if ("+alphaclip.getOutputVar()+" < "+alpha_threshold.toFixed(3);+")\n" +
+        r += "       if ("+alphaclip.getOutputVar()+" < "+alpha_threshold.toFixed(3)+")\n" +
             "      {\n" +
             "           discard;\n" +
             "      }\n";
@@ -221,7 +222,7 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     r +="      vec3 reflect_dir = reflect(light_dir, normal);\n" +
         "      float spec_angle = max(dot(reflect_dir, view_dir), 0.0);\n" +
         "      float specular_light = pow(spec_angle, gloss) * specular_intensity;\n" +
-        "      vec3 specular_color = vec3(1.0) * specular_light;\n"; // vec3(1.0) is the light color
+        "      vec3 specular_color = "+light_color+".xyz * specular_light;\n"; // vec3(1.0) is the light color
 
 //    // reflections
 //    r +="      vec3 reflected_vector2 = reflect(view_dir,normal);\n" +

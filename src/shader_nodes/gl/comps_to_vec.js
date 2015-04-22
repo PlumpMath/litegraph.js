@@ -2,11 +2,13 @@
 //Constant
 function LGraphCompsToVec()
 {
-    this.addOutput("result","vec4", {float:1,vec4:1,vec3:1,vec2:1});
-    this.addInput("x","float", {float:1});
-    this.addInput("y","float", {float:1});
-    this.addInput("z","float", {float:1});
-    this.addInput("v","float", {float:1});
+    this.output_array_types = [ "" , "float","vec2", "vec3" , "vec4"];
+    this.output_array_index = 0;
+    this.addOutput("result","");
+    this.addInput("x","", {float:1});
+    this.addInput("y","", {float:1});
+    this.addInput("z","", {float:1});
+    this.addInput("v","", {float:1});
 
     this.shader_piece = new PConstant("vec4");
 
@@ -63,7 +65,6 @@ LGraphCompsToVec.prototype.processInputCode = function(scope)
     output_code.merge(y);
     output_code.merge(z);
     output_code.merge(v);
-
 }
 LGraphCompsToVec.prototype.valueToString = function(type,comps,x,y,z,v)
 {
@@ -71,7 +72,22 @@ LGraphCompsToVec.prototype.valueToString = function(type,comps,x,y,z,v)
     var val = comps_str.join(",");
     val = type+"("+val+")";
     return val;
-
 }
+
+LGraphCompsToVec.prototype.onInputDisconnect = function(slot)
+{
+    this.output_array_index--;
+    this.outputs[0].types = {};
+    this.outputs[0].types[""+this.output_array_types[this.output_array_index]+""] = 1;
+}
+
+LGraphCompsToVec.prototype.onInputConnect = function(o)
+{
+    this.output_array_index++;
+    this.outputs[0].types = {};
+    this.outputs[0].types[""+this.output_array_types[this.output_array_index]+""] = 1;
+}
+
+
 
 LiteGraph.registerNodeType("coordinates/"+LGraphCompsToVec.title , LGraphCompsToVec);

@@ -1,8 +1,8 @@
 
 function LGraph1ParamNode()
 {
-    this.addOutput("result","notype", this.getOutputTypes(), this.getOutputExtraInfo() );
-    this.addInput("A","notype", this.getInputTypes(), this.getInputExtraInfo());
+    this.addOutput("result","", this.getOutputTypes(), this.getOutputExtraInfo() );
+    this.addInput("A","", this.getInputTypes(), this.getInputExtraInfo());
     this.shader_piece = LiteGraph.CodeLib[this.getCodeName()]; // hardcoded for testing
 
 }
@@ -46,7 +46,8 @@ LGraph1ParamNode.prototype.processInputCode = function(scope, priority_modifier)
 LGraph1ParamNode.prototype.getOutputType = function()
 {
     var obj = this.output_types ? this.output_types :  this.T_out_types;
-    return Object.keys(obj)[0];
+    var string_type = LiteGraph.getOtputTypeFromMap(obj);
+    return string_type;
 }
 
 
@@ -108,8 +109,6 @@ LGraph2ParamNode.prototype.processNodePath = function()
     this.mergePaths(input1,input2);
     this.insertIntoPath(input1);
     this.node_path[0] = input1;
-
-
 }
 
 
@@ -157,7 +156,6 @@ LGraph2ParamNode.prototype.getOutputType = function()
     var obj = this.output_types ? this.output_types :  this.T_out_types;
     var string_type = LiteGraph.getOtputTypeFromMap(obj);
     return string_type;
-
 }
 
 LGraph2ParamNode.prototype.getScope = function()
@@ -281,7 +279,8 @@ LGraph3ParamNode.prototype.getInputTypesC = function()
 LGraph3ParamNode.prototype.getOutputType = function()
 {
     var obj = this.output_types ? this.output_types :  this.T_out_types;
-    return Object.keys(obj)[0];
+    var string_type = LiteGraph.getOtputTypeFromMap(obj);
+    return string_type;
 }
 
 LGraph3ParamNode.prototype.getScope = function()
@@ -957,11 +956,13 @@ LiteGraph.registerNodeType("core/"+ LGraphShader.title ,LGraphShader);
 //Constant
 function LGraphCompsToVec()
 {
-    this.addOutput("result","vec4", {float:1,vec4:1,vec3:1,vec2:1});
-    this.addInput("x","float", {float:1});
-    this.addInput("y","float", {float:1});
-    this.addInput("z","float", {float:1});
-    this.addInput("v","float", {float:1});
+    this.output_array_types = [ "" , "float","vec2", "vec3" , "vec4"];
+    this.output_array_index = 0;
+    this.addOutput("result","");
+    this.addInput("x","", {float:1});
+    this.addInput("y","", {float:1});
+    this.addInput("z","", {float:1});
+    this.addInput("v","", {float:1});
 
     this.shader_piece = new PConstant("vec4");
 
@@ -1018,7 +1019,6 @@ LGraphCompsToVec.prototype.processInputCode = function(scope)
     output_code.merge(y);
     output_code.merge(z);
     output_code.merge(v);
-
 }
 LGraphCompsToVec.prototype.valueToString = function(type,comps,x,y,z,v)
 {
@@ -1026,8 +1026,23 @@ LGraphCompsToVec.prototype.valueToString = function(type,comps,x,y,z,v)
     var val = comps_str.join(",");
     val = type+"("+val+")";
     return val;
-
 }
+
+LGraphCompsToVec.prototype.onInputDisconnect = function(slot)
+{
+    this.output_array_index--;
+    this.outputs[0].types = {};
+    this.outputs[0].types[""+this.output_array_types[this.output_array_index]+""] = 1;
+}
+
+LGraphCompsToVec.prototype.onInputConnect = function(o)
+{
+    this.output_array_index++;
+    this.outputs[0].types = {};
+    this.outputs[0].types[""+this.output_array_types[this.output_array_index]+""] = 1;
+}
+
+
 
 LiteGraph.registerNodeType("coordinates/"+LGraphCompsToVec.title , LGraphCompsToVec);
 
@@ -1093,13 +1108,7 @@ function LGraphTexture()
     this.options.texture_url = {hidden:1};
     var that = this;
     this.options.texture_type = {multichoice:[ 'Color', 'Normal map'], reloadonchange:1,
-                                 callback: function(){
-                                     if(that.properties.texture_type == "Normal map") {
-                                         that.options.normal_map_type.hidden = 0;
-                                     } else  {
-                                         that.options.normal_map_type.hidden = 1;
-                                     }
-                                 }};
+                                 callback: "toggleNormalMap"};
     this.options.normal_map_type = {multichoice:[ 'Tangent space', 'Model space', 'Bump map' ], hidden:1};
 
 
@@ -1149,7 +1158,7 @@ LGraphTexture.getTexture = function(name, url)
 
     var tex = container[ name ];
 
-    if(!tex && name && name[0] != ":")
+    if(!tex && name && name[0] != ":" || tex && tex.width == 1 && tex.height == 1 && tex.texture_type != gl.TEXTURE_CUBE_MAP)
     {
         //texture must be loaded
         if(LGraphTexture.loadTextureCallback)
@@ -1233,6 +1242,15 @@ LGraphTexture.loadTextureFromFile = function(data, filename, file, callback, gl)
     }
 
 }
+
+LGraphTexture.prototype.toggleNormalMap = function () {
+    if(that.properties.texture_type == "Normal map") {
+        that.options.normal_map_type.hidden = 0;
+    } else  {
+        that.options.normal_map_type.hidden = 1;
+    }
+}
+
 
 LGraphTexture.prototype.onDropFile = function(data, filename, file, callback, gl)
 {
@@ -1626,11 +1644,11 @@ window.LGraphCubemap = LGraphCubemap;
 //Constant
 function LGraphVecToComps()
 {
-    this.addInput("vec","vec4", {vec4:1,vec3:1,vec2:1});
-    this.addOutput("x","number", {float:1});
-    this.addOutput("y","number", {float:1});
-    this.addOutput("z","number", {float:1});
-    this.addOutput("v","number", {float:1});
+    this.addInput("vec","", {vec4:1,vec3:1,vec2:1});
+    this.addOutput("x","", {float:1});
+    this.addOutput("y","", {float:1});
+    this.addOutput("z","", {float:1});
+    this.addOutput("v","", {float:1});
 
 }
 
@@ -1681,6 +1699,103 @@ LiteGraph.registerNodeType("coordinates/"+LGraphVecToComps.title , LGraphVecToCo
 
 
 
+//Constant
+function LGraphVecToVec()
+{
+    this.addInput("vec","", null, {types_list: {float:1, vec3:1, vec4:1, vec2:1},  use_t:1});
+    this.addOutput("number","float", {float:1});
+    this.addOutput("vec2","vec2", {vec2:1});
+    this.addOutput("vec3","vec3",  {vec3:1});
+    this.addOutput("vec4","vec4", {vec4:1});
+
+    this.shader_piece = new PVecToVec();
+
+}
+
+LGraphVecToVec.title = "VecToVec";
+LGraphVecToVec.desc = "VectorX To VectorY";
+
+
+LGraphVecToVec.prototype.onExecute = function()
+{
+    this.processNodePath();
+}
+
+LGraphVecToVec.prototype.processNodePath = function()
+{
+    var input1 = this.getInputNodePath(0);
+
+
+    this.insertIntoPath(input1);
+
+
+    this.node_path[0] = input1;
+    this.node_path[1] = input1;
+    this.node_path[2] = input1;
+    this.node_path[3] = input1;
+
+
+}
+
+LGraphVecToVec.prototype.processInputCode = function(scope)
+{
+
+    var v = this.getInputCode(0) || LiteGraph.EMPTY_CODE;
+
+    var output_code = this.codes[0] = this.shader_piece.getCode(
+        {   out_var:"float_"+this.id,
+            out_type:"float",
+            in_type:this.getInputType(),
+            a: v.getOutputVar(),
+            scope:scope,
+            order:this.order
+        });
+    output_code.merge(v);
+
+    output_code = this.codes[1] = this.shader_piece.getCode(
+        {   out_var:"vec2_"+this.id,
+            out_type:"vec2",
+            in_type:this.getInputType(),
+            a: v.getOutputVar(),
+            scope:scope,
+            order:this.order
+        });
+    output_code.merge(v);
+
+    output_code = this.codes[2] = this.shader_piece.getCode(
+        {   out_var:"vec3_"+this.id,
+            out_type:"vec3",
+            in_type:this.getInputType(),
+            a: v.getOutputVar(),
+            scope:scope,
+            order:this.order
+        });
+    output_code.merge(v);
+
+    output_code = this.codes[3] = this.shader_piece.getCode(
+        {   out_var:"vec4_"+this.id,
+            out_type:"vec4",
+            in_type:this.getInputType(),
+            a: v.getOutputVar(),
+            scope:scope,
+            order:this.order
+        });
+    output_code.merge(v);
+
+}
+
+
+LGraphVecToVec.prototype.getInputType = function()
+{
+    var obj = this.T_in_types;
+    var string_type = LiteGraph.getOtputTypeFromMap(obj);
+    return string_type;
+}
+
+LiteGraph.registerNodeType("coordinates/"+LGraphVecToVec.title , LGraphVecToVec);
+
+
+
 
 
 function LGraphAbs()
@@ -1723,7 +1838,7 @@ function LGraphCos()
 }
 
 LGraphCos.prototype = Object.create(LGraph1ParamNode); // we inherit from Entity
-LGraphCos.prototype.constructor = LGraphSin;
+LGraphCos.prototype.constructor = LGraphCos;
 
 LGraphCos.title = "Cos";
 LGraphCos.desc = "cosine of input";
@@ -1765,17 +1880,19 @@ LiteGraph.registerNodeType("math/"+LGraphExp.title, LGraphExp);
 
 function LGraphFrac()
 {
+    this._ctor(LGraphFrac.title);
     this.code_name = "fract";
-    this.output_types = {vec2:1, float:1, vec3:1, vec4:1 };
-    this.intput_types = { vec2:1, float:1, vec3:1, vec4:1};
-    this.output_type = "vec2";
 
+    this.code_name = "sin";
+    this.output_types = null;
+    this.out_extra_info = {types_list: {float:1, vec3:1, vec4:1, vec2:1},   use_t:1};
+    this.intput_types = null;
+    this.in_extra_info = {types_list: {float:1, vec3:1, vec4:1, vec2:1},   use_t:1};
     LGraph1ParamNode.call( this);
-    console.log(this);
 }
 
 LGraphFrac.prototype = Object.create(LGraph1ParamNode); // we inherit from Entity
-LGraphFrac.prototype.constructor = LGraphSin;
+LGraphFrac.prototype.constructor = LGraphFrac;
 
 LGraphFrac.title = "Fract";
 LGraphFrac.desc = "fract of input";
@@ -1858,6 +1975,7 @@ LGraphOperation.prototype.infereTypes = function( output_slot, target_slot, node
         for (var k in out_types)
             this.T_out_types[k] = out_types[k];
     }
+
 }
 
 
@@ -2115,16 +2233,15 @@ LiteGraph.registerNodeType("operations/"+LGraphFresnel.title, LGraphFresnel);
 //Constant
 function LGraphIf()
 {
-    this.addOutput("result","vec4", {float:1,vec4:1,vec3:1,vec2:1});
+    this._ctor(LGraphIf.title);
+    this.addOutput("result","", null, {types_list: {float:1, vec3:1, vec4:1, vec2:1},  use_t:1});
     this.addInput("A","float", {float:1,vec4:1,vec3:1,vec2:1});
     this.addInput("B","float", {float:1,vec4:1,vec3:1,vec2:1});
-    this.addInput("A>B","float", {float:1,vec4:1,vec3:1,vec2:1});
-    this.addInput("A<B","float", {float:1,vec4:1,vec3:1,vec2:1});
-    this.addInput("A==B","float", {float:1,vec4:1,vec3:1,vec2:1});
+    this.addInput("A>B","", null, {types_list: {float:1, vec3:1, vec4:1, vec2:1},  use_t:1});
+    this.addInput("A<B","", null, {types_list: {float:1, vec3:1, vec4:1, vec2:1},  use_t:1});
+    this.addInput("A==B","", null, {types_list: {float:1, vec3:1, vec4:1, vec2:1},  use_t:1});
 
     this.shader_piece = new PIf();
-
-
 }
 
 LGraphIf.title = "If";
@@ -2175,7 +2292,7 @@ LGraphIf.prototype.processInputCode = function(scope)
     var output_code = this.codes[0] = this.shader_piece.getCode(
         {
             out_var:"if_"+this.id,
-            out_type: "vec3",
+            out_type: this.getOutputType(),
             a: A.getOutputVar(),
             b: B.getOutputVar(),
             gt_out: gt.getOutputVar(),
@@ -2192,6 +2309,12 @@ LGraphIf.prototype.processInputCode = function(scope)
 
 }
 
+LGraphIf.prototype.getOutputType = function()
+{
+    var obj = this.output_types ? this.output_types :  this.T_out_types;
+    var string_type = LiteGraph.getOtputTypeFromMap(obj);
+    return string_type;
+}
 
 LiteGraph.registerNodeType("coordinates/"+LGraphIf.title , LGraphIf);
 
@@ -2225,19 +2348,21 @@ LGraphMix.prototype.constructor = LGraphMix;
 LGraphMix.title = "Mix";
 LGraphMix.desc = "mix of input";
 
-LGraphMix.prototype.infereTypes = function( output, target_slot) {
-    var output_type = Object.keys(output.types)[0];
-    if(target_slot == 2 && output_type == "float")
+LGraphMix.prototype.infereTypes = function( output_slot, target_slot, node) {
+    var out_types = node.getTypesFromOutputSlot(output_slot);
+    if( target_slot == 2 && Object.keys(out_types)[0] == "float")
         return;
+    this.connectTemplateSlot();
 
-    this.in_conected_using_T++;
+
     var input = this.inputs[target_slot];
-    if (input.use_t && this.in_conected_using_T == 1) {
-        for (var k in output.types){
-            this.T_out_types[k] = output.types[k];
-            this.T_in_types[k] = output.types[k];
-        }
+    if (input.use_t && Object.keys(this.T_in_types).length === 0) {
 
+        this.T_in_types["float"] = 1; // we hardcode the float as operation always accept float in one of the inputs
+        for (var k in out_types)
+            this.T_in_types[k] = out_types[k];
+        for (var k in out_types)
+            this.T_out_types[k] = out_types[k];
     }
 }
 

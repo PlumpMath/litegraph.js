@@ -43,6 +43,7 @@ LGraphOperation.prototype.infereTypes = function( output_slot, target_slot, node
         for (var k in out_types)
             this.T_out_types[k] = out_types[k];
     }
+
 }
 
 

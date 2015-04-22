@@ -113,6 +113,12 @@ var LiteGraph = {
         if(!node.shader_piece) node.shader_piece = null;
         if(!node.codes) node.codes = [];
         if(!node.node_path) node.node_path = [];
+        if(!node.T_in_types) node.T_in_types = {};
+        if(!node.T_out_types) node.T_out_types = {};
+        if(!node.in_using_T) node.in_using_T = 0;
+        if(!node.in_conected_using_T) node.in_conected_using_T = 0;
+
+
         if(node.extraproperties)
             for(var i in node.extraproperties)
                 node.properties[i] = node.extraproperties[i];

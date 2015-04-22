@@ -20,13 +20,7 @@ function LGraphTexture()
     this.options.texture_url = {hidden:1};
     var that = this;
     this.options.texture_type = {multichoice:[ 'Color', 'Normal map'], reloadonchange:1,
-                                 callback: function(){
-                                     if(that.properties.texture_type == "Normal map") {
-                                         that.options.normal_map_type.hidden = 0;
-                                     } else  {
-                                         that.options.normal_map_type.hidden = 1;
-                                     }
-                                 }};
+                                 callback: "toggleNormalMap"};
     this.options.normal_map_type = {multichoice:[ 'Tangent space', 'Model space', 'Bump map' ], hidden:1};
 
 
@@ -76,7 +70,7 @@ LGraphTexture.getTexture = function(name, url)
 
     var tex = container[ name ];
 
-    if(!tex && name && name[0] != ":")
+    if(!tex && name && name[0] != ":" || tex && tex.width == 1 && tex.height == 1 && tex.texture_type != gl.TEXTURE_CUBE_MAP)
     {
         //texture must be loaded
         if(LGraphTexture.loadTextureCallback)
@@ -160,6 +154,15 @@ LGraphTexture.loadTextureFromFile = function(data, filename, file, callback, gl)
     }
 
 }
+
+LGraphTexture.prototype.toggleNormalMap = function () {
+    if(that.properties.texture_type == "Normal map") {
+        that.options.normal_map_type.hidden = 0;
+    } else  {
+        that.options.normal_map_type.hidden = 1;
+    }
+}
+
 
 LGraphTexture.prototype.onDropFile = function(data, filename, file, callback, gl)
 {

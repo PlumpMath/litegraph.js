@@ -118,6 +118,12 @@ var LiteGraph = {
         if(!node.shader_piece) node.shader_piece = null;
         if(!node.codes) node.codes = [];
         if(!node.node_path) node.node_path = [];
+        if(!node.T_in_types) node.T_in_types = {};
+        if(!node.T_out_types) node.T_out_types = {};
+        if(!node.in_using_T) node.in_using_T = 0;
+        if(!node.in_conected_using_T) node.in_conected_using_T = 0;
+
+
         if(node.extraproperties)
             for(var i in node.extraproperties)
                 node.properties[i] = node.extraproperties[i];
@@ -1753,7 +1759,12 @@ LGraphNode.prototype.addBasicProperties = function(  )
     this.properties.is_global = false
     this.properties.global_name = this.title;
     this.options.global_name = {hidden:true};
-    this.options.is_global = {reloadonchange:1, callback: function(){ that.options.global_name.hidden = !that.options.global_name.hidden}};
+    this.options.is_global = {reloadonchange:1, callback: "callbackIsGlobal"};
+}
+
+LGraphNode.prototype.callbackIsGlobal = function(  )
+{
+    this.options.global_name.hidden = !this.options.global_name.hidden
 }
 
 /**
@@ -1771,6 +1782,14 @@ LGraphNode.prototype.configure = function(info)
             //i dont want to clone properties, I want to reuse the old container
             for(var k in info.properties)
                 this.properties[k] = info.properties[k];
+            continue;
+        }
+
+        if(j == "options")
+        {
+            //i dont want to clone properties, I want to reuse the old container
+            for(var k in info.options)
+                this.options[k] = info.options[k];
             continue;
         }
 
@@ -2348,6 +2367,9 @@ LGraphNode.prototype.connect = function(slot, node, target_slot)
         this.setDirtyCanvas(false,true);
         this.graph.onConnectionChange();
     }
+    if(node.onInputConnect)
+        node.onInputConnect();
+
     return true;
 }
 
@@ -2477,6 +2499,9 @@ LGraphNode.prototype.disconnectInput = function(slot)
             break;
         }
     }
+
+    if(this.onInputDisconnect)
+        this.onInputDisconnect();
 
     this.setDirtyCanvas(false,true);
     this.graph.onConnectionChange();
@@ -3065,12 +3090,12 @@ LGraphCanvas.prototype.setCanvas = function (canvas) {
             return;
         }
 
-
-        if (!node)
-            return;
-
-        if (!node.onDropFile)
-            return;
+        // we want to throw graphs in the canvas
+//        if (!node)
+//            return;
+//
+//        if (!node.onDropFile)
+//            return;
 
         var file = e.dataTransfer.files[0];
         var filename = file.name;
@@ -3082,7 +3107,8 @@ LGraphCanvas.prototype.setCanvas = function (canvas) {
         reader.onload = function (event) {
             //console.log(event.target);
             var data = event.target.result;
-            node.onDropFile(data, filename, file, null, gl);
+            if(node && node.onDropFile)
+                node.onDropFile(data, filename, file, null, gl);
             if(that.onDropFile)
                 that.onDropFile(data, filename, file);
             LiteGraph.dispatchEvent("contentChange", null, null);
@@ -4249,10 +4275,12 @@ LGraphCanvas.prototype.drawNode = function (node, ctx) {
         if (node.inputs)
             for (var i = 0; i < node.inputs.length; i++) {
                 var slot = node.inputs[i];
-
+                if(node.title == "If" && this.connecting_node != null)
+                    var a = 0;
                 ctx.globalAlpha = editor_alpha;
                 if (this.connecting_node != null  &&
-                    (this.connecting_output.type != node.inputs[i].type &&
+                    ( (this.connecting_output.type != node.inputs[i].type ||
+                        (this.connecting_output.type ==  "" ||   node.inputs[i].type == ""))  &&
                     !node.compareNodeTypes(this.connecting_node, this.connecting_output, i)))
                         ctx.globalAlpha = 0.4 * editor_alpha;
 
@@ -5379,6 +5407,7 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     var has_refraction = Object.keys(refraction.fragment.getBody()).length  > 0;
 
     var light_dir = "vec3("+properties.light_dir_x+","+properties.light_dir_y+","+properties.light_dir_z+")";
+    var light_color = LiteGraph.hexToColor(properties.color);
     var alpha_threshold = properties.alpha_threshold;
 
 //    var includes = albedo.fragment.includes;
@@ -5452,7 +5481,7 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     }
 
     if(has_alphaclip) {
-        r += "       if ("+alphaclip.getOutputVar()+" < "+alpha_threshold.toFixed(3);+")\n" +
+        r += "       if ("+alphaclip.getOutputVar()+" < "+alpha_threshold.toFixed(3)+")\n" +
             "      {\n" +
             "           discard;\n" +
             "      }\n";
@@ -5486,7 +5515,7 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     r +="      vec3 reflect_dir = reflect(light_dir, normal);\n" +
         "      float spec_angle = max(dot(reflect_dir, view_dir), 0.0);\n" +
         "      float specular_light = pow(spec_angle, gloss) * specular_intensity;\n" +
-        "      vec3 specular_color = vec3(1.0) * specular_light;\n"; // vec3(1.0) is the light color
+        "      vec3 specular_color = "+light_color+".xyz * specular_light;\n"; // vec3(1.0) is the light color
 
 //    // reflections
 //    r +="      vec3 reflected_vector2 = reflect(view_dir,normal);\n" +
@@ -5976,6 +6005,90 @@ PUVs.getCode = function (params) {
 
     return new ShaderCode(vertex, fragment, uvs_modified ? out_var : "v_coord");
 }
+
+
+require(CodePiece);
+declare(PVecToVec);
+
+
+
+function PVecToVec () {
+    this.id = "vec_to_vec";
+    this.includes = {};
+}
+
+
+PVecToVec.prototype.getCastedVar = function(output_var, out_type, in_type, value) {
+
+
+    var out_vec =parseInt(out_type.slice(-1));
+    var in_vec = parseInt(in_type.slice(-1));
+    if( isNaN(out_vec))
+        out_vec = 1;
+    if( isNaN(in_vec))
+        in_vec = 1;
+
+    if(in_vec > out_vec){
+        if(out_type == "float")
+            return value +".x;\n";
+        if(out_type == "vec2")
+            return value +".xy;\n";
+        if(out_type == "vec3")
+            return value +".xyz;\n";
+        if(out_type == "vec4")
+            return value +".xyzw;\n";
+    } else {
+        var r = out_type +"("+value;
+        for(var i = 0; i < in_vec - out_vec; ++i){
+            r +=", 0.0";
+        }
+        r +=");\n";
+        return r;
+    }
+
+
+
+}
+
+PVecToVec.prototype.getVertexCode = function (output_var, out_type, in_type, value, scope) {
+    if(scope == CodePiece.VERTEX || scope == CodePiece.BOTH){
+        var code = out_type+" " +output_var+" = " + this.getCastedVar(output_var, out_type, in_type, value);
+        return code;
+    }
+    return "";
+}
+
+PVecToVec.prototype.getFragmentCode = function (output_var, out_type, in_type, value, scope) {
+    if(scope == CodePiece.FRAGMENT || scope == CodePiece.BOTH){
+        var code = out_type+" " +output_var+" = " + this.getCastedVar(output_var, out_type, in_type, value);
+        return code;
+    }
+    return "";
+}
+
+
+PVecToVec.prototype.getCode = function (params) {
+    var out_var = params.out_var;
+    var in_type = params.in_type;
+    var out_type = params.out_type;
+    var a = params.a;
+    var scope = params.scope;
+    var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
+
+
+    var vertex = new CodePiece(order);
+    vertex.setBody(this.getVertexCode(out_var, out_type, in_type, a, scope));
+    vertex.setIncludesFromMap(this.includes);
+
+    var fragment = new CodePiece(order);
+    fragment.setBody(this.getFragmentCode(out_var, out_type, in_type, a, scope));
+    fragment.setIncludesFromMap(this.includes );
+
+    return new ShaderCode(vertex, fragment, out_var);
+}
+
+
+
 
 
 

@@ -13,7 +13,7 @@ function LGraphCos()
 }
 
 LGraphCos.prototype = Object.create(LGraph1ParamNode); // we inherit from Entity
-LGraphCos.prototype.constructor = LGraphSin;
+LGraphCos.prototype.constructor = LGraphCos;
 
 LGraphCos.title = "Cos";
 LGraphCos.desc = "cosine of input";

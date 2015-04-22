@@ -262,12 +262,12 @@ LGraphCanvas.prototype.setCanvas = function (canvas) {
             return;
         }
 
-
-        if (!node)
-            return;
-
-        if (!node.onDropFile)
-            return;
+        // we want to throw graphs in the canvas
+//        if (!node)
+//            return;
+//
+//        if (!node.onDropFile)
+//            return;
 
         var file = e.dataTransfer.files[0];
         var filename = file.name;
@@ -279,7 +279,8 @@ LGraphCanvas.prototype.setCanvas = function (canvas) {
         reader.onload = function (event) {
             //console.log(event.target);
             var data = event.target.result;
-            node.onDropFile(data, filename, file, null, gl);
+            if(node && node.onDropFile)
+                node.onDropFile(data, filename, file, null, gl);
             if(that.onDropFile)
                 that.onDropFile(data, filename, file);
             LiteGraph.dispatchEvent("contentChange", null, null);
@@ -1446,10 +1447,12 @@ LGraphCanvas.prototype.drawNode = function (node, ctx) {
         if (node.inputs)
             for (var i = 0; i < node.inputs.length; i++) {
                 var slot = node.inputs[i];
-
+                if(node.title == "If" && this.connecting_node != null)
+                    var a = 0;
                 ctx.globalAlpha = editor_alpha;
                 if (this.connecting_node != null  &&
-                    (this.connecting_output.type != node.inputs[i].type &&
+                    ( (this.connecting_output.type != node.inputs[i].type ||
+                        (this.connecting_output.type ==  "" ||   node.inputs[i].type == ""))  &&
                     !node.compareNodeTypes(this.connecting_node, this.connecting_output, i)))
                         ctx.globalAlpha = 0.4 * editor_alpha;
 

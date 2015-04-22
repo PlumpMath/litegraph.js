@@ -2,16 +2,15 @@
 //Constant
 function LGraphIf()
 {
-    this.addOutput("result","vec4", {float:1,vec4:1,vec3:1,vec2:1});
+    this._ctor(LGraphIf.title);
+    this.addOutput("result","", null, {types_list: {float:1, vec3:1, vec4:1, vec2:1},  use_t:1});
     this.addInput("A","float", {float:1,vec4:1,vec3:1,vec2:1});
     this.addInput("B","float", {float:1,vec4:1,vec3:1,vec2:1});
-    this.addInput("A>B","float", {float:1,vec4:1,vec3:1,vec2:1});
-    this.addInput("A<B","float", {float:1,vec4:1,vec3:1,vec2:1});
-    this.addInput("A==B","float", {float:1,vec4:1,vec3:1,vec2:1});
+    this.addInput("A>B","", null, {types_list: {float:1, vec3:1, vec4:1, vec2:1},  use_t:1});
+    this.addInput("A<B","", null, {types_list: {float:1, vec3:1, vec4:1, vec2:1},  use_t:1});
+    this.addInput("A==B","", null, {types_list: {float:1, vec3:1, vec4:1, vec2:1},  use_t:1});
 
     this.shader_piece = new PIf();
-
-
 }
 
 LGraphIf.title = "If";
@@ -62,7 +61,7 @@ LGraphIf.prototype.processInputCode = function(scope)
     var output_code = this.codes[0] = this.shader_piece.getCode(
         {
             out_var:"if_"+this.id,
-            out_type: "vec3",
+            out_type: this.getOutputType(),
             a: A.getOutputVar(),
             b: B.getOutputVar(),
             gt_out: gt.getOutputVar(),
@@ -79,5 +78,11 @@ LGraphIf.prototype.processInputCode = function(scope)
 
 }
 
+LGraphIf.prototype.getOutputType = function()
+{
+    var obj = this.output_types ? this.output_types :  this.T_out_types;
+    var string_type = LiteGraph.getOtputTypeFromMap(obj);
+    return string_type;
+}
 
 LiteGraph.registerNodeType("coordinates/"+LGraphIf.title , LGraphIf);

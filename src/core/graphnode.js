@@ -88,7 +88,12 @@ LGraphNode.prototype.addBasicProperties = function(  )
     this.properties.is_global = false
     this.properties.global_name = this.title;
     this.options.global_name = {hidden:true};
-    this.options.is_global = {reloadonchange:1, callback: function(){ that.options.global_name.hidden = !that.options.global_name.hidden}};
+    this.options.is_global = {reloadonchange:1, callback: "callbackIsGlobal"};
+}
+
+LGraphNode.prototype.callbackIsGlobal = function(  )
+{
+    this.options.global_name.hidden = !this.options.global_name.hidden
 }
 
 /**
@@ -106,6 +111,14 @@ LGraphNode.prototype.configure = function(info)
             //i dont want to clone properties, I want to reuse the old container
             for(var k in info.properties)
                 this.properties[k] = info.properties[k];
+            continue;
+        }
+
+        if(j == "options")
+        {
+            //i dont want to clone properties, I want to reuse the old container
+            for(var k in info.options)
+                this.options[k] = info.options[k];
             continue;
         }
 
@@ -683,6 +696,9 @@ LGraphNode.prototype.connect = function(slot, node, target_slot)
         this.setDirtyCanvas(false,true);
         this.graph.onConnectionChange();
     }
+    if(node.onInputConnect)
+        node.onInputConnect();
+
     return true;
 }
 
@@ -812,6 +828,9 @@ LGraphNode.prototype.disconnectInput = function(slot)
             break;
         }
     }
+
+    if(this.onInputDisconnect)
+        this.onInputDisconnect();
 
     this.setDirtyCanvas(false,true);
     this.graph.onConnectionChange();

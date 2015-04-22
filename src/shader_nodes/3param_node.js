@@ -88,7 +88,8 @@ LGraph3ParamNode.prototype.getInputTypesC = function()
 LGraph3ParamNode.prototype.getOutputType = function()
 {
     var obj = this.output_types ? this.output_types :  this.T_out_types;
-    return Object.keys(obj)[0];
+    var string_type = LiteGraph.getOtputTypeFromMap(obj);
+    return string_type;
 }
 
 LGraph3ParamNode.prototype.getScope = function()

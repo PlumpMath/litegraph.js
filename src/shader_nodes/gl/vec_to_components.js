@@ -2,11 +2,11 @@
 //Constant
 function LGraphVecToComps()
 {
-    this.addInput("vec","vec4", {vec4:1,vec3:1,vec2:1});
-    this.addOutput("x","number", {float:1});
-    this.addOutput("y","number", {float:1});
-    this.addOutput("z","number", {float:1});
-    this.addOutput("v","number", {float:1});
+    this.addInput("vec","", {vec4:1,vec3:1,vec2:1});
+    this.addOutput("x","", {float:1});
+    this.addOutput("y","", {float:1});
+    this.addOutput("z","", {float:1});
+    this.addOutput("v","", {float:1});
 
 }
 

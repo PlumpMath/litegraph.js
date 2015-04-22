@@ -22,8 +22,6 @@ LGraph2ParamNode.prototype.processNodePath = function()
     this.mergePaths(input1,input2);
     this.insertIntoPath(input1);
     this.node_path[0] = input1;
-
-
 }
 
 
@@ -71,7 +69,6 @@ LGraph2ParamNode.prototype.getOutputType = function()
     var obj = this.output_types ? this.output_types :  this.T_out_types;
     var string_type = LiteGraph.getOtputTypeFromMap(obj);
     return string_type;
-
 }
 
 LGraph2ParamNode.prototype.getScope = function()

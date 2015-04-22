@@ -1,8 +1,8 @@
 
 function LGraph1ParamNode()
 {
-    this.addOutput("result","notype", this.getOutputTypes(), this.getOutputExtraInfo() );
-    this.addInput("A","notype", this.getInputTypes(), this.getInputExtraInfo());
+    this.addOutput("result","", this.getOutputTypes(), this.getOutputExtraInfo() );
+    this.addInput("A","", this.getInputTypes(), this.getInputExtraInfo());
     this.shader_piece = LiteGraph.CodeLib[this.getCodeName()]; // hardcoded for testing
 
 }
@@ -46,7 +46,8 @@ LGraph1ParamNode.prototype.processInputCode = function(scope, priority_modifier)
 LGraph1ParamNode.prototype.getOutputType = function()
 {
     var obj = this.output_types ? this.output_types :  this.T_out_types;
-    return Object.keys(obj)[0];
+    var string_type = LiteGraph.getOtputTypeFromMap(obj);
+    return string_type;
 }
 
 
