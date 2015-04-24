@@ -183,7 +183,8 @@ LGraphNode.prototype.serialize = function()
         shader_piece: this.shader_piece,
         codes: this.codes,
         T_out_types: this.T_out_types,
-        T_in_types: this.T_in_types
+        T_in_types: this.T_in_types,
+        in_conected_using_T: this.in_conected_using_T
     };
 
     if(this.properties)
@@ -739,12 +740,17 @@ LGraphNode.prototype.disconnectOutput = function(slot, target_node)
         {
             var link_id = output.links[i];
             var link_info = this.graph.links[ link_id ];
-
             //is the link we are searching for...
             if( link_info.target_id == target_node.id )
             {
                 output.links.splice(i,1); //remove here
-                target_node.inputs[ link_info.target_slot ].link = null; //remove there
+                var input_slot = target_node.inputs[ link_info.target_slot ];
+                input_slot.link = null; //remove there
+
+                if(input_slot.use_t){
+                    target_node.disconnectTemplateSlot(i);
+                }
+
                 delete this.graph.links[ link_id ]; //remove the link from the links pool
                 break;
             }
@@ -758,8 +764,14 @@ LGraphNode.prototype.disconnectOutput = function(slot, target_node)
             var link_info = this.graph.links[ link_id ];
 
             var target_node = this.graph.getNodeById( link_info.target_id );
-            if(target_node)
-                target_node.inputs[ link_info.target_slot ].link = null; //remove other side link
+            if(target_node){
+                var input_slot = target_node.inputs[ link_info.target_slot ];
+                input_slot.link = null; //remove other side link
+                if(input_slot.use_t){
+                    target_node.disconnectTemplateSlot(i);
+                }
+            }
+
         }
         output.links = null;
     }
@@ -801,7 +813,7 @@ LGraphNode.prototype.disconnectInput = function(slot)
     var input = this.inputs[slot];
     if(!input) return false;
     if(input.use_t){
-        this.disconnectTemplateSlot(input);
+        this.disconnectTemplateSlot(slot);
     }
     var link_id = this.inputs[slot].link;
     this.inputs[slot].link = null;
@@ -1075,23 +1087,15 @@ LGraphNode.prototype.infereTypes = function( output, target_slot)
 
 }
 
-LGraphNode.prototype.resetTypes = function( input )
+LGraphNode.prototype.resetTypes = function( slot )
 {
-//    var out_types = this.getTypesFromOutputSlot(input);
-//    if(this.in_conected_using_T == Object.keys(this.T_in_types).length){
-//        for(var k in out_types){
-//            delete this.T_in_types[k];
-//            delete this.T_out_types[k];
-//        }
-//    }
+
     if( !this.in_conected_using_T ){
         for(var k in this.T_in_types)
             delete this.T_in_types[k];
         for(var k in this.T_out_types)
             delete this.T_out_types[k];
     }
-
-
 }
 
 /** Compares the
@@ -1144,11 +1148,11 @@ LGraphNode.prototype.getTypesFromOutputSlot = function(output_slot){
     return out_types;
 }
 
-LGraphNode.prototype.disconnectTemplateSlot = function(input){
+LGraphNode.prototype.disconnectTemplateSlot = function(slot){
 
     if(this.in_conected_using_T > 0)
         this.in_conected_using_T--;
-    this.resetTypes(input);
+    this.resetTypes(slot);
 }
 
 LGraphNode.prototype.connectTemplateSlot = function(){

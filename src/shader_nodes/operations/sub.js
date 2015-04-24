@@ -18,5 +18,5 @@ LGraphSubOp.desc = "Substraction of the inputs";
 
 
 LiteGraph.extendClass(LGraphSubOp,LGraphOperation);
-LiteGraph.registerNodeType("operations/"+LGraphSubOp.title, LGraphSubOp);
+LiteGraph.registerNodeType("math/"+LGraphSubOp.title, LGraphSubOp);
 

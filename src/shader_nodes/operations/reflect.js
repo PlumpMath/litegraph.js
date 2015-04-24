@@ -37,5 +37,5 @@ LGraphReflect.prototype.processInputCode = function()
 
 }
 
-LiteGraph.registerNodeType("texture/"+LGraphReflect.title, LGraphReflect);
+LiteGraph.registerNodeType("math/"+LGraphReflect.title, LGraphReflect);
 

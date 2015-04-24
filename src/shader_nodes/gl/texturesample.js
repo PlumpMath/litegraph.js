@@ -156,10 +156,10 @@ LGraphTexture.loadTextureFromFile = function(data, filename, file, callback, gl)
 }
 
 LGraphTexture.prototype.toggleNormalMap = function () {
-    if(that.properties.texture_type == "Normal map") {
-        that.options.normal_map_type.hidden = 0;
+    if(this.properties.texture_type == "Normal map") {
+        this.options.normal_map_type.hidden = 0;
     } else  {
-        that.options.normal_map_type.hidden = 1;
+        this.options.normal_map_type.hidden = 1;
     }
 }
 
@@ -333,7 +333,7 @@ LGraphTexture.prototype.processInputCode = function(scope)
     var texture_type = 0;
     if(this.properties.texture_type == "Normal map"  ){
         if(this.properties.normal_map_type == "Tangent space")
-            texture_type =  LiteGraph.TANGENT_MAP
+            texture_type =  LiteGraph.TANGENT_MAP;
         else if(this.properties.normal_map_type == "Model space")
             texture_type = LiteGraph.NORMAL_MAP;
         else if(this.properties.normal_map_type == "Bump map")

@@ -28,5 +28,5 @@ LGraphPow.prototype.onDrawBackground = function(ctx)
 //LGraphMulOp.prototype = Object.create(LGraphOperation); // we inherit from Entity
 //LGraphMulOp.prototype.constructor = LGraphMulOp;
 LiteGraph.extendClass(LGraphPow,LGraphOperation);
-LiteGraph.registerNodeType("operations/"+LGraphPow.title, LGraphPow);
+LiteGraph.registerNodeType("math/"+LGraphPow.title, LGraphPow);
 

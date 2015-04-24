@@ -46,6 +46,14 @@ LGraphMix.prototype.infereTypes = function( output_slot, target_slot, node) {
     }
 }
 
+LGraphMix.prototype.disconnectTemplateSlot = function(input_slot){
+    if(input_slot == 2 ) return;
+
+    if(this.in_conected_using_T > 0)
+        this.in_conected_using_T--;
+    this.resetTypes(input_slot);
+}
+
 LGraphMix.prototype.onGetNullCode = function(slot, scope)
 {
     if(slot == 2){
@@ -69,5 +77,5 @@ LGraphMix.prototype.onDrawBackground = function(ctx)
 }
 
 LiteGraph.extendClass(LGraphMix,LGraph3ParamNode);
-LiteGraph.registerNodeType("operations/"+LGraphMix.title, LGraphMix);
+LiteGraph.registerNodeType("math/"+LGraphMix.title, LGraphMix);
 

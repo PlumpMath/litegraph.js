@@ -1,9 +1,9 @@
 //UVS
 function LGraphPanner()
 {
-    this.addOutput("output","vec2", {vec2:1, vec3:1});
-    this.addInput("coordinate","vec2", {vec3:1,vec2:1});
-    this.addInput("time","float", {float:1});
+    this.addOutput("output","", {vec2:1});
+    this.addInput("coordinate","", {vec2:1});
+    this.addInput("time","", {float:1});
     this.properties = { SpeedX:1.0,
         SpeedY:1.0 };
     this.options = {    SpeedX:{min:-1.0, max:1.0, step:0.001},
@@ -67,5 +67,5 @@ LGraphPanner.prototype.onGetNullCode = function(slot, scope)
 
 }
 
-LiteGraph.registerNodeType("operations/"+LGraphPanner.title, LGraphPanner);
+LiteGraph.registerNodeType("math/"+LGraphPanner.title, LGraphPanner);
 

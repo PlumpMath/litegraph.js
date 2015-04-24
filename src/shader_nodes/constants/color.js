@@ -5,7 +5,7 @@ function LGraphConstColor()
     this.addOutput("color","vec4", {vec4:1});
     this.properties = { color:"#ffffff"};
     this.editable = { property:"value", type:"vec4" };
-
+    this.boxcolor = this.properties.color;
     this.shader_piece = new PConstant("vec4"); // hardcoded for testing
 }
 
@@ -22,6 +22,7 @@ LGraphConstColor.prototype.onDrawBackground = function(ctx)
 LGraphConstColor.prototype.onExecute = function()
 {
     this.processNodePath();
+    this.bgcolor = this.properties.color;
 }
 
 LGraphConstColor.prototype.processNodePath = function()

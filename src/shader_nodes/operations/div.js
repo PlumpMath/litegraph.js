@@ -16,5 +16,5 @@ LGraphDivOp.desc = "div the inputs";
 //LGraphMulDiv.prototype = Object.create(LGraphOperation); // we inherit from Entity
 //LGraphMulDiv.prototype.constructor = LGraphMulDiv;
 LiteGraph.extendClass(LGraphDivOp,LGraphOperation);
-LiteGraph.registerNodeType("operations/"+LGraphDivOp.title, LGraphDivOp);
+LiteGraph.registerNodeType("math/"+LGraphDivOp.title, LGraphDivOp);
 

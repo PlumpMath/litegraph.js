@@ -29,18 +29,31 @@ LGraphSmooth.prototype.constructor = LGraphSmooth;
 LGraphSmooth.title = "SmoothStep";
 LGraphSmooth.desc = "smoothstep of input";
 
-//LGraphSmooth.prototype.infereTypes = function( output, target_slot) {
-//    var output_type = Object.keys(output.types)[0];
-//    if(target_slot == 2 && output_type == "float")
-//        return;
-//
-//    this.in_conected_using_T++;
-//    var input = this.inputs[target_slot];
-//    if (input.use_t && this.in_conected_using_T == 1) {
-//        for (var k in output.types)
-//            this.T_types[k] = output.types[k];
-//    }
-//}
+LGraphSmooth.prototype.infereTypes = function( output_slot, target_slot, node) {
+    var out_types = node.getTypesFromOutputSlot(output_slot);
+    if( (target_slot == 0 || target_slot == 1) && Object.keys(out_types)[0] == "float")
+        return;
+    this.connectTemplateSlot();
+
+
+    var input = this.inputs[target_slot];
+    if (input.use_t && Object.keys(this.T_in_types).length === 0) {
+
+        this.T_in_types["float"] = 1; // we hardcode the float as operation always accept float in one of the inputs
+        for (var k in out_types)
+            this.T_in_types[k] = out_types[k];
+        for (var k in out_types)
+            this.T_out_types[k] = out_types[k];
+    }
+}
+
+LGraphMix.prototype.disconnectTemplateSlot = function(input_slot){
+    if(input_slot == 0 || input_slot == 1 ) return;
+
+    if(this.in_conected_using_T > 0)
+        this.in_conected_using_T--;
+    this.resetTypes(input_slot);
+}
 
 LGraphSmooth.prototype.onGetNullCode = function(slot, scope)
 {
@@ -79,5 +92,5 @@ LGraphSmooth.prototype.onDrawBackground = function(ctx)
 }
 
 LiteGraph.extendClass(LGraphSmooth,LGraph3ParamNode);
-LiteGraph.registerNodeType("operations/"+LGraphSmooth.title, LGraphSmooth);
+LiteGraph.registerNodeType("math/"+LGraphSmooth.title, LGraphSmooth);
 

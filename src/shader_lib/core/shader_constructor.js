@@ -42,6 +42,7 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
 //    for (var line in alpha.vertex.includes) { includes[line] = 1; }
 //    for (var line in alphaclip.vertex.includes) { includes[line] = 1; }
 //    for (var line in offset.vertex.includes) { includes[line] = 1; }
+    var light_dir = "vec3("+properties.light_dir_x+","+properties.light_dir_y+","+properties.light_dir_z+")";
 
     // header
     var r = "precision highp float;\n"+
@@ -61,6 +62,10 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
     r += "uniform mat4 u_mvp;\n"+
          "uniform mat4 u_model;\n" +
         "uniform mat4 u_viewprojection;\n";
+    if (albedo.vertex.isLineIncluded("view_dir"))
+        r += "      vec3 view_dir = normalize(v_pos - u_eye);\n" +
+            "      vec3 light_dir = normalize("+light_dir+");\n" +
+            "      vec3 half_dir = normalize(view_dir + light_dir);\n";
 
     var h = albedo.vertex.getHeader();
     for(var id in h)
@@ -73,7 +78,7 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
         r += "      v_coord = a_coord;\n";
     r += "      v_normal = (u_model * vec4(a_normal, 0.0)).xyz;\n";
     r += "      vec3 pos = a_vertex;\n";
-    if (albedo.fragment.isLineIncluded("depth")){
+    if (albedo.vertex.isLineIncluded("depth")){
         r += "      vec4 pos4 = (u_model * vec4(pos,1.0));\n";
         r += "      float depth = pos4.z / pos4.w;\n";
     }
@@ -148,7 +153,7 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
         r += h[id];
 
     // http://www.thetenthplanet.de/archives/1180
-    if(has_normal) {
+    if(albedo.fragment.isLineIncluded("TBN")) {
         r+= "\nmat3 computeTBN(){\n" +
             "      vec3 dp1 = dFdx( v_pos );\n" +
             "      vec3 dp2 = dFdy( v_pos );\n" +
@@ -168,17 +173,21 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
 
     if (albedo.fragment.isLineIncluded("depth"))
         r += "      float depth = gl_FragCoord.z / gl_FragCoord.w;\n";
-    //if (includes["view_dir"])
-    r += "      vec3 view_dir = normalize(v_pos - u_eye);\n" +
-        "      vec3 light_dir = normalize("+light_dir+");\n" +
+
+
+    //if (albedo.fragment.isLineIncluded("view_dir"))
+    r += "      vec3 view_dir = normalize(v_pos - u_eye);\n";
+    // constans for light
+    r +="      vec3 light_dir = normalize("+light_dir+");\n" +
         "      vec3 half_dir = normalize(view_dir + light_dir);\n";
 
 
 
-    if(has_normal){
+    if(albedo.fragment.isLineIncluded("TBN")){
         // http://www.thetenthplanet.de/archives/1180
         r+= "      mat3 TBN = computeTBN();\n";
     }
+
 
 
     var body_hash = albedo.fragment.getBody();

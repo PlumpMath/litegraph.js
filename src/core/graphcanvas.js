@@ -926,8 +926,10 @@ LGraphCanvas.prototype.onNodeSelected = function (n) {
 }
 
 LGraphCanvas.prototype.processNodeSelected = function (n, e) {
-    if(LiteGraph.debug)
+    if(LiteGraph.debug){
         console.log(n);
+    }
+
     n.selected = true;
     if (n.onSelected)
         n.onSelected();
@@ -945,6 +947,7 @@ LGraphCanvas.prototype.processNodeSelected = function (n, e) {
         this.onNodeSelected(n);
 
     console.log(n);
+    console.log(this.graph);
     //if(this.node_in_panel) this.showNodePanel(n);
 }
 

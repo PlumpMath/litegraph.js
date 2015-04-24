@@ -71,5 +71,5 @@ LGraphClamp.prototype.onDrawBackground = function(ctx)
 }
 
 LiteGraph.extendClass(LGraphClamp,LGraph3ParamNode);
-LiteGraph.registerNodeType("operations/"+LGraphClamp.title, LGraphClamp);
+LiteGraph.registerNodeType("math/"+LGraphClamp.title, LGraphClamp);
 

@@ -22,7 +22,7 @@ PTextureSample.getVertexCode = function (output, input, texture_id, texture_type
 PTextureSample.getFragmentCode = function (output, input, texture_id, texture_type, scope, order) {
     input = input || "v_coord";
     var code = new CodePiece(order);
-    code.setIncludesFromMap(PTextureSample.includes);
+
     var code_str = "";
     if(scope == CodePiece.FRAGMENT) {
         code.addHeaderLine("uniform sampler2D " + texture_id + ";\n");
@@ -32,13 +32,13 @@ PTextureSample.getFragmentCode = function (output, input, texture_id, texture_ty
             code_str += "      " + output + " = (2.0 * " + output + " )-1.0;\n";
         }
         else if( texture_type == LiteGraph.TANGENT_MAP){
+            PTextureSample.includes.TBN = 1;
             code_str += "      " + output + " = (2.0 * " + output + " )-1.0;\n";
             code_str += "      "+output+" = vec4(TBN * "+output+".xyz, 1.0);\n";
-            code.setIncludesFromMap(PTextureSample.includes);
-        }    else if( texture_type == LiteGraph.TANGENT_MAP){
+        } else if( texture_type == LiteGraph.TANGENT_MAP){
+            PTextureSample.includes.TBN = 1;
             code_str += "      " + output + " = (2.0 * " + output + " )-1.0;\n";
             code_str += "      "+output+" = vec4(TBN * "+output+".xyz, 1.0);\n";
-            code.setIncludesFromMap(PTextureSample.includes);
         }
     }
 //    else if( texture_type == LiteGraph.BUMP_MAP){
@@ -56,7 +56,7 @@ PTextureSample.getFragmentCode = function (output, input, texture_id, texture_ty
 //        code.setIncludesFromMap(PTextureSample.includes);
 //    }
 
-
+    code.setIncludesFromMap(PTextureSample.includes);
     code.setBody(code_str);
 
     return code;
@@ -72,6 +72,7 @@ PTextureSample.getCode = function (params) {
     var scope = params.scope;
     var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
 
+    PTextureSample.includes.TBN = 0;
     var vertex = this.getVertexCode(out_var, input, texture_id, texture_type, scope , order);
 
     var fragment = this.getFragmentCode(out_var, input, texture_id, texture_type, scope, order);

@@ -16,5 +16,5 @@ LGraphDot.desc = "Dot product the inputs";
 
 
 LiteGraph.extendClass(LGraphDot,LGraphOperation);
-LiteGraph.registerNodeType("operations/"+LGraphDot.title, LGraphDot);
+LiteGraph.registerNodeType("math/"+LGraphDot.title, LGraphDot);
 

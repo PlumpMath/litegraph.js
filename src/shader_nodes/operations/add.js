@@ -18,5 +18,5 @@ LGraphAddOp.desc = "Add the inputs";
 
 
 LiteGraph.extendClass(LGraphAddOp,LGraphOperation);
-LiteGraph.registerNodeType("operations/"+LGraphAddOp.title, LGraphAddOp);
+LiteGraph.registerNodeType("math/"+LGraphAddOp.title, LGraphAddOp);
 

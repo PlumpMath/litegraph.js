@@ -85,4 +85,4 @@ LGraphIf.prototype.getOutputType = function()
     return string_type;
 }
 
-LiteGraph.registerNodeType("coordinates/"+LGraphIf.title , LGraphIf);
+LiteGraph.registerNodeType("math/"+LGraphIf.title , LGraphIf);

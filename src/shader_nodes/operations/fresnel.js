@@ -58,5 +58,5 @@ LGraphFresnel.prototype.processInputCode = function(scope)
 //
 //}
 
-LiteGraph.registerNodeType("operations/"+LGraphFresnel.title, LGraphFresnel);
+LiteGraph.registerNodeType("math/"+LGraphFresnel.title, LGraphFresnel);
 
