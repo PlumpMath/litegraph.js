@@ -12,17 +12,17 @@ LGraph2ParamNode.prototype.constructor = LGraph2ParamNode;
 
 LGraph2ParamNode.prototype.onExecute = function()
 {
-    this.processNodePath();
+    //this.processNodePath();
 }
 
-LGraph2ParamNode.prototype.processNodePath = function()
-{
-    var input1 = this.getInputNodePath(0);
-    var input2 = this.getInputNodePath(1);
-    this.mergePaths(input1,input2);
-    this.insertIntoPath(input1);
-    this.node_path[0] = input1;
-}
+//LGraph2ParamNode.prototype.processNodePath = function()
+//{
+//    var input1 = this.getInputNodePath(0);
+//    var input2 = this.getInputNodePath(1);
+//    this.mergePaths(input1,input2);
+//    this.insertIntoPath(input1);
+//    this.node_path[0] = input1;
+//}
 
 
 LGraph2ParamNode.prototype.processInputCode = function(scope)

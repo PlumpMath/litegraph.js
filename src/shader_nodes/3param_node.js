@@ -14,7 +14,7 @@ LGraph3ParamNode.prototype.constructor = LGraph3ParamNode;
 
 LGraph3ParamNode.prototype.onExecute = function()
 {
-    this.processNodePath();
+    //this.processNodePath();
 }
 
 LGraph3ParamNode.prototype.processInputCode = function(scope)
@@ -51,18 +51,18 @@ LGraph3ParamNode.prototype.processInputCode = function(scope)
 
 }
 
-LGraph3ParamNode.prototype.processNodePath = function()
-{
-    var input1 = this.getInputNodePath(0);
-    var input2 = this.getInputNodePath(1);
-    var input3 = this.getInputNodePath(2);
-    this.mergePaths(input1,input2);
-    this.mergePaths(input1,input3);
-    this.insertIntoPath(input1);
-
-    this.node_path[0] = input1;
-
-}
+//LGraph3ParamNode.prototype.processNodePath = function()
+//{
+//    var input1 = this.getInputNodePath(0);
+//    var input2 = this.getInputNodePath(1);
+//    var input3 = this.getInputNodePath(2);
+//    this.mergePaths(input1,input2);
+//    this.mergePaths(input1,input3);
+//    this.insertIntoPath(input1);
+//
+//    this.node_path[0] = input1;
+//
+//}
 
 
 LGraph3ParamNode.prototype.getOutputTypes = function()

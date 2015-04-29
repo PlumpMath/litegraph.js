@@ -9,11 +9,10 @@ PTextureSample.includes = {v_pos:1, v_coord:1, camera_to_pixel_ws:1, u_eye:1};
 PTextureSample.getVertexCode = function (output, input, texture_id, texture_type, scope, order) {
     var code = new CodePiece(order);
     var code_str = "";
+    code.setIncludesFromMap(PTextureSample.includes);
     if(scope == CodePiece.VERTEX) {
-        code.setIncludesFromMap(PTextureSample.includes);
         code_str = "vec4 " + output + " = texture2D(" + texture_id + ", " + input + ");\n";
         code.addHeaderLine("uniform sampler2D "+texture_id+";\n");
-        code.setIncludesFromMap(PTextureSample.includes);
     }
     code.setBody(code_str);
     return code;

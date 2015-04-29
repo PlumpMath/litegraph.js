@@ -15,17 +15,17 @@ LGraphFresnel.desc = "Fresnel the input";
 
 LGraphFresnel.prototype.onExecute = function()
 {
-    this.processNodePath();
+    //this.processNodePath();
 }
 
-LGraphFresnel.prototype.processNodePath = function()
-{
-    var input1 = this.getInputNodePath(0);
-    var input2 = this.getInputNodePath(1);
-    this.mergePaths(input1,input2);
-    this.insertIntoPath(input1);
-    this.node_path[0] = input1;
-}
+//LGraphFresnel.prototype.processNodePath = function()
+//{
+//    var input1 = this.getInputNodePath(0);
+//    var input2 = this.getInputNodePath(1);
+//    this.mergePaths(input1,input2);
+//    this.insertIntoPath(input1);
+//    this.node_path[0] = input1;
+//}
 
 
 LGraphFresnel.prototype.processInputCode = function(scope)

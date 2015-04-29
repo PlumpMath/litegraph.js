@@ -14,7 +14,7 @@ LGraphReflect.desc = "To reflect a vector3";
 
 LGraphReflect.prototype.onExecute = function()
 {
-    this.processInputCode();
+    //this.processInputCode();
 }
 
 

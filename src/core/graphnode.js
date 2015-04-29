@@ -85,7 +85,7 @@ LGraphNode.prototype._ctor = function( title )
 LGraphNode.prototype.addBasicProperties = function(  )
 {
     var that = this;
-    this.properties.is_global = false
+    this.properties.is_global = false;
     this.properties.global_name = this.title;
     this.options.global_name = {hidden:true};
     this.options.is_global = {reloadonchange:1, callback: "callbackIsGlobal"};
@@ -178,8 +178,8 @@ LGraphNode.prototype.serialize = function()
         size: this.size,
         data: this.data,
         flags: LiteGraph.cloneObject(this.flags),
-        inputs: this.inputs,
-        outputs: this.outputs,
+        inputs: LiteGraph.cloneObject(this.inputs),
+        outputs: LiteGraph.cloneObject(this.outputs),
         shader_piece: this.shader_piece,
         codes: this.codes,
         T_out_types: this.T_out_types,
@@ -213,13 +213,33 @@ LGraphNode.prototype.serialize = function()
 
 
 /* Creates a clone of this node */
-LGraphNode.prototype.clone = function()
+LGraphNode.prototype.clone = function(last_node_id, last_link_id)
 {
     var node = LiteGraph.createNode(this.type);
 
     var data = this.serialize();
+    var original_id = data["id"];
     delete data["id"];
+    for(var j in data.inputs){
+        var link_id = data.inputs[j].link;
+        var link = this.graph.links[ link_id ];
+        if(link){
+            var new_id = link_id + last_link_id;
+            data.inputs[j].link = new_id;
+            this.graph.links[ new_id ] = { id: new_id, origin_id: link.origin_id, origin_slot: link.origin_slot, target_id: link.target_id, target_slot: link.target_slot };
+        }
+
+    }
+    for(var j in data.outputs){
+        var links = data.outputs[j].links;
+        for(var k in links){
+            var link_id = links[k];
+            data.outputs[j].links[k] = link_id + last_link_id;
+        }
+    }
     node.configure(data);
+    node.id = last_node_id + original_id;
+    node.properties.is_global = false;
 
     return node;
 }
@@ -1045,6 +1065,15 @@ LGraphNode.prototype.getInputNodePath = function(slot)
     return {};
 }
 
+LGraphNode.prototype.getOutputNodePath = function(slot)
+{
+    var link_id = this.outputs[slot].link;
+    var link = this.graph.links[link_id];
+    if(link)
+        return this.graph.getNodeById( link.target_id ).node_path[link.target_slot];
+    return {};
+}
+
 LGraphNode.prototype.insertIntoPath = function(path)
 {
     if(!path.hasOwnProperty((this.id)))
@@ -1059,6 +1088,23 @@ LGraphNode.prototype.mergePaths = function(path_target, path_to_merge)
         id = objKeys[i];
         path_target[id] = path_to_merge[id];
     }
+}
+
+LGraphNode.prototype.processNodePath = function()
+{
+    var last_path = {};
+    for(var i in this.inputs){
+        var output_path = this.getInputNodePath(i);
+        if(i > 0){
+            this.mergePaths(last_path,output_path);
+        } else
+            last_path = output_path;
+    }
+    this.insertIntoPath(last_path);
+
+    for(var i in this.outputs)
+        this.node_path[i] = last_path;
+
 }
 
 LGraphNode.prototype.onGetNullCode = function(slot)

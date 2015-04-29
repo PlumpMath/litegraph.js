@@ -31,12 +31,12 @@ LGraphConstVec4.prototype.setValue = function(v1,v2,v3,v4)
     this.setDirtyCanvas(true);
 };
 
-LGraphConstVec4.prototype.processNodePath = function()
-{
-    var input = {};
-    this.insertIntoPath(input);
-    this.node_path[0] = input;
-}
+//LGraphConstVec4.prototype.processNodePath = function()
+//{
+//    var input = {};
+//    this.insertIntoPath(input);
+//    this.node_path[0] = input;
+//}
 
 LGraphConstVec4.prototype.processInputCode = function(scope)
 {

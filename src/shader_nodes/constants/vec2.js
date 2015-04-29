@@ -28,15 +28,15 @@ LGraphConstVec2.prototype.setValue = function(v1,v2)
 
 LGraphConstVec2.prototype.onExecute = function()
 {
-    this.processNodePath();
+    //    this.processNodePath();
 }
-
-LGraphConstVec2.prototype.processNodePath = function()
-{
-    var input = {};
-    this.insertIntoPath(input);
-    this.node_path[0] = input;
-}
+//
+//LGraphConstVec2.prototype.processNodePath = function()
+//{
+//    var input = {};
+//    this.insertIntoPath(input);
+//    this.node_path[0] = input;
+//}
 
 LGraphConstVec2.prototype.processInputCode = function(scope)
 {

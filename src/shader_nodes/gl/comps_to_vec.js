@@ -20,26 +20,26 @@ LGraphCompsToVec.desc = "Components To Vector";
 
 LGraphCompsToVec.prototype.onExecute = function()
 {
-    this.processNodePath();
+    //this.processNodePath();
 }
 
-LGraphCompsToVec.prototype.processNodePath = function()
-{
-    var input1 = this.getInputNodePath(0);
-    var input2 = this.getInputNodePath(1);
-    var input3 = this.getInputNodePath(2);
-    var input4 = this.getInputNodePath(3);
-
-    this.mergePaths(input1,input2);
-    this.mergePaths(input1,input3);
-    this.mergePaths(input1,input4);
-    this.insertIntoPath(input1);
-
-
-    this.node_path[0] = input1;
-
-
-}
+//LGraphCompsToVec.prototype.processNodePath = function()
+//{
+//    var input1 = this.getInputNodePath(0);
+//    var input2 = this.getInputNodePath(1);
+//    var input3 = this.getInputNodePath(2);
+//    var input4 = this.getInputNodePath(3);
+//
+//    this.mergePaths(input1,input2);
+//    this.mergePaths(input1,input3);
+//    this.mergePaths(input1,input4);
+//    this.insertIntoPath(input1);
+//
+//
+//    this.node_path[0] = input1;
+//
+//
+//}
 
 LGraphCompsToVec.prototype.processInputCode = function(scope)
 {

@@ -946,8 +946,8 @@ LGraphCanvas.prototype.processNodeSelected = function (n, e) {
     if (this.onNodeSelected)
         this.onNodeSelected(n);
 
-    console.log(n);
-    console.log(this.graph);
+    //console.log(n);
+    //console.log(this.graph);
     //if(this.node_in_panel) this.showNodePanel(n);
 }
 
@@ -2081,13 +2081,54 @@ LGraphCanvas.onMenuNodeRemove = function (node) {
     node.setDirtyCanvas(true, true);
 }
 
-LGraphCanvas.onMenuNodeClone = function (node) {
-    if (node.clonable == false) return;
-    var newnode = node.clone();
-    if (!newnode) return;
-    newnode.pos = [node.pos[0] + 5, node.pos[1] + 5];
-    node.graph.add(newnode);
-    node.setDirtyCanvas(true, true);
+LGraphCanvas.onMenuNodeClone = function (node, e, menu, that) {
+    var last_id = node.graph.last_node_id;
+    var last_link_id = node.graph.last_link_id;
+    var max_id = last_id;
+    var max_link_id = last_link_id;
+    var cloned = [];
+    for(var i in that.selected_nodes){
+        var n = that.selected_nodes[i];
+
+        if (n.clonable == false) continue;
+        var newnode = n.clone(last_id, last_link_id);
+        if (!newnode) return;
+        newnode.pos = [n.pos[0] + 15, n.pos[1] + 15];
+        cloned.push(newnode);
+        n.graph.add(newnode);
+        n.setDirtyCanvas(true, true);
+        max_id = Math.max(max_id, newnode.id);
+    }
+    for(var i in cloned){
+        var n = cloned[i];
+        for(var j in n.inputs){
+            var link_id = n.inputs[i].link;
+            var link = node.graph.links[ link_id ];
+            if(link){
+                max_link_id = Math.max(max_link_id,link_id);
+                var origin_node = node.graph.getNodeById( link.origin_id + last_id);
+                if(origin_node)
+                    link.origin_id = link.origin_id + last_id;
+                link.target_id = link.target_id + last_id;
+            }
+
+        }
+        for(var j in n.outputs){
+            var links = n.outputs[j].links;
+            for(var k in links){
+                var link_id = links[k];
+                var link = node.graph.links[ link_id ];
+                if(link){
+                    max_link_id = Math.max(max_link_id,link_id);
+                    var target_node = node.graph.getNodeById( link.target_id + last_id);
+                    if(target_node)
+                        link.target_id = link.target_id + last_id;
+                    link.origin_id = link.origin_id + last_id;
+                }
+            }
+        }
+    }
+    node.graph.last_node_id = max_id;
 }
 
 LGraphCanvas.node_colors = {

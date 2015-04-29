@@ -3,12 +3,12 @@ require('2param_node');
 
 function LGraphOperation()
 {
-    this.output_types = null;
-    this.out_extra_info = {types_list: {float:1},   use_t:1};
-    this.intput_typesA = null;
-    this.in_extra_infoA = {types_list: {float:1, vec3:1, vec4:1, vec2:1},   use_t:1}
-    this.intput_typesB = null;
-    this.in_extra_infoB = {types_list: {float:1, vec3:1, vec4:1, vec2:1},   use_t:1};
+    this.output_types = this.output_types || null;
+    this.out_extra_info = this.out_extra_info || {types_list: {float:1},   use_t:1};
+    this.intput_typesA = this.intput_typesA || null;
+    this.in_extra_infoA = this.in_extra_infoA || {types_list: {float:1, vec3:1, vec4:1, vec2:1},   use_t:1}
+    this.intput_typesB = this.intput_typesB || null;
+    this.in_extra_infoB = this.in_extra_infoB || {types_list: {float:1, vec3:1, vec4:1, vec2:1},   use_t:1};
 //    this.output_types = {vec2:1, float:1, vec3:1,  vec4:1};
 //    this.intput_typesA = {vec2:1, float:1, vec3:1,  vec4:1};
 //    this.intput_typesB = {vec2:1, float:1, vec3:1, vec4:1};

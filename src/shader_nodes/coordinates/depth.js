@@ -11,15 +11,15 @@ LGraphDepth.desc = "Depth of the pixel";
 
 LGraphDepth.prototype.onExecute = function()
 {
-    this.processNodePath();
+    //this.processNodePath();
 }
 
-LGraphDepth.prototype.processNodePath = function()
-{
-    var input = {};
-    this.insertIntoPath(input);
-    this.node_path[0] = input;
-}
+//LGraphDepth.prototype.processNodePath = function()
+//{
+//    var input = {};
+//    this.insertIntoPath(input);
+//    this.node_path[0] = input;
+//}
 
 LGraphDepth.prototype.processInputCode = function()
 {

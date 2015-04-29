@@ -19,17 +19,17 @@ LGraphPanner.desc = "Moves the input";
 
 LGraphPanner.prototype.onExecute = function()
 {
-    this.processNodePath();
+   // this.processNodePath();
 }
 
-LGraphPanner.prototype.processNodePath = function()
-{
-    var input1 = this.getInputNodePath(0);
-    var input2 = this.getInputNodePath(1);
-    this.mergePaths(input1,input2);
-    this.insertIntoPath(input1);
-    this.node_path[0] = input1;
-}
+//LGraphPanner.prototype.processNodePath = function()
+//{
+//    var input1 = this.getInputNodePath(0);
+//    var input2 = this.getInputNodePath(1);
+//    this.mergePaths(input1,input2);
+//    this.insertIntoPath(input1);
+//    this.node_path[0] = input1;
+//}
 
 
 LGraphPanner.prototype.processInputCode = function(scope)

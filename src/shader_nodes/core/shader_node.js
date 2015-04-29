@@ -6,6 +6,7 @@
 function LGraphShader()
 {
     this.uninstantiable = true;
+    this.clonable = false;
     this.addInput("albedo","vec3", {vec3:1, vec4:1});
     this.addInput("normal","vec3", {vec3:1, vec4:1}); // tangent space normal, if written
     this.addInput("emission","vec3", {vec3:1, vec4:1});
@@ -77,7 +78,9 @@ LGraphShader.prototype.getFullCode = function(slot, scope, modifier) {
     var path = this.getInputNodePath(slot);
     var sorted_map = this.sortPathByOrder(path);
     for(var i = 0; i < sorted_map.length; ++i){
-        sorted_map[i][1].processInputCode(scope);
+        var node = sorted_map[i][1];
+        if (node != this)
+            node.processInputCode(scope);
     }
     var code = this.getInputCode(slot) || LiteGraph.EMPTY_CODE; // 0 it's the color
     return code;

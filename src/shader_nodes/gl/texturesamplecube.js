@@ -45,7 +45,7 @@ LGraphCubemap.prototype.onDropFile = function(data, filename, file)
 LGraphCubemap.prototype.onExecute = function()
 {
 
-    this.processNodePath();
+    //this.processNodePath();
     if(this._drop_texture)
     {
         this.setOutputData(0, this._drop_texture);
@@ -80,17 +80,17 @@ LGraphCubemap.prototype.onDrawBackground = function(ctx)
 
 }
 
-LGraphCubemap.prototype.processNodePath = function()
-{
-    var input = this.getInputNodePath(0);
-    this.insertIntoPath(input);
-    this.node_path[1] = input;
-    this.node_path[2] = input;
-    this.node_path[3] = input;
-    this.node_path[4] = input;
-    this.node_path[5] = input;
-
-}
+//LGraphCubemap.prototype.processNodePath = function()
+//{
+//    var input = this.getInputNodePath(0);
+//    this.insertIntoPath(input);
+//    this.node_path[1] = input;
+//    this.node_path[2] = input;
+//    this.node_path[3] = input;
+//    this.node_path[4] = input;
+//    this.node_path[5] = input;
+//
+//}
 
 LGraphCubemap.prototype.processInputCode = function(scope)
 {

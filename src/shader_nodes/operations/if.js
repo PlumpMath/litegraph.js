@@ -19,28 +19,28 @@ LGraphIf.desc = "if between A and B";
 
 LGraphIf.prototype.onExecute = function()
 {
-    this.processNodePath();
+    //this.processNodePath();
 }
 
-LGraphIf.prototype.processNodePath = function()
-{
-    var input1 = this.getInputNodePath(0);
-    var input2 = this.getInputNodePath(1);
-    var input3 = this.getInputNodePath(2);
-    var input4 = this.getInputNodePath(3);
-    var input5 = this.getInputNodePath(4);
-
-    this.mergePaths(input1,input2);
-    this.mergePaths(input1,input3);
-    this.mergePaths(input1,input4);
-    this.mergePaths(input1,input5);
-    this.insertIntoPath(input1);
-
-
-    this.node_path[0] = input1;
-
-
-}
+//LGraphIf.prototype.processNodePath = function()
+//{
+//    var input1 = this.getInputNodePath(0);
+//    var input2 = this.getInputNodePath(1);
+//    var input3 = this.getInputNodePath(2);
+//    var input4 = this.getInputNodePath(3);
+//    var input5 = this.getInputNodePath(4);
+//
+//    this.mergePaths(input1,input2);
+//    this.mergePaths(input1,input3);
+//    this.mergePaths(input1,input4);
+//    this.mergePaths(input1,input5);
+//    this.insertIntoPath(input1);
+//
+//
+//    this.node_path[0] = input1;
+//
+//
+//}
 
 LGraphIf.prototype.processInputCode = function(scope)
 {

@@ -21,17 +21,17 @@ LGraphConstColor.prototype.onDrawBackground = function(ctx)
 
 LGraphConstColor.prototype.onExecute = function()
 {
-    this.processNodePath();
+    //this.processNodePath();
     this.bgcolor = this.properties.color;
 }
 
-LGraphConstColor.prototype.processNodePath = function()
-{
-    var input = {};
-    this.insertIntoPath(input);
-    this.node_path[0] = input;
-
-}
+//LGraphConstColor.prototype.processNodePath = function()
+//{
+//    var input = {};
+//    this.insertIntoPath(input);
+//    this.node_path[0] = input;
+//
+//}
 
 LGraphConstColor.prototype.processInputCode = function(scope)
 {

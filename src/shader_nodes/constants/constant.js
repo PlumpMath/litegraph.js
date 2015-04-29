@@ -23,17 +23,17 @@ LGraphConstant.prototype.setValue = function(v)
 
 LGraphConstant.prototype.onExecute = function()
 {
-    this.processNodePath();
+//    this.processNodePath();
 
     this.setOutputData(0, parseFloat( this.properties["value"] ) );
 }
 
-LGraphConstant.prototype.processNodePath = function()
-{
-    var input = {};
-    this.insertIntoPath(input);
-    this.node_path[0] = input;
-}
+//LGraphConstant.prototype.processNodePath = function()
+//{
+//    var input = {};
+//    this.insertIntoPath(input);
+//    this.node_path[0] = input;
+//}
 
 LGraphConstant.prototype.processInputCode = function(scope)
 {

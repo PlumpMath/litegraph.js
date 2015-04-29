@@ -37,9 +37,9 @@ var LiteGraph = {
 
     proxy: null, //used to redirect calls
 
-    debug: false,
+    debug: true,
     throw_errors: true,
-    showcode:false,
+    showcode:true,
     registered_node_types: {},
 
     graph_max_steps:0,
@@ -897,11 +897,14 @@ LGraph.prototype.runStep = function(num)
 
 LGraph.prototype.updateExecutionOrder = function()
 {
-    //this._nodes_in_order = this.computeExecutionBFS();
-    this._nodes_in_order = this.computeExecutionOrder();
+    if(LiteGraph.BFS)
+        this._nodes_in_order = this.computeExecutionBFS();
+    else
+        this._nodes_in_order = this.computeExecutionOrderTopological();
 
     LiteGraph.dispatchEvent("contentChange", null, null);
 }
+
 
 //This is more internal, it computes the order and returns it
 LGraph.prototype.computeExecutionBFS = function()
@@ -912,11 +915,12 @@ LGraph.prototype.computeExecutionBFS = function()
     var visited_links = {}; //to avoid repeating links
     var visited_nodes = {}; //to avoid repeating links
     var remaining_links = {}; //to a
-    var node_output = this.findNodesByType("core/output")[0]; // our main output
+    var node_output = this.findNodesByType("core/Output")[0]; // our main output
     var nodes_ordered = [node_output];
-    for (var i = 0;  i < nodes_ordered.length; ++i) {
-        var n = nodes_ordered[i];
-        visited_nodes[n.id] = i; //visited in step i for last time
+    var i = 0;
+    while( nodes_ordered.length > 0) {
+        var n = nodes_ordered.shift();
+        visited_nodes[n.id] = i++; //visited in step i for last time
         if(n.inputs){
             for (var j = 0; j < n.inputs.length; j++) {
                 var input = n.inputs[j];
@@ -944,9 +948,6 @@ LGraph.prototype.computeExecutionBFS = function()
 
             }
         }
-        if(i > LiteGraph.graph_max_steps){
-            throw("the graph has a loop");
-        }
     }
     var sortable = [];
     for (var node_id in visited_nodes)
@@ -954,14 +955,106 @@ LGraph.prototype.computeExecutionBFS = function()
     sortable.sort(function(a, b) {return a[1] - b[1]})
 
     var nodes_ordered = [];
-    for(var i = sortable.length-1; i>=0; --i ){
+    for(var l = sortable.length, i = l - 1 ; i>=0; --i ){
         var n = sortable[i][0];
-        n.order = i;
+        n.order = l -i;
         nodes_ordered.push(n);
+        n.processNodePath();
     }
 
     return nodes_ordered;
 
+}
+
+//This is more internal, it computes the order and returns it
+LGraph.prototype.computeExecutionOrderTopological = function()
+{
+    var L = [];
+    var S = [];
+    var M = {};
+    var visited_links = {}; //to avoid repeating links
+    var remaining_links = {}; //to a
+    var node_output = this.findNodesByType("core/Output")[0]; // our main output
+
+    //search for the nodes without inputs (starting nodes)
+    for (var i in this._nodes)
+    {
+        var n = this._nodes[i];
+        M[n.id] = n; //add to pending nodes
+
+        var num = 0; //num of input connections
+        if(n.outputs)
+            for(var j = 0, l = n.outputs.length; j < l; j++)
+                if(n.outputs[j] && n.outputs[j].links  != null && n.outputs[j].links.length > 0 )
+                    num += n.outputs[j].links.length;
+
+        if(num == 0) //is a starting node
+            S.push(n);
+        else //num of input links
+            remaining_links[n.id] = num;
+
+    }
+    S.push(node_output);
+
+    var counter = 0;
+    while(true)
+    {
+        counter++;
+        if(S.length == 0)
+            break;
+
+        //get an starting node
+        var n = S.shift();
+        L.unshift(n); //add to ordered list
+        delete M[n.id]; //remove from the pending nodes
+
+        //for every output
+        if(n.inputs)
+            for(var i = 0; i < n.inputs.length; i++)
+            {
+                var input = n.inputs[i];
+                //not connected
+                if(input == null || input.link == null)
+                    continue;
+
+
+                var link_id = input.link;
+                var link = this.links[link_id];
+                if(!link) continue;
+
+                //already visited link (ignore it)
+                if(visited_links[ link.id ])
+                    continue;
+
+                var origin_node = this.getNodeById( link.origin_id );
+                if(origin_node == null)
+                {
+                    visited_links[ link.id ] = true;
+                    continue;
+                }
+
+                visited_links[link.id] = true; //mark as visited
+                remaining_links[origin_node.id] -= 1; //reduce the number of links remaining
+                if (remaining_links[origin_node.id] == 0)
+                    S.push(origin_node); //if no more links, then add to Starters array
+
+            }
+    }
+
+    //the remaining ones (loops)
+    for(var i in M)
+        L.unshift(M[i]);
+
+    if(L.length != this._nodes.length && LiteGraph.debug)
+        console.log("something went wrong, nodes missing");
+
+    //save order number in the node
+    for(var i in L){
+        L[i].order = parseInt(i);
+        L[i].processNodePath();
+    }
+
+    return L;
 }
 
 
@@ -991,9 +1084,10 @@ LGraph.prototype.computeExecutionOrder = function()
         else //num of input links
             remaining_links[n.id] = num;
     }
-
+    var counter = 0;
     while(true)
     {
+        counter++;
         if(S.length == 0)
             break;
 
@@ -1045,8 +1139,10 @@ LGraph.prototype.computeExecutionOrder = function()
         console.log("something went wrong, nodes missing");
 
     //save order number in the node
-    for(var i in L)
+    for(var i in L){
         L[i].order = parseInt(i);
+        L[i].processNodePath();
+    }
 
     return L;
 }
@@ -1756,7 +1852,7 @@ LGraphNode.prototype._ctor = function( title )
 LGraphNode.prototype.addBasicProperties = function(  )
 {
     var that = this;
-    this.properties.is_global = false
+    this.properties.is_global = false;
     this.properties.global_name = this.title;
     this.options.global_name = {hidden:true};
     this.options.is_global = {reloadonchange:1, callback: "callbackIsGlobal"};
@@ -1849,8 +1945,8 @@ LGraphNode.prototype.serialize = function()
         size: this.size,
         data: this.data,
         flags: LiteGraph.cloneObject(this.flags),
-        inputs: this.inputs,
-        outputs: this.outputs,
+        inputs: LiteGraph.cloneObject(this.inputs),
+        outputs: LiteGraph.cloneObject(this.outputs),
         shader_piece: this.shader_piece,
         codes: this.codes,
         T_out_types: this.T_out_types,
@@ -1884,13 +1980,33 @@ LGraphNode.prototype.serialize = function()
 
 
 /* Creates a clone of this node */
-LGraphNode.prototype.clone = function()
+LGraphNode.prototype.clone = function(last_node_id, last_link_id)
 {
     var node = LiteGraph.createNode(this.type);
 
     var data = this.serialize();
+    var original_id = data["id"];
     delete data["id"];
+    for(var j in data.inputs){
+        var link_id = data.inputs[j].link;
+        var link = this.graph.links[ link_id ];
+        if(link){
+            var new_id = link_id + last_link_id;
+            data.inputs[j].link = new_id;
+            this.graph.links[ new_id ] = { id: new_id, origin_id: link.origin_id, origin_slot: link.origin_slot, target_id: link.target_id, target_slot: link.target_slot };
+        }
+
+    }
+    for(var j in data.outputs){
+        var links = data.outputs[j].links;
+        for(var k in links){
+            var link_id = links[k];
+            data.outputs[j].links[k] = link_id + last_link_id;
+        }
+    }
     node.configure(data);
+    node.id = last_node_id + original_id;
+    node.properties.is_global = false;
 
     return node;
 }
@@ -2716,6 +2832,15 @@ LGraphNode.prototype.getInputNodePath = function(slot)
     return {};
 }
 
+LGraphNode.prototype.getOutputNodePath = function(slot)
+{
+    var link_id = this.outputs[slot].link;
+    var link = this.graph.links[link_id];
+    if(link)
+        return this.graph.getNodeById( link.target_id ).node_path[link.target_slot];
+    return {};
+}
+
 LGraphNode.prototype.insertIntoPath = function(path)
 {
     if(!path.hasOwnProperty((this.id)))
@@ -2730,6 +2855,23 @@ LGraphNode.prototype.mergePaths = function(path_target, path_to_merge)
         id = objKeys[i];
         path_target[id] = path_to_merge[id];
     }
+}
+
+LGraphNode.prototype.processNodePath = function()
+{
+    var last_path = {};
+    for(var i in this.inputs){
+        var output_path = this.getInputNodePath(i);
+        if(i > 0){
+            this.mergePaths(last_path,output_path);
+        } else
+            last_path = output_path;
+    }
+    this.insertIntoPath(last_path);
+
+    for(var i in this.outputs)
+        this.node_path[i] = last_path;
+
 }
 
 LGraphNode.prototype.onGetNullCode = function(slot)
@@ -3778,8 +3920,8 @@ LGraphCanvas.prototype.processNodeSelected = function (n, e) {
     if (this.onNodeSelected)
         this.onNodeSelected(n);
 
-    console.log(n);
-    console.log(this.graph);
+    //console.log(n);
+    //console.log(this.graph);
     //if(this.node_in_panel) this.showNodePanel(n);
 }
 
@@ -4913,13 +5055,54 @@ LGraphCanvas.onMenuNodeRemove = function (node) {
     node.setDirtyCanvas(true, true);
 }
 
-LGraphCanvas.onMenuNodeClone = function (node) {
-    if (node.clonable == false) return;
-    var newnode = node.clone();
-    if (!newnode) return;
-    newnode.pos = [node.pos[0] + 5, node.pos[1] + 5];
-    node.graph.add(newnode);
-    node.setDirtyCanvas(true, true);
+LGraphCanvas.onMenuNodeClone = function (node, e, menu, that) {
+    var last_id = node.graph.last_node_id;
+    var last_link_id = node.graph.last_link_id;
+    var max_id = last_id;
+    var max_link_id = last_link_id;
+    var cloned = [];
+    for(var i in that.selected_nodes){
+        var n = that.selected_nodes[i];
+
+        if (n.clonable == false) continue;
+        var newnode = n.clone(last_id, last_link_id);
+        if (!newnode) return;
+        newnode.pos = [n.pos[0] + 15, n.pos[1] + 15];
+        cloned.push(newnode);
+        n.graph.add(newnode);
+        n.setDirtyCanvas(true, true);
+        max_id = Math.max(max_id, newnode.id);
+    }
+    for(var i in cloned){
+        var n = cloned[i];
+        for(var j in n.inputs){
+            var link_id = n.inputs[i].link;
+            var link = node.graph.links[ link_id ];
+            if(link){
+                max_link_id = Math.max(max_link_id,link_id);
+                var origin_node = node.graph.getNodeById( link.origin_id + last_id);
+                if(origin_node)
+                    link.origin_id = link.origin_id + last_id;
+                link.target_id = link.target_id + last_id;
+            }
+
+        }
+        for(var j in n.outputs){
+            var links = n.outputs[j].links;
+            for(var k in links){
+                var link_id = links[k];
+                var link = node.graph.links[ link_id ];
+                if(link){
+                    max_link_id = Math.max(max_link_id,link_id);
+                    var target_node = node.graph.getNodeById( link.target_id + last_id);
+                    if(target_node)
+                        link.target_id = link.target_id + last_id;
+                    link.origin_id = link.origin_id + last_id;
+                }
+            }
+        }
+    }
+    node.graph.last_node_id = max_id;
 }
 
 LGraphCanvas.node_colors = {
@@ -5345,7 +5528,7 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
     var light_dir = "vec3("+properties.light_dir_x+","+properties.light_dir_y+","+properties.light_dir_z+")";
 
     // header
-    var r = "precision highp float;\n"+
+    var r = "precision mediump float;\n"+
         "attribute vec3 a_vertex;\n"+
         "attribute vec3 a_normal;\n"+
         "attribute vec2 a_coord;\n";
@@ -5435,7 +5618,7 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
 
 
     // header
-    var r = "precision highp float;\n"+
+    var r = "precision mediump float;\n"+
      "#extension GL_OES_standard_derivatives : enable\n";
     if (albedo.fragment.isLineIncluded("v_coord"))
         r += "varying vec2 v_coord;\n";
@@ -6455,11 +6638,10 @@ PTextureSample.includes = {v_pos:1, v_coord:1, camera_to_pixel_ws:1, u_eye:1};
 PTextureSample.getVertexCode = function (output, input, texture_id, texture_type, scope, order) {
     var code = new CodePiece(order);
     var code_str = "";
+    code.setIncludesFromMap(PTextureSample.includes);
     if(scope == CodePiece.VERTEX) {
-        code.setIncludesFromMap(PTextureSample.includes);
         code_str = "vec4 " + output + " = texture2D(" + texture_id + ", " + input + ");\n";
         code.addHeaderLine("uniform sampler2D "+texture_id+";\n");
-        code.setIncludesFromMap(PTextureSample.includes);
     }
     code.setBody(code_str);
     return code;

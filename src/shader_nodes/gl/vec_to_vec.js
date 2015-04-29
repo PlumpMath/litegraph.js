@@ -18,24 +18,24 @@ LGraphVecToVec.desc = "VectorX To VectorY";
 
 LGraphVecToVec.prototype.onExecute = function()
 {
-    this.processNodePath();
+    //this.processNodePath();
 }
-
-LGraphVecToVec.prototype.processNodePath = function()
-{
-    var input1 = this.getInputNodePath(0);
-
-
-    this.insertIntoPath(input1);
-
-
-    this.node_path[0] = input1;
-    this.node_path[1] = input1;
-    this.node_path[2] = input1;
-    this.node_path[3] = input1;
-
-
-}
+//
+//LGraphVecToVec.prototype.processNodePath = function()
+//{
+//    var input1 = this.getInputNodePath(0);
+//
+//
+//    this.insertIntoPath(input1);
+//
+//
+//    this.node_path[0] = input1;
+//    this.node_path[1] = input1;
+//    this.node_path[2] = input1;
+//    this.node_path[3] = input1;
+//
+//
+//}
 
 LGraphVecToVec.prototype.processInputCode = function(scope)
 {

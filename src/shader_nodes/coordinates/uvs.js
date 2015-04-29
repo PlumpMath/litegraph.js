@@ -16,15 +16,15 @@ LGraphUVs.desc = "Texture coordinates";
 
 LGraphUVs.prototype.onExecute = function()
 {
-    this.processNodePath();
+    //this.processNodePath();
 }
 
-LGraphUVs.prototype.processNodePath = function()
-{
-    var input = {};
-    this.insertIntoPath(input);
-    this.node_path[0] = input;
-}
+//LGraphUVs.prototype.processNodePath = function()
+//{
+//    var input = {};
+//    this.insertIntoPath(input);
+//    this.node_path[0] = input;
+//}
 
 LGraphUVs.prototype.processInputCode = function(scope)
 {

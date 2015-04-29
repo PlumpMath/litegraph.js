@@ -11,15 +11,15 @@ LGraphVertexPosWS.desc = "Vertex position in WS";
 
 LGraphVertexPosWS.prototype.onExecute = function()
 {
-    this.processNodePath();
+    //this.processNodePath();
 }
 
-LGraphVertexPosWS.prototype.processNodePath = function()
-{
-    var input = {};
-    this.insertIntoPath(input);
-    this.node_path[0] = input;
-}
+//LGraphVertexPosWS.prototype.processNodePath = function()
+//{
+//    var input = {};
+//    this.insertIntoPath(input);
+//    this.node_path[0] = input;
+//}
 
 LGraphVertexPosWS.prototype.processInputCode = function()
 {

@@ -196,7 +196,7 @@ LGraphTexture.prototype.getExtraMenuOptions = function(graphcanvas)
 
 LGraphTexture.prototype.onExecute = function()
 {
-    this.processNodePath();
+    //this.processNodePath();
 
     if(this._drop_texture ){
 
@@ -299,24 +299,24 @@ LGraphTexture.generateLowResTexturePreview = function(tex)
     return tex_canvas;
 }
 
-LGraphTexture.prototype.processNodePath = function()
-{
-
-    var input = this.getInputNodePath(0);
-
-    this.insertIntoPath(input);
-
-    this.node_path[1] = input;
-    this.node_path[2] = input;
-    this.node_path[3] = input;
-    this.node_path[4] = input;
-    this.node_path[5] = input;
-//    this.node_path[2] = cloned_input.slice(0);
-//    this.node_path[3] = cloned_input.slice(0);
-//    this.node_path[4] = cloned_input.slice(0);
-//    this.node_path[5] = cloned_input.slice(0);
-
-}
+//LGraphTexture.prototype.processNodePath = function()
+//{
+//
+//    var input = this.getInputNodePath(0);
+//
+//    this.insertIntoPath(input);
+//
+//    this.node_path[1] = input;
+//    this.node_path[2] = input;
+//    this.node_path[3] = input;
+//    this.node_path[4] = input;
+//    this.node_path[5] = input;
+////    this.node_path[2] = cloned_input.slice(0);
+////    this.node_path[3] = cloned_input.slice(0);
+////    this.node_path[4] = cloned_input.slice(0);
+////    this.node_path[5] = cloned_input.slice(0);
+//
+//}
 
 LGraphTexture.prototype.processInputCode = function(scope)
 {

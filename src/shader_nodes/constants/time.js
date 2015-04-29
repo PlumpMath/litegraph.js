@@ -13,15 +13,15 @@ LGraphTime.desc = "Time since execution started";
 
 LGraphTime.prototype.onExecute = function()
 {
-    this.processNodePath();
+//    this.processNodePath();
 }
-
-LGraphTime.prototype.processNodePath = function()
-{
-    var input = {};
-    this.insertIntoPath(input);
-    this.node_path[0] = input;
-}
+//
+//LGraphTime.prototype.processNodePath = function()
+//{
+//    var input = {};
+//    this.insertIntoPath(input);
+//    this.node_path[0] = input;
+//}
 
 LGraphTime.prototype.processInputCode = function(scope)
 {

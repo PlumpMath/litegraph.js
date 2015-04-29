@@ -16,23 +16,23 @@ LGraphVecToComps.desc = "Vector To Components";
 
 LGraphVecToComps.prototype.onExecute = function()
 {
-    this.processNodePath();
+    //this.processNodePath();
 }
 
-LGraphVecToComps.prototype.processNodePath = function()
-{
-    var input = this.getInputNodePath(0);
-
-    this.insertIntoPath(input);
-
-    this.node_path[0] = input;
-    this.node_path[1] = input;
-    this.node_path[2] = input;
-    this.node_path[3] = input;
-
-
-
-}
+//LGraphVecToComps.prototype.processNodePath = function()
+//{
+//    var input = this.getInputNodePath(0);
+//
+//    this.insertIntoPath(input);
+//
+//    this.node_path[0] = input;
+//    this.node_path[1] = input;
+//    this.node_path[2] = input;
+//    this.node_path[3] = input;
+//
+//
+//
+//}
 
 LGraphVecToComps.prototype.processInputCode = function(scope)
 {
