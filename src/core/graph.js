@@ -220,12 +220,15 @@ LGraph.prototype.runStep = function(num)
 
 LGraph.prototype.updateExecutionOrder = function()
 {
-    if(LiteGraph.BFS)
-        this._nodes_in_order = this.computeExecutionBFS();
-    else
-        this._nodes_in_order = this.computeExecutionOrderTopological();
+    if(!this.removing){
 
-    LiteGraph.dispatchEvent("contentChange", null, null);
+        if(LiteGraph.BFS)
+            this._nodes_in_order = this.computeExecutionBFS();
+        else
+            this._nodes_in_order = this.computeExecutionOrder();
+
+        LiteGraph.dispatchEvent("contentChange", null, null);
+    }
 }
 
 
@@ -595,6 +598,7 @@ LGraph.prototype.remove = function(node)
     if(this._nodes_by_id[node.id] == null)
         return; //not found
 
+
     if(node.ignore_remove)
         return; //cannot be removed
 
@@ -654,6 +658,8 @@ LGraph.prototype.remove = function(node)
     this.change();
 
     this.updateExecutionOrder();
+
+
 }
 
 /**

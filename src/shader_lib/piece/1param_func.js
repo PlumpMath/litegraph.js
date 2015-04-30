@@ -57,6 +57,7 @@ P1ParamFunc.prototype.getCode = function (params) {
 LiteGraph.CodeLib["length"] = new P1ParamFunc ("float", "length");
 LiteGraph.CodeLib["exp2"] = new P1ParamFunc (undefined, "exp2");
 LiteGraph.CodeLib["sin"] = new P1ParamFunc (undefined, "sin");
+LiteGraph.CodeLib["normalize"] = new P1ParamFunc (undefined, "normalize");
 LiteGraph.CodeLib["cos"] = new P1ParamFunc (undefined, "cos");
 LiteGraph.CodeLib["tan"] = new P1ParamFunc (undefined, "tan");
 LiteGraph.CodeLib["asin"] = new P1ParamFunc (undefined, "asin");

@@ -213,32 +213,28 @@ LGraphNode.prototype.serialize = function()
 
 
 /* Creates a clone of this node */
-LGraphNode.prototype.clone = function(last_node_id, last_link_id)
+LGraphNode.prototype.clone = function()
 {
     var node = LiteGraph.createNode(this.type);
 
     var data = this.serialize();
-    var original_id = data["id"];
     delete data["id"];
+    node.configure(data);
     for(var j in data.inputs){
-        var link_id = data.inputs[j].link;
+        var link_id = node.inputs[j].link;
         var link = this.graph.links[ link_id ];
         if(link){
-            var new_id = link_id + last_link_id;
-            data.inputs[j].link = new_id;
+            var new_id = this.graph.last_link_id++;
+            node.inputs[j].link = new_id;
             this.graph.links[ new_id ] = { id: new_id, origin_id: link.origin_id, origin_slot: link.origin_slot, target_id: link.target_id, target_slot: link.target_slot };
         }
 
     }
     for(var j in data.outputs){
         var links = data.outputs[j].links;
-        for(var k in links){
-            var link_id = links[k];
-            data.outputs[j].links[k] = link_id + last_link_id;
-        }
+        node.outputs[j].links = [];
+
     }
-    node.configure(data);
-    node.id = last_node_id + original_id;
     node.properties.is_global = false;
 
     return node;

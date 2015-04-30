@@ -897,12 +897,15 @@ LGraph.prototype.runStep = function(num)
 
 LGraph.prototype.updateExecutionOrder = function()
 {
-    if(LiteGraph.BFS)
-        this._nodes_in_order = this.computeExecutionBFS();
-    else
-        this._nodes_in_order = this.computeExecutionOrderTopological();
+    if(!this.removing){
 
-    LiteGraph.dispatchEvent("contentChange", null, null);
+        if(LiteGraph.BFS)
+            this._nodes_in_order = this.computeExecutionBFS();
+        else
+            this._nodes_in_order = this.computeExecutionOrder();
+
+        LiteGraph.dispatchEvent("contentChange", null, null);
+    }
 }
 
 
@@ -1272,6 +1275,7 @@ LGraph.prototype.remove = function(node)
     if(this._nodes_by_id[node.id] == null)
         return; //not found
 
+
     if(node.ignore_remove)
         return; //cannot be removed
 
@@ -1331,6 +1335,8 @@ LGraph.prototype.remove = function(node)
     this.change();
 
     this.updateExecutionOrder();
+
+
 }
 
 /**
@@ -1980,32 +1986,28 @@ LGraphNode.prototype.serialize = function()
 
 
 /* Creates a clone of this node */
-LGraphNode.prototype.clone = function(last_node_id, last_link_id)
+LGraphNode.prototype.clone = function()
 {
     var node = LiteGraph.createNode(this.type);
 
     var data = this.serialize();
-    var original_id = data["id"];
     delete data["id"];
+    node.configure(data);
     for(var j in data.inputs){
-        var link_id = data.inputs[j].link;
+        var link_id = node.inputs[j].link;
         var link = this.graph.links[ link_id ];
         if(link){
-            var new_id = link_id + last_link_id;
-            data.inputs[j].link = new_id;
+            var new_id = this.graph.last_link_id++;
+            node.inputs[j].link = new_id;
             this.graph.links[ new_id ] = { id: new_id, origin_id: link.origin_id, origin_slot: link.origin_slot, target_id: link.target_id, target_slot: link.target_slot };
         }
 
     }
     for(var j in data.outputs){
         var links = data.outputs[j].links;
-        for(var k in links){
-            var link_id = links[k];
-            data.outputs[j].links[k] = link_id + last_link_id;
-        }
+        node.outputs[j].links = [];
+
     }
-    node.configure(data);
-    node.id = last_node_id + original_id;
     node.properties.is_global = false;
 
     return node;
@@ -3185,6 +3187,7 @@ LGraphCanvas.prototype.setCanvas = function (canvas) {
     canvas.addEventListener("mousemove", this._mousemove_callback);
 
     canvas.addEventListener("contextmenu", function (e) {
+        canvas.focus();
         e.preventDefault();
         return false;
     });
@@ -3194,16 +3197,19 @@ LGraphCanvas.prototype.setCanvas = function (canvas) {
 
     //touch events
     //if( 'touchstart' in document.documentElement )
-    {
-        //alert("doo");
-        canvas.addEventListener("touchstart", this.touchHandler.bind(this), true);
-        canvas.addEventListener("touchmove", this.touchHandler.bind(this), true);
-        canvas.addEventListener("touchend", this.touchHandler.bind(this), true);
-        canvas.addEventListener("touchcancel", this.touchHandler.bind(this), true);
-    }
+//    {
+//        //alert("doo");
+//        canvas.addEventListener("touchstart", this.touchHandler.bind(this), true);
+//        canvas.addEventListener("touchmove", this.touchHandler.bind(this), true);
+//        canvas.addEventListener("touchend", this.touchHandler.bind(this), true);
+//        canvas.addEventListener("touchcancel", this.touchHandler.bind(this), true);
+//    }
 
     //this.canvas.onselectstart = function () { return false; };
+    canvas.tabIndex = 1000;
+    canvas.style.outline = "none";
     canvas.addEventListener("keydown", function (e) {
+        e.preventDefault();
         that.processKeyDown(e);
     });
 
@@ -3220,6 +3226,7 @@ LGraphCanvas.prototype.setCanvas = function (canvas) {
         return false;
     };
     canvas.ondrop = function (e) {
+        canvas.focus();
         e.preventDefault();
         that.adjustMouseEvent(e);
 
@@ -3428,6 +3435,7 @@ LGraphCanvas.prototype.stopRendering = function () {
 LGraphCanvas.prototype.processMouseDown = function (e) {
     if (!this.graph) return;
     this.adjustMouseEvent(e);
+    this.canvas.focus();
 
     var ref_window = this.getCanvasWindow();
     var document = ref_window.document;
@@ -3987,6 +3995,7 @@ LGraphCanvas.prototype.deselectAllNodes = function () {
 }
 
 LGraphCanvas.prototype.deleteSelectedNodes = function () {
+    this.graph.removing = true;
     for (var i in this.selected_nodes) {
         var m = this.selected_nodes[i];
         //if(m == this.node_in_panel) this.showNodePanel(null);
@@ -3994,6 +4003,8 @@ LGraphCanvas.prototype.deleteSelectedNodes = function () {
     }
     this.selected_nodes = {};
     this.setDirty(true);
+    this.graph.removing = false;
+    this.graph.updateExecutionOrder();
 }
 
 LGraphCanvas.prototype.centerOnNode = function (node) {
@@ -5056,53 +5067,56 @@ LGraphCanvas.onMenuNodeRemove = function (node) {
 }
 
 LGraphCanvas.onMenuNodeClone = function (node, e, menu, that) {
-    var last_id = node.graph.last_node_id;
-    var last_link_id = node.graph.last_link_id;
-    var max_id = last_id;
-    var max_link_id = last_link_id;
+//    var last_id = node.graph.last_node_id;
+//    var last_link_id = node.graph.last_link_id;
+//    var max_id = last_id;
+//    var max_link_id = last_link_id;
     var cloned = [];
+    var map_oldid_newid = {};
     for(var i in that.selected_nodes){
         var n = that.selected_nodes[i];
-
         if (n.clonable == false) continue;
-        var newnode = n.clone(last_id, last_link_id);
+        var newnode = n.clone();
         if (!newnode) return;
         newnode.pos = [n.pos[0] + 15, n.pos[1] + 15];
         cloned.push(newnode);
         n.graph.add(newnode);
+        map_oldid_newid[n.id] = newnode.id;
         n.setDirtyCanvas(true, true);
-        max_id = Math.max(max_id, newnode.id);
     }
     for(var i in cloned){
         var n = cloned[i];
         for(var j in n.inputs){
-            var link_id = n.inputs[i].link;
+            var link_id = n.inputs[j].link;
             var link = node.graph.links[ link_id ];
             if(link){
-                max_link_id = Math.max(max_link_id,link_id);
-                var origin_node = node.graph.getNodeById( link.origin_id + last_id);
-                if(origin_node)
-                    link.origin_id = link.origin_id + last_id;
-                link.target_id = link.target_id + last_id;
-            }
-
-        }
-        for(var j in n.outputs){
-            var links = n.outputs[j].links;
-            for(var k in links){
-                var link_id = links[k];
-                var link = node.graph.links[ link_id ];
-                if(link){
-                    max_link_id = Math.max(max_link_id,link_id);
-                    var target_node = node.graph.getNodeById( link.target_id + last_id);
-                    if(target_node)
-                        link.target_id = link.target_id + last_id;
-                    link.origin_id = link.origin_id + last_id;
+                var new_origin_node_id = map_oldid_newid[link.origin_id];
+                var origin_node = node.graph.getNodeById( new_origin_node_id );
+                if(origin_node){
+                    link.origin_id = origin_node.id;
+                } else {
+                    origin_node = node.graph.getNodeById( link.origin_id );
                 }
+                origin_node.outputs[link.origin_slot].links.push(link.id);
+                link.target_id = n.id;
             }
         }
+//        for(var j in n.outputs){
+//            var links = n.outputs[j].links;
+//            for(var k in links){
+//                var link_id = links[k];
+//                var link = node.graph.links[ link_id ];
+//                if(link){
+//                    var new_target_node_id = map_oldid_newid[link.target_id];
+//                    var target_node = node.graph.getNodeById( new_target_node_id);
+//                    if(!target_node){
+//                        links.splice(k, 1);
+//                    }
+//                }
+//            }
+//        }
     }
-    node.graph.last_node_id = max_id;
+//    node.graph.last_node_id = max_id;
 }
 
 LGraphCanvas.node_colors = {
@@ -5817,6 +5831,7 @@ P1ParamFunc.prototype.getCode = function (params) {
 LiteGraph.CodeLib["length"] = new P1ParamFunc ("float", "length");
 LiteGraph.CodeLib["exp2"] = new P1ParamFunc (undefined, "exp2");
 LiteGraph.CodeLib["sin"] = new P1ParamFunc (undefined, "sin");
+LiteGraph.CodeLib["normalize"] = new P1ParamFunc (undefined, "normalize");
 LiteGraph.CodeLib["cos"] = new P1ParamFunc (undefined, "cos");
 LiteGraph.CodeLib["tan"] = new P1ParamFunc (undefined, "tan");
 LiteGraph.CodeLib["asin"] = new P1ParamFunc (undefined, "asin");
