@@ -57,6 +57,8 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
     r += "varying vec3 v_pos;\n";
     if (albedo.vertex.isLineIncluded("u_time"))
         r += "uniform float u_time;\n";
+    if (albedo.vertex.isLineIncluded("u_frame_time"))
+        r += "uniform float u_frame_time;\n";
     //if (includes["u_eye"])
         r += "uniform vec3 u_eye;\n";
     r += "uniform mat4 u_mvp;\n"+
@@ -145,6 +147,8 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
         r += "varying vec3 v_pos;\n";
     if (albedo.fragment.isLineIncluded("u_time"))
         r += "uniform float u_time;\n";
+    if (albedo.fragment.isLineIncluded("u_frame_time"))
+        r += "uniform float u_frame_time;\n";
     //if (includes["u_eye"])
         r += "uniform vec3 u_eye;\n";
     r += "uniform vec4 u_color;\n";

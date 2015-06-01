@@ -14,7 +14,7 @@ PFresnel.prototype.getVertexCode = function (output_var,  normal, exp, scope) {
     if(scope == CodePiece.VERTEX || scope == CodePiece.BOTH){
         var normal = normal || "v_normal";
         var code = "float fresnel_"+output_var+" = dot("+normal+", -view_dir);\n" +
-        "      float "+output_var+" = pow( 1.0 - clamp(0.0,fresnel_"+output_var+",1.0), "+exp+");\n";
+        "      float "+output_var+" = pow( 1.0 - clamp(fresnel_"+output_var+",0.0,1.0), "+exp+");\n";
         return code;
     }
     return "";
@@ -24,7 +24,7 @@ PFresnel.prototype.getFragmentCode = function (output_var,  normal, exp, scope) 
     if(scope == CodePiece.FRAGMENT || scope == CodePiece.BOTH){
         var normal = normal || "normal";
         var code = "float fresnel_"+output_var+" = dot("+normal+", -view_dir);\n" +
-            "      float "+output_var+" = pow( 1.0 - clamp(0.0,fresnel_"+output_var+",1.0), "+exp+");\n";
+            "      float "+output_var+" = pow( 1.0 - clamp(fresnel_"+output_var+",0.0,1.0), "+exp+");\n";
         return code;
     }
     return "";

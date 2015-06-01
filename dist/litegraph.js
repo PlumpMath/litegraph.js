@@ -5554,6 +5554,8 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
     r += "varying vec3 v_pos;\n";
     if (albedo.vertex.isLineIncluded("u_time"))
         r += "uniform float u_time;\n";
+    if (albedo.vertex.isLineIncluded("u_frame_time"))
+        r += "uniform float u_frame_time;\n";
     //if (includes["u_eye"])
         r += "uniform vec3 u_eye;\n";
     r += "uniform mat4 u_mvp;\n"+
@@ -5642,6 +5644,8 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
         r += "varying vec3 v_pos;\n";
     if (albedo.fragment.isLineIncluded("u_time"))
         r += "uniform float u_time;\n";
+    if (albedo.fragment.isLineIncluded("u_frame_time"))
+        r += "uniform float u_frame_time;\n";
     //if (includes["u_eye"])
         r += "uniform vec3 u_eye;\n";
     r += "uniform vec4 u_color;\n";
@@ -5770,6 +5774,40 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
 }
 
 
+
+
+require(ShaderCode);
+require(CodePiece);
+declare(PFrameTime);
+
+var PFrameTime = {};
+
+PFrameTime.id = "frame_time";
+PFrameTime.includes = {u_frame_time:1};
+
+
+PFrameTime.getVertexCode = function () {
+    return "";
+}
+
+PFrameTime.getFragmentCode = function () {
+    return "";
+}
+
+
+PFrameTime.getCode = function (params) {
+    var scope = params.scope;
+    var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
+
+    var fragment = new CodePiece(order);
+    fragment.setIncludesFromMap(PFrameTime.includes);
+
+    var vertex = new CodePiece(order);
+    vertex.setBody(this.getVertexCode());
+    vertex.setIncludesFromMap(PFrameTime.includes);
+
+    return new ShaderCode(vertex, fragment, "u_frame_time");
+}
 
 
 require(CodePiece);
@@ -6504,7 +6542,7 @@ PFresnel.prototype.getVertexCode = function (output_var,  normal, exp, scope) {
     if(scope == CodePiece.VERTEX || scope == CodePiece.BOTH){
         var normal = normal || "v_normal";
         var code = "float fresnel_"+output_var+" = dot("+normal+", -view_dir);\n" +
-        "      float "+output_var+" = pow( 1.0 - clamp(0.0,fresnel_"+output_var+",1.0), "+exp+");\n";
+        "      float "+output_var+" = pow( 1.0 - clamp(fresnel_"+output_var+",0.0,1.0), "+exp+");\n";
         return code;
     }
     return "";
@@ -6514,7 +6552,7 @@ PFresnel.prototype.getFragmentCode = function (output_var,  normal, exp, scope) 
     if(scope == CodePiece.FRAGMENT || scope == CodePiece.BOTH){
         var normal = normal || "normal";
         var code = "float fresnel_"+output_var+" = dot("+normal+", -view_dir);\n" +
-            "      float "+output_var+" = pow( 1.0 - clamp(0.0,fresnel_"+output_var+",1.0), "+exp+");\n";
+            "      float "+output_var+" = pow( 1.0 - clamp(fresnel_"+output_var+",0.0,1.0), "+exp+");\n";
         return code;
     }
     return "";

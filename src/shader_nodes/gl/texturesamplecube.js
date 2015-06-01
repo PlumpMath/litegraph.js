@@ -55,7 +55,7 @@ LGraphCubemap.prototype.onExecute = function()
     if(!this.properties.name)
         return;
 
-    var tex = LGraphTexture.getTexture( this.properties.name, this.properties.texture_url );
+    var tex = LGraphTexture.getTexture( this.properties.name, this.properties.texture_url, true );
     if(!tex)
         return;
 
@@ -119,9 +119,6 @@ LGraphCubemap.prototype.onGetNullCode = function(slot)
         var code = this.vector_piece.getCode({order:this.order-1});
         return code;
     }
-
-
-
 }
 
 LiteGraph.registerNodeType("texture/"+LGraphCubemap.title, LGraphCubemap );
