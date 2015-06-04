@@ -693,7 +693,8 @@ LGraphNode.prototype.connect = function(slot, node, target_slot)
     }
     else if( //!output.type ||  //generic output
         //!node.inputs[target_slot].type || //generic input
-        output.type == node.inputs[target_slot].type || //same type
+        ((output.type !=  "" &&   node.inputs[target_slot].type != "") &&
+        output.type == node.inputs[target_slot].type) || //same type
         node.compareNodeTypes(this,output,target_slot)) //compare with multiple types
     {
         //info: link structure => [ 0:link_id, 1:start_node_id, 2:start_slot, 3:end_node_id, 4:end_slot ]
@@ -1117,16 +1118,31 @@ LGraphNode.prototype.infereTypes = function( output, target_slot)
 {
     this.in_conected_using_T++;
     var input = this.inputs[target_slot];
-    var out_types = this.getTypesFromOutputSlot(output)
     if(input.use_t && this.in_conected_using_T == 1){
+        var out_types = this.getTypesFromOutputSlot(output);
         for(var k in out_types){
             this.T_in_types[k] = out_types[k];
             this.T_out_types[k] = out_types[k];
         }
     }
+}
 
-
-
+/**
+ * @method recomputeTypes
+ **/
+LGraphNode.prototype.recomputeTypes = function( output, target_slot)
+{
+    if(this.id == 13 || this.id == 11)
+   console.log("hola");
+    var input = this.inputs[target_slot];
+    if(input.use_t && this.in_conected_using_T == 1){
+        this.resetTypes(target_slot);
+        var out_types = this.getTypesFromOutputSlot(output);
+        for(var k in out_types){
+            this.T_in_types[k] = out_types[k];
+            this.T_out_types[k] = out_types[k];
+        }
+    }
 }
 
 LGraphNode.prototype.resetTypes = function( slot )
@@ -1146,14 +1162,14 @@ LGraphNode.prototype.resetTypes = function( slot )
  * @param slot_id the id of the slot where we are connecting our input node
  * @method compareNodeTypes
  **/
-LGraphNode.prototype.compareNodeTypes = function(connecting_node, connection_slot, slot_id)
+LGraphNode.prototype.compareNodeTypes = function(input_node, connection_slot, slot_id)
 {
     var input_slot = this.inputs[slot_id];
     var out_types = null;
     var in_types = null;
     var ret = false;
     if(connection_slot.use_t){
-        out_types = Object.keys(connecting_node.T_out_types) == 0 ? null : connecting_node.T_out_types;
+        out_types = Object.keys(input_node.T_out_types) == 0 ? null : input_node.T_out_types;
     }
 
     if(out_types === null) {

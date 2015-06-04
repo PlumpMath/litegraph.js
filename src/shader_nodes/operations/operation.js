@@ -27,10 +27,10 @@ LGraphOperation.prototype.constructor = LGraphOperation;
 LGraphOperation.prototype.infereTypes = function( output_slot, target_slot, node) {
 
 
-
     var out_types = node.getTypesFromOutputSlot(output_slot);
     if( Object.keys(out_types)[0] == "float")
         return;
+
     this.connectTemplateSlot();
 
 

@@ -672,6 +672,8 @@ LGraphCanvas.prototype.processMouseMove = function (e) {
                         (this.connecting_output.type == n.inputs[slot].type ||
                         n.compareNodeTypes(this.connecting_node, this.connecting_output,  slot)))
                             this._highlight_input = pos;
+
+
                 }
                 else
                     this._highlight_input = null;
@@ -1740,6 +1742,8 @@ LGraphCanvas.prototype.drawConnections = function (ctx) {
                 var color = LGraphCanvas.link_type_colors[node.inputs[i].type];
                 if (color == null)
                     color = LGraphCanvas.link_colors[node.id % LGraphCanvas.link_colors.length];
+                if(link.color != null)
+                    color = link.color;
                 this.renderLink(ctx, start_node_slotpos, node.getConnectionPos(true, i), color);
             }
     }

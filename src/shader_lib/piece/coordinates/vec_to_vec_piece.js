@@ -30,7 +30,7 @@ PVecToVec.prototype.getCastedVar = function(output_var, out_type, in_type, value
             return value +".xyzw;\n";
     } else {
         var r = out_type +"("+value;
-        for(var i = 0; i < in_vec - out_vec; ++i){
+        for(var i = 0; i < (out_vec - in_vec); ++i){
             r +=", 0.0";
         }
         r +=");\n";

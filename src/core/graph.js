@@ -227,10 +227,53 @@ LGraph.prototype.updateExecutionOrder = function()
         else
             this._nodes_in_order = this.computeExecutionOrder();
 
+
+        this.checkLinksIntegrity();
         LiteGraph.dispatchEvent("contentChange", null, null);
+
+
+
     }
 }
 
+/**
+ * Checks if all links have the correct vars in each side
+ * @method checkLinksIntegrity
+ */
+LGraph.prototype.checkLinksIntegrity = function() {
+
+    for (var id in this._nodes_in_order) {
+        var node = this._nodes_in_order[id];
+        if(node.in_conected_using_T > 0){
+            node.in_conected_using_T = 0;
+            node.resetTypes();
+        }
+        for (var i = 0; node.inputs != undefined && i <  node.inputs.length; i++) {
+            if(node.inputs[i].use_t){
+                var link_id = node.inputs[i].link;
+                if(!link_id) continue;
+                var link = this.links[link_id];
+                if (link) {
+                    var input_node = this.getNodeById(link.origin_id);
+                    node.infereTypes(input_node.outputs[link.origin_slot], link.target_slot, input_node); // skip_autoinc
+                }
+            }
+        }
+    }
+
+    for (var i in this.links) {
+        var link = this.links[i];
+        var input_node = this.getNodeById( link.origin_id );
+        var output_node = this.getNodeById( link.target_id );
+
+        if(output_node && input_node && !output_node.compareNodeTypes(input_node, input_node.outputs[link.origin_slot], link.target_slot)){
+            link.color = "#FF0000";
+        } else {
+            link.color = null;
+        }
+    }
+
+}
 
 //This is more internal, it computes the order and returns it
 LGraph.prototype.computeExecutionBFS = function()
