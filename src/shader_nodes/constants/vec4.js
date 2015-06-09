@@ -42,6 +42,7 @@ LGraphConstVec4.prototype.processInputCode = function(scope)
 {
     this.codes[0] = this.shader_piece.getCode(
         { out_var:"vec4_"+this.id,
+        is_global:this.properties.is_global,
         a:this.valueToString(),
         scope:scope,
         order:this.order
@@ -64,5 +65,19 @@ LGraphConstVec4.prototype.valueToString = function()
 {
     return "vec4("+this.properties["v1"].toFixed(3)+","+this.properties["v2"].toFixed(3)+","+this.properties["v3"].toFixed(3)+","+this.properties["v4"].toFixed(3)+")";
 }
+
+LGraphConstVec4.prototype.callbackIsGlobal = function(  )
+{
+    this.options.global_name.hidden = !this.options.global_name.hidden
+
+    if(this.id in this.graph.globals)
+        delete this.graph.globals[this.id];
+    else{
+        this.graph.globals[this.id] = {name:"vec4_"+this.id, value: this.properties , getValue:function(){return [this.value.v1,this.value.v2,this.value.v3,this.value.v4]}};
+    }
+
+
+}
+
 
 LiteGraph.registerNodeType("constants/"+LGraphConstVec4.title, LGraphConstVec4);

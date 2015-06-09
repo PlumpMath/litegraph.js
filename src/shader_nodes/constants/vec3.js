@@ -7,7 +7,6 @@ function LGraphConstVec3()
                         v2:1.0,
                         v3:1.0};
     this.editable = { property:"value", type:"vec3" };
-
     this.shader_piece = new PConstant("vec3"); // hardcoded for testing
 }
 
@@ -45,6 +44,7 @@ LGraphConstVec3.prototype.processInputCode = function(scope)
 {
     this.codes[0] = this.shader_piece.getCode(
         { out_var:"vec3_"+this.id,
+            is_global:this.properties.is_global,
         a:this.valueToString(),
         scope:scope,
         order:this.order
@@ -60,6 +60,19 @@ LGraphConstVec3.prototype.onDrawBackground = function(ctx)
 LGraphConstVec3.prototype.valueToString = function()
 {
     return "vec3("+this.properties["v1"].toFixed(3)+","+this.properties["v2"].toFixed(3)+","+this.properties["v3"].toFixed(3)+")";
+}
+
+LGraphConstVec3.prototype.callbackIsGlobal = function(  )
+{
+    this.options.global_name.hidden = !this.options.global_name.hidden
+
+    if(this.id in this.graph.globals)
+        delete this.graph.globals[this.id];
+    else{
+        this.graph.globals[this.id] = {name:"vec3_"+this.id, value: this.properties , getValue:function(){return [this.value.v1,this.value.v2,this.value.v3]}};
+    }
+
+
 }
 
 LiteGraph.registerNodeType("constants/"+LGraphConstVec3.title, LGraphConstVec3);

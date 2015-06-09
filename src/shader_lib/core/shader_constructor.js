@@ -110,15 +110,15 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
 ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emission,specular,gloss,alpha,alphaclip, refraction, offset) {
 
 
-    var has_gloss = Object.keys(gloss.fragment.getBody()).length  > 0;
-    var has_albedo = Object.keys(albedo.fragment.getBody()).length  > 0;
-    var has_normal = Object.keys(normal.fragment.getBody()).length  > 0;
-    var has_specular = Object.keys(specular.fragment.getBody()).length  > 0;
-    var has_emission = Object.keys(emission.fragment.getBody()).length  > 0;
-    var has_gloss = Object.keys(gloss.fragment.getBody()).length  > 0;
-    var has_alpha = Object.keys(alpha.fragment.getBody()).length  > 0;
-    var has_alphaclip = Object.keys(alphaclip.fragment.getBody()).length  > 0;
-    var has_refraction = Object.keys(refraction.fragment.getBody()).length  > 0;
+    var has_gloss = gloss.fragment.isCodeUsed();
+    var has_albedo = albedo.fragment.isCodeUsed();
+    var has_normal = normal.fragment.isCodeUsed();
+    var has_specular = specular.fragment.isCodeUsed();
+    var has_emission = emission.fragment.isCodeUsed();
+    var has_gloss = gloss.fragment.isCodeUsed();
+    var has_alpha = alpha.fragment.isCodeUsed();
+    var has_alphaclip = alphaclip.fragment.isCodeUsed();
+    var has_refraction = refraction.fragment.isCodeUsed();
 
     var light_dir = "vec3("+properties.light_dir_x+","+properties.light_dir_y+","+properties.light_dir_z+")";
     var light_color = LiteGraph.hexToColor(properties.color);
@@ -132,7 +132,8 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
 //    for (var line in gloss.fragment.includes) { includes[line] = 1; }
 //    for (var line in alpha.fragment.includes) { includes[line] = 1; }
 //    for (var line in offset.fragment.includes) { includes[line] = 1; }
-    albedo.fragment.addHeaderLine("uniform samplerCube u_cube_default_texture;\n");
+    if(albedo.fragment !== LiteGraph.EMPTY_CODE.fragment)
+        albedo.fragment.addHeaderLine("uniform samplerCube u_cube_default_texture;\n");
 
 
 

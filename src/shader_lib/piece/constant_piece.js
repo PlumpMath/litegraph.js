@@ -30,16 +30,24 @@ PConstant.prototype.getFragmentCode = function (output_var, value, scope) {
 PConstant.prototype.getCode = function (params) {
     var out_var = params.out_var;
     var a = params.a;
+    var is_global = params.hasOwnProperty("is_global") ? params.is_global : false;
     var scope = params.scope;
     var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
 
     var vertex = new CodePiece(order);
-    vertex.setBody(this.getVertexCode(out_var, a, scope));
-    vertex.setIncludesFromMap(this.includes);
-
     var fragment = new CodePiece(order);
-    fragment.setBody(this.getFragmentCode(out_var, a, scope));
+    if(!is_global){
+        vertex.setBody(this.getVertexCode(out_var, a, scope));
+        fragment.setBody(this.getFragmentCode(out_var, a, scope));
+    } else {
+        var id = {};
+        var s = "uniform "+this.type+" " +out_var+";\n";
+        id[s] = 1;
+        vertex.setHeaderFromMap(id);
+        fragment.setHeaderFromMap(id);
+    }
     fragment.setIncludesFromMap(this.includes );
+    vertex.setIncludesFromMap(this.includes);
 
     return new ShaderCode(vertex, fragment, out_var);
 }

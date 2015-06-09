@@ -42,6 +42,7 @@ LGraphConstVec2.prototype.processInputCode = function(scope)
 {
     this.codes[0] = this.shader_piece.getCode(
         { out_var:"vec2_"+this.id,
+            is_global:this.properties.is_global,
         a:this.valueToString(),
         scope:scope,
         order:this.order
@@ -57,6 +58,20 @@ LGraphConstVec2.prototype.onDrawBackground = function(ctx)
 LGraphConstVec2.prototype.valueToString = function()
 {
     return "vec2("+this.properties["v1"].toFixed(3)+","+this.properties["v2"].toFixed(3)+")";
+}
+
+
+LGraphConstVec2.prototype.callbackIsGlobal = function(  )
+{
+    this.options.global_name.hidden = !this.options.global_name.hidden
+
+    if(this.id in this.graph.globals)
+        delete this.graph.globals[this.id];
+    else{
+        this.graph.globals[this.id] = {name:"vec2_"+this.id, value: this.properties , getValue:function(){return [this.value.v1,this.value.v2]}};
+    }
+
+
 }
 
 LiteGraph.registerNodeType("constants/"+LGraphConstVec2.title, LGraphConstVec2);

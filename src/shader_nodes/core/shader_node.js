@@ -118,6 +118,7 @@ LGraphShader.prototype.processInputCode = function() {
 
     shader.cubemaps = shader_cubemaps;
     shader.textures = shader_textures;
+    shader.globals = this.graph.globals;
     this.graph.shader_output = shader;
 
 }

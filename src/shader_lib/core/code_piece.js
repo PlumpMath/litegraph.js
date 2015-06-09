@@ -195,4 +195,8 @@ CodePiece.prototype.clone = function()
 };
 
 
+CodePiece.prototype.isCodeUsed = function() {
+    return Object.keys(this.getBody()).length  > 0 || Object.keys(this.getHeader()).length  > 0;
+}
+
 LiteGraph.CodeLib = {};

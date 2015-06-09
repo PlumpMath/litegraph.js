@@ -45,6 +45,7 @@ LGraph.prototype.clear = function()
     this._nodes_by_id = {};
     this._nodes_in_order = [];
 
+    this.globals = {}; // for the global vars in shaders
 
     //links
     this.last_link_id = 1; // u need to start by 1 otherwise it fails some if's

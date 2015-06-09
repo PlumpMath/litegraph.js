@@ -6,7 +6,6 @@ function LGraphConstant()
     this.properties = { value:1.0 };
 
     this.editable = { property:"value", type:"float" };
-
     this.shader_piece = new PConstant("float"); // hardcoded for testing
 }
 
@@ -40,6 +39,7 @@ LGraphConstant.prototype.processInputCode = function(scope)
     this.codes[0] = this.shader_piece.getCode(
         { out_var:"float_"+this.id,
             a:this.properties["value"].toFixed(3),
+            is_global:this.properties.is_global,
             scope:scope,
             order:this.order
         }); // need to check scope
@@ -56,6 +56,19 @@ LGraphConstant.prototype.onWidget = function(e,widget)
 {
     if(widget.name == "value")
         this.setValue(widget.value);
+}
+
+LGraphConstant.prototype.callbackIsGlobal = function(  )
+{
+    this.options.global_name.hidden = !this.options.global_name.hidden
+
+    if(this.id in this.graph.globals)
+        delete this.graph.globals[this.id];
+    else{
+        this.graph.globals[this.id] = {name:"float_"+this.id, value: this.properties , getValue:function(){return [this.value.value]}};
+    }
+
+
 }
 
 LiteGraph.registerNodeType("constants/"+LGraphConstant.title, LGraphConstant);

@@ -632,7 +632,7 @@ LiteGraph.removeExtension = function(name){
     return no_ext_name;
 }
 
-LiteGraph.hexToColor = function( color_hex)
+LiteGraph.hexToColor = function( color_hex, array)
 {
     // http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
     function hexToRgb(hex) {
@@ -644,7 +644,10 @@ LiteGraph.hexToColor = function( color_hex)
         ] : null;
     };
     var color = hexToRgb(color_hex);
-    return "vec4("+(color[0]/255).toFixed(3)+","+(color[1]/255).toFixed(3)+","+(color[2]/255).toFixed(3)+", 1.0)";
+    if(!array)
+        return "vec4("+(color[0]/255).toFixed(3)+","+(color[1]/255).toFixed(3)+","+(color[2]/255).toFixed(3)+", 1.0)";
+    else
+        return [(color[0]/255).toFixed(3),(color[1]/255).toFixed(3),(color[2]/255).toFixed(3), 1.0];
 }
 
 LiteGraph.getOtputTypeFromMap = function( map)
