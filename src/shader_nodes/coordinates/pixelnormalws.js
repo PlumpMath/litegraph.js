@@ -12,9 +12,15 @@ LGraphPixelNormalWS.desc = "The normal in world space";
 
 LGraphPixelNormalWS.prototype.onExecute = function()
 {
-    this.codes[0] = this.shader_piece.getCode({order:this.order}); // I need to check texture id
+
 }
 
+LGraphPixelNormalWS.prototype.processInputCode = function(scope)
+{
+    this.codes[0] = this.shader_piece.getCode({order:this.order,
+        scope:scope
+    }); // I need to check texture id
+}
 
 LiteGraph.registerNodeType("coordinates/"+LGraphPixelNormalWS.title, LGraphPixelNormalWS);
 

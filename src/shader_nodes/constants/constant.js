@@ -65,7 +65,7 @@ LGraphConstant.prototype.callbackIsGlobal = function(  )
     if(this.id in this.graph.globals)
         delete this.graph.globals[this.id];
     else{
-        this.graph.globals[this.id] = {name:"float_"+this.id, value: this.properties , getValue:function(){return [this.value.value]}};
+        this.graph.globals[this.id] = {name:"float_"+this.id, value: this.properties , getValue:function(){return this.value.value}};
     }
 
 

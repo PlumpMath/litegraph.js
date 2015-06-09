@@ -18,7 +18,7 @@ LGraphReflect.prototype.onExecute = function()
 }
 
 
-LGraphReflect.prototype.processInputCode = function()
+LGraphReflect.prototype.processInputCode = function(scope)
 {
 
     var code_normal = this.getInputCode(0); // normal
@@ -26,8 +26,14 @@ LGraphReflect.prototype.processInputCode = function()
 
     // (output, incident, normal)
     if(code_incident && code_normal){
-        var output_code = this.codes[0] = this.shader_piece.getCode("reflect_"+this.id, code_incident.getOutputVar(), code_normal.getOutputVar(), CodePiece.FRAGMENT, "vec3"); // output var must be fragment
-        output_code.order = this.order;
+        var output_code = this.codes[0] = this.shader_piece.getCode(
+            { out_var: "reflect_" + this.id,
+                a: code_incident.getOutputVar(),
+                b: code_normal.getOutputVar(),
+                scope: scope,
+                out_type: "vec3",
+                order: this.order
+            });
 
         output_code.merge(code_normal);
         output_code.merge(code_incident);

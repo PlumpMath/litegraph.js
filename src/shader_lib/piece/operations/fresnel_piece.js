@@ -40,11 +40,13 @@ PFresnel.prototype.getCode = function (params) {
 
     var vertex = new CodePiece(order);
     vertex.setBody(this.getVertexCode(out_var,  normal, exp, scope));
-    vertex.setIncludesFromMap(this.includes);
+    if(scope == CodePiece.VERTEX || scope == CodePiece.BOTH)
+        vertex.setIncludesFromMap(this.includes);
 
     var fragment = new CodePiece(order);
     fragment.setBody(this.getFragmentCode(out_var,  normal, exp, scope));
-    fragment.setIncludesFromMap(this.includes );
+    if(scope == CodePiece.FRAGMENT || scope == CodePiece.BOTH)
+        fragment.setIncludesFromMap(this.includes );
 
     return new ShaderCode(vertex, fragment, out_var);
 }
