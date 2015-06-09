@@ -10,6 +10,7 @@ function LGraphConstVec4()
     this.editable = { property:"value", type:"vec4" };
 
     this.shader_piece = new PConstant("vec4");
+    this.size = [181,20];
 }
 
 LGraphConstVec4.title = "ConstVec4";
