@@ -6,7 +6,6 @@ function LGraphUVs()
     this.properties = { UTiling:1.0,
                         VTiling:1.0 };
     this.options =  this.options || {};
-    this.options.is_global = {hidden:false};
     this.options = {    UTiling:{ step:0.01},
                         VTiling:{step:0.01}
     };

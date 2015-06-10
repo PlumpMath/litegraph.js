@@ -67,8 +67,8 @@ LGraphConstVec3.prototype.valueToString = function()
 
 LGraphConstVec3.prototype.callbackIsGlobal = function(  )
 {
-    this.options.global_name.hidden = !this.options.global_name.hidden
-
+    this.options.global_name.hidden = !this.properties.is_global;
+    this.setGlobalColor();
     if(this.id in this.graph.globals)
         delete this.graph.globals[this.id];
     else{

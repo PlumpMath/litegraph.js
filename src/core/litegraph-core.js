@@ -25,14 +25,14 @@ var LiteGraph = {
     NODE_DEFAULT_BGCOLOR: "#444",
     NODE_DEFAULT_BOXCOLOR: "#AEF",
     NODE_SELECTED_COLOR: "#FFF",
-    NODE_DEFAULT_SHAPE: "box", // round circle box
+    NODE_DEFAULT_SHAPE: "round", // round circle box
     MAX_NUMBER_OF_NODES: 1000, //avoid infinite loops
     DEFAULT_POSITION: [100,100],//default node position
     node_images_path: "",
 
     proxy: null, //used to redirect calls
 
-    debug: true,
+    debug: false,
     throw_errors: true,
     showcode:true,
     registered_node_types: {},
@@ -198,7 +198,7 @@ var LiteGraph = {
                 categories[ this.registered_node_types[i].category ] = 1;
         var result = [];
         for(var i in categories)
-           // if(i != "core")
+           if(i != "core")
                 result.push(i);
         return result;
     },

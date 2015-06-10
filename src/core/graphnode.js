@@ -98,6 +98,7 @@ LGraphNode.prototype.addBasicProperties = function(  )
 
 LGraphNode.prototype.callbackIsGlobal = function(  )
 {
+    this.setGlobalColor();
     this.options.global_name.hidden = !this.options.global_name.hidden
 }
 
@@ -1222,7 +1223,14 @@ LGraphNode.prototype.connectTemplateSlot = function(){
     this.in_conected_using_T++;
 }
 
+LGraphNode.prototype.setGlobalColor = function() {
+    if(this.properties.is_global){
+        this.color = "#AFA";
+    } else {
+        delete this.color ;
+    }
 
+}
 
 
 
