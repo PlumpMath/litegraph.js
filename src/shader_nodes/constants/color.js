@@ -5,6 +5,8 @@ function LGraphConstColor()
     this.addOutput("color","vec4", {vec4:1});
     this.properties = { color:"#ffffff"};
     this.editable = { property:"value", type:"vec4" };
+    this.options =  this.options || {};
+    this.options.is_global = {hidden:false};
     this.boxcolor = this.properties.color;
     this.shader_piece = new PConstant("vec4"); // hardcoded for testing
     this.global_var = {name:"vec4_"+this.id, value: this.properties , getValue:function(){return LiteGraph.hexToColor(this.value["color"], true)}};

@@ -10,6 +10,8 @@ function LGraphCubemap()
     this.properties =  this.properties || {};
     this.properties.name = "";
     this.properties.texture_url = "";
+    this.options =  this.options || {};
+    this.options.is_global = {hidden:false};
     this.options = {    texture_url:{hidden:1}};
 
 

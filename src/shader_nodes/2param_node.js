@@ -5,6 +5,7 @@ function LGraph2ParamNode()
     this.addInput("B","", this.getInputTypesB(), this.getInputExtraInfoB());
     this.shader_piece = LiteGraph.CodeLib[this.getCodeName()];
 
+
 }
 
 LGraph2ParamNode.prototype.constructor = LGraph2ParamNode;

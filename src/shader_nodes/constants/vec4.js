@@ -7,6 +7,9 @@ function LGraphConstVec4()
                         v2:1.0,
                         v3:1.0,
                         v4:1.0};
+    this.options =  this.options || {};
+    this.options.is_global = {hidden:false};
+
     this.editable = { property:"value", type:"vec4" };
 
     this.shader_piece = new PConstant("vec4");

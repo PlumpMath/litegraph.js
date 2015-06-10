@@ -6,6 +6,8 @@ function LGraphPanner()
     this.addInput("time","", {float:1});
     this.properties = { SpeedX:1.0,
         SpeedY:1.0 };
+    this.options =  this.options || {};
+    this.options.is_global = {hidden:false};
     this.options = {    SpeedX:{min:-1.0, max:1.0, step:0.001},
         SpeedY:{min:-1.0, max:1.0, step:0.001}
     };

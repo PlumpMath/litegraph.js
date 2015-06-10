@@ -87,8 +87,13 @@ LGraphNode.prototype.addBasicProperties = function(  )
     var that = this;
     this.properties.is_global = false;
     this.properties.global_name = this.title;
-    this.options.global_name = {hidden:true};
-    this.options.is_global = {reloadonchange:1, callback: "callbackIsGlobal"};
+    this.options =  this.options || {};
+    this.options.is_global =  this.options.is_global || {};
+    this.options.is_global.reloadonchange = 1;
+    this.options.is_global.callback  = "callbackIsGlobal";
+    this.options.is_global.hidden = this.options.is_global.hasOwnProperty("hidden") ? this.options.is_global.hidden  : true;
+    this.options.global_name = {hidden:!this.properties.is_global};
+
 }
 
 LGraphNode.prototype.callbackIsGlobal = function(  )

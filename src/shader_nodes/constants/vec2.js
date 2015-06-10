@@ -5,6 +5,8 @@ function LGraphConstVec2()
     this.addOutput("value","vec2", {vec2:1});
     this.properties = { v1:1.0,
                         v2:1.0 };
+    this.options =  this.options || {};
+    this.options.is_global = {hidden:false};
     //this.editable = { property:"value", type:"vec2" };
     this.size = [115,20];
     this.shader_piece = new PConstant("vec2"); // hardcoded for testing
