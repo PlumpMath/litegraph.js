@@ -1938,9 +1938,6 @@ LGraphVecToVec.prototype.getInputType = function()
 LiteGraph.registerNodeType("coordinates/"+LGraphVecToVec.title , LGraphVecToVec);
 
 
-
-
-
 function LGraphAbs()
 {
     this._ctor(LGraphAbs.title);
@@ -1966,8 +1963,6 @@ LiteGraph.registerNodeType("math/"+LGraphAbs.title, LGraphAbs);
 
 
 
-
-
 function LGraphCos()
 {
     this._ctor(LGraphCos.title);
@@ -1989,8 +1984,6 @@ LGraphCos.desc = "cosine of input";
 
 LiteGraph.extendClass(LGraphCos,LGraph1ParamNode);
 LiteGraph.registerNodeType("math/"+LGraphCos.title, LGraphCos);
-
-
 
 
 
@@ -2019,8 +2012,6 @@ LiteGraph.registerNodeType("math/"+LGraphExp.title, LGraphExp);
 
 
 
-
-
 function LGraphFrac()
 {
     this._ctor(LGraphFrac.title);
@@ -2041,8 +2032,6 @@ LGraphFrac.desc = "fract of input";
 
 LiteGraph.extendClass(LGraphFrac,LGraph1ParamNode);
 LiteGraph.registerNodeType("math/"+LGraphFrac.title, LGraphFrac);
-
-
 
 
 
@@ -2071,8 +2060,6 @@ LiteGraph.registerNodeType("math/"+LGraphNormnalize.title, LGraphNormnalize);
 
 
 
-
-
 function LGraphSin()
 {
     this._ctor(LGraphSin.title);
@@ -2095,9 +2082,6 @@ LGraphSin.desc = "sine of input";
 
 LiteGraph.extendClass(LGraphSin,LGraph1ParamNode);
 LiteGraph.registerNodeType("math/"+LGraphSin.title, LGraphSin);
-
-
-
 
 
 
@@ -2189,9 +2173,6 @@ LiteGraph.extendClass(LGraphOperation,LGraph2ParamNode);
 
 
 
-
-
-
 function LGraphAddOp()
 {
     this._ctor(LGraphAddOp.title);
@@ -2210,8 +2191,6 @@ LGraphAddOp.desc = "Add the inputs";
 
 LiteGraph.extendClass(LGraphAddOp,LGraphOperation);
 LiteGraph.registerNodeType("math/"+LGraphAddOp.title, LGraphAddOp);
-
-
 
 
 
@@ -2289,9 +2268,6 @@ LiteGraph.registerNodeType("math/"+LGraphClamp.title, LGraphClamp);
 
 
 
-
-
-
 function LGraphDivOp()
 {
     this._ctor(LGraphDivOp.title);
@@ -2308,9 +2284,6 @@ LGraphDivOp.desc = "div the inputs";
 //LGraphMulDiv.prototype.constructor = LGraphMulDiv;
 LiteGraph.extendClass(LGraphDivOp,LGraphOperation);
 LiteGraph.registerNodeType("math/"+LGraphDivOp.title, LGraphDivOp);
-
-
-
 
 
 
@@ -2489,9 +2462,6 @@ LGraphIf.prototype.getOutputType = function()
 LiteGraph.registerNodeType("math/"+LGraphIf.title , LGraphIf);
 
 
-
-
-
 function LGraphMix()
 {
     this._ctor(LGraphMix.title);
@@ -2568,9 +2538,6 @@ LGraphMix.prototype.onDrawBackground = function(ctx)
 
 LiteGraph.extendClass(LGraphMix,LGraph3ParamNode);
 LiteGraph.registerNodeType("math/"+LGraphMix.title, LGraphMix);
-
-
-
 
 
 
@@ -2667,9 +2634,6 @@ LiteGraph.registerNodeType("math/"+LGraphPanner.title, LGraphPanner);
 
 
 
-
-
-
 function LGraphPow()
 {
     this._ctor(LGraphPow.title);
@@ -2747,8 +2711,6 @@ LGraphReflect.prototype.processInputCode = function(scope)
 }
 
 LiteGraph.registerNodeType("math/"+LGraphReflect.title, LGraphReflect);
-
-
 
 
 
@@ -2844,9 +2806,6 @@ LGraphSmooth.prototype.onDrawBackground = function(ctx)
 
 LiteGraph.extendClass(LGraphSmooth,LGraph3ParamNode);
 LiteGraph.registerNodeType("math/"+LGraphSmooth.title, LGraphSmooth);
-
-
-
 
 
 

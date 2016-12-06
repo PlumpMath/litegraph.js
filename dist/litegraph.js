@@ -4,6 +4,7 @@
 //*********************************************************************************
 
 
+
 // *************************************************************
 //   LiteGraph CLASS                                     *******
 // *************************************************************
@@ -681,8 +682,6 @@ if( !window["requestAnimationFrame"] )
             window.setTimeout(callback, 1000 / 60);
         });
 }
-
-
 
 
 /**
@@ -1817,7 +1816,6 @@ LGraph.prototype.onNodeTrace = function(node, msg, color)
 //*********************************************************************************
 
 
-
 // *************************************************************
 //   Node CLASS                                          *******
 // *************************************************************
@@ -1849,7 +1847,6 @@ LGraph.prototype.onNodeTrace = function(node, msg, color)
  + onDeselected
  + onDropFile
  */
-
 
 
 /**
@@ -3051,9 +3048,6 @@ LGraphNode.prototype.setGlobalColor = function() {
     }
 
 }
-
-
-
 
 
 
@@ -5504,9 +5498,6 @@ LiteGraph.CodeLib = {};
  */
 
 
-
-
-
 function ShaderCode(vertex, fragment, out_var)
 {
     this.vertex = vertex || new CodePiece();
@@ -5709,8 +5700,8 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
 
 
     // header
-    var r = "precision mediump float;\n"+
-     "#extension GL_OES_standard_derivatives : enable\n";
+    var r = "#extension GL_OES_standard_derivatives : enable\n"+
+        "precision mediump float;\n";
     if (albedo.fragment.isLineIncluded("v_coord"))
         r += "varying vec2 v_coord;\n";
     //if (includes["v_normal"] || normal != LiteGraph.EMPTY_CODE )
